@@ -1,16 +1,18 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-07-30
-**Last session worked on:** Repo/tooling setup (no Story ID — not a product story)
+**Last updated:** 2026-08-04
+**Last session worked on:** Standup reconciliation (no Story ID — not a product story)
 
 ## Current state
-Repo cloned locally and pushed to `main` (commit `ae5c96a`). Session continuity system is in place: `.claude/skills/standup/SKILL.md`, `.claude/skills/wrapup/SKILL.md`, and this `PROGRESS.md`. `CLAUDE.md` created at repo root with the app's stack/conventions/gotchas. No product code exists yet — nothing from the Walking Skeleton (T-01 through T-09) has been started.
+Repo cloned locally and pushed to `main` (commit `4152490`). Session continuity system is in place: `.claude/skills/standup/SKILL.md`, `.claude/skills/wrapup/SKILL.md`, and this `PROGRESS.md`. `CLAUDE.md` created at repo root with the app's stack/conventions/gotchas.
+
+T-01, T-02, and T-03 are done, but that work happened entirely in the **philaindiacovers-admin** repo, not here — they're backend/admin-side work against the shared Supabase project (Mumbai region), with no App-side code. **This repo (App) genuinely has no product code yet.** Do not read the T-01/T-02/T-03 completion as "pending" in this repo's `/standup` — check the Admin repo's own PROGRESS.md for their status/history.
 
 ## In progress
-Nothing in progress.
+Nothing in progress in this repo.
 
 ## Next up
-Pick the first Walking Skeleton task, T-01 (US-36): set up the Supabase project (Mumbai region), create the `covers` table, seed `postal_circles` with the 23 official circles. Per current Jira priority — confirm against the board at next `/standup`.
+Nothing to do in this repo until **T-08** (consumer catalogue list view) — the first Walking Skeleton task that actually touches the App repo. Confirm against Jira/backlog priority at next `/standup` before starting.
 
 ## Known gotchas from recent sessions
 - This session's commit (`ae5c96a`, repo/tooling setup) was pushed directly to `main` with no branch/PR. This is an **intentional, accepted one-off** — not a deviation to flag going forward. Reasoning: scaffolding/tooling setup isn't product code, and retroactively branching something already merged would just be theater. Same reasoning applied to the Admin repo. The branch-per-story/PR convention in CLAUDE.md applies strictly starting with the first real story (T-01 onward) — `/standup` should not re-flag this commit as a process gap in future sessions.
