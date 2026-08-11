@@ -1,11 +1,11 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-11
-**Last session worked on:** T-08 — the consumer catalogue list view, stacked on T-07.5's login/scaffolding branch
+**Last session worked on:** T-07.5 + T-08 — this repo's first real product code, now merged into `main`
 
 ## Current state
 
-This repo's first real feature work is code-complete and verified live, split across two stacked branches (not yet merged — see "In progress"). **Split into two on purpose**: an earlier pass bundled T-07.5 and T-08 into one branch/PR, which was an oversight, not a real dependency — T-07.5's own verification check never needed the catalogue view to exist. Matches the one-task-one-PR precedent T-06.5 already established in the Admin repo.
+`main` is at `51c7877` (PR #2, `t08-catalogue-list-view`, merged; PR #1, `t07-5-electron-scaffold-collector-login`, merged just before it). This repo's first real feature work is done, merged, and verified live. **Split into two on purpose**: an earlier pass bundled T-07.5 and T-08 into one branch/PR, which was an oversight, not a real dependency — T-07.5's own verification check never needed the catalogue view to exist. Matches the one-task-one-PR precedent T-06.5 already established in the Admin repo. Both branches were auto-deleted on merge (same GitHub setting as the Admin repo); local copies cleaned up too.
 
 **T-07.5 (US-01, US-03) — Electron + React scaffolding + minimal Collector login:**
 
@@ -19,28 +19,24 @@ This repo's first real feature work is code-complete and verified live, split ac
 
 **Verified live, end-to-end, not mocked**: signed in as the real script-provisioned test Collector through the actual Login screen (`electron-vite dev`, renderer viewed via its Vite dev-server port in the Browser pane), with a genuine sign-out/sign-in cycle, not a leftover session — reached the signed-in placeholder screen, proving a real authenticated Collector session end-to-end without depending on T-08's Catalogue existing.
 
-**T-08 (US-07) — consumer catalogue list view, branch `t08-catalogue-list-view` (stacked on `t07-5-electron-scaffold-collector-login`):**
+**T-08 (US-07) — consumer catalogue list view:**
 
 - `src/renderer/src/pages/Catalogue.tsx` + `src/renderer/src/lib/covers.ts` — queries `covers` joined to `postal_circles(name)` where `verification_status = 'verified'`; thumbnail via `.storage.from('cover-images').download(image_file)` → `URL.createObjectURL(...)`, the same pattern Admin's T-07 review queue already proved (a plain `<img src>` can't work — the bucket stays private, access is RLS-policy-gated).
 - `src/renderer/src/App.tsx` updated: T-07.5's placeholder is replaced with the real Catalogue on a signed-in session.
 - Three distinct states with real playful/courteous copy: loading ("Dusting off the covers for you…"), empty-catalogue ("The shelves are freshly dusted!" — this app's actual first-run experience, not yet reachable live since one real Verified cover already exists), and error ("Well, that didn't go to plan.").
-- **Cross-repo dependency (Admin repo)**: new migration `20260811190000_cover_images_verified_read_policy.sql` — a Collector can now download a _verified_ cover's image via Storage, scoped to `authenticated` only (not `anon`, per this app's locked no-anonymous-browsing non-goal — corrected stale "public read" wording in `API-Integration-Contracts.md` §4 at the source). Applied to the live dev project, verified via `coverImageAccess.integration.test.ts` (2 new/updated cases) and a real curl round-trip (anon → 400, real Collector session → 200). On Admin repo branch `t08-consumer-storage-read-policy`, not yet merged.
+- **Cross-repo dependency (Admin repo)**: new migration `20260811190000_cover_images_verified_read_policy.sql` — a Collector can now download a _verified_ cover's image via Storage, scoped to `authenticated` only (not `anon`, per this app's locked no-anonymous-browsing non-goal — corrected stale "public read" wording in `API-Integration-Contracts.md` §4 at the source). Applied to the live dev project, verified via `coverImageAccess.integration.test.ts` (2 new/updated cases) and a real curl round-trip (anon → 400, real Collector session → 200). Merged into the Admin repo's `main` via PR #12.
 
 **Verified live, end-to-end, not mocked**: signed in as the real test Collector, landed on the Catalogue, and confirmed the one real Verified cover — "Adamchini Chawal (Rice)," Uttar Pradesh, 19 May 2023, "Category not recorded yet" (courteous fallback for the genuinely-null `product_category`) — renders correctly with a real, non-broken thumbnail (confirmed via `naturalWidth`/`naturalHeight`, not just "no error thrown"). The empty-catalogue and error states were deliberately verified separately, via Vitest component tests with a mocked Supabase client, not live — the real database currently has exactly one Verified cover, so there's no real zero-covers moment to test against without disrupting actual data.
 
 ## In progress
 
-Both branches are code-complete and verified live but **not yet merged**, no PRs opened yet (`gh` not installed — PRs to be opened via the GitHub web UI):
+Nothing in progress. Both branches merged (PR #1 `t07-5-electron-scaffold-collector-login`, PR #2 `t08-catalogue-list-view`, in that order), auto-deleted on GitHub, local copies cleaned up. Confirmed via a fresh `git fetch origin` at session wrap-up — the merges happened via the GitHub web UI mid-session and weren't otherwise visible in conversation until this fetch caught them, same class of drift `/standup`'s fetch-first step exists to catch. The Admin repo's companion migration (PR #12) is merged too.
 
-- `t07-5-electron-scaffold-collector-login` (3/3 Vitest tests, build/lint clean)
-- `t08-catalogue-list-view`, **stacked on top of** the above (11/11 Vitest tests — includes T-07.5's 3 plus this branch's 8 new ones — build/lint clean) — open its PR with base = `t07-5-electron-scaffold-collector-login`, not `main`; once that one merges, retarget T-08's PR to `main` (GitHub may do this automatically) before merging it.
-
-The Admin repo's companion branch (`t08-consumer-storage-read-policy`) is in the same not-yet-merged state.
+**Not yet confirmed**: whether Jira has been updated to reflect this (US-07, and possibly US-01/US-03) — reminder given to the user this session, not something this tool can verify or do itself.
 
 ## Next up
 
-1. **Open PRs for both branches** (this repo's two, plus the Admin repo's `t08-consumer-storage-read-policy`) and merge in order: `t07-5-electron-scaffold-collector-login` → `t08-catalogue-list-view` (retargeted to `main`) → Admin's storage-policy branch can merge independently of these two.
-2. **T-09** (US-11, cover detail view) — the next Walking Skeleton task, builds directly on T-08's query/auth foundation.
+**T-09** (US-11, cover detail view) — the next Walking Skeleton task, builds directly on T-08's query/auth foundation (`covers`/`postal_circles` query pattern, Storage image-download pattern, and the authenticated Collector session already established).
 
 ## Known gotchas from recent sessions
 
