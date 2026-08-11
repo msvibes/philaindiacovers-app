@@ -2,18 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabaseClient'
 import Login from './pages/Login'
-
-// The catalogue list view (T-08) replaces this placeholder once it lands —
-// T-07.5's own scope is just getting a real authenticated Collector session,
-// which this proves without depending on any later screen existing yet.
-function SignedIn(): React.JSX.Element {
-  return (
-    <main className="p-8">
-      <h1 className="text-xl font-semibold mb-2">You&apos;re in!</h1>
-      <p className="text-gray-500">The catalogue is on its way — check back soon.</p>
-    </main>
-  )
-}
+import Catalogue from './pages/Catalogue'
 
 function App(): React.JSX.Element | null {
   // 'loading' until the initial session check resolves, so we never flash
@@ -32,7 +21,7 @@ function App(): React.JSX.Element | null {
   }, [])
 
   if (session === 'loading') return null
-  return session ? <SignedIn /> : <Login />
+  return session ? <Catalogue /> : <Login />
 }
 
 export default App
