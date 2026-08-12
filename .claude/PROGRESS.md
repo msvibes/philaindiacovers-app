@@ -1,7 +1,32 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-08-11
-**Last session worked on:** UX copy reconciliation — `docs/UX-Design-Reference.md` finally arrived in this repo (it should have before T-08 started, but never made it), so T-08's already-shipped copy needed checking against it before T-09 begins
+**Last updated:** 2026-08-12
+**Last session worked on:** T-09 — the cover detail view. **This is the last Walking Skeleton task** — T-01 through T-09 are now all built.
+
+## T-09 (US-11) — cover detail view
+
+**Navigation**: extended the existing conditional-rendering pattern (Login ↔ Catalogue ↔ Detail), per the trigger condition already documented in `App.tsx` when T-08 made that call — revisit with a real router once there are more than ~4 screens, or any screen needs to preserve/restore scroll or selection state across navigation. Neither applies yet. `App.tsx` now lifts a `selectedCoverId` value; `Catalogue` takes an `onSelectCover` callback, `Detail` takes `coverId` + `onBack`.
+
+**Per-field null audit — checked against the actual import code, not assumed symmetry with the list view:**
+
+- `gi_registration_number`: genuinely nullable — `extractGiRegistrationNumber()` (Admin repo) returns `null` when no GI number is embedded in the source text. Already real and live (the one real row has it null).
+- `name_of_cover`, `cancellation_description`, `cachet_description`, `overall_description`, `place_of_issue`: inserted directly via `sanitizeCsvCell(...)` with no `|| null` fallback (unlike `product_category`), and that function never returns `null` — worst case is `''`. So via the only import path that exists today, these five become empty string, not null, when a source cell is blank. The DB columns themselves still have no `NOT NULL` constraint though (unlike `image_file`, fixed this session — see below), so `null` remains reachable outside today's import flow. **Decision**: treat both `null` and `''` as "missing" for all six fields — a new `withFallback()` helper (`covers.ts`) does this, deliberately using `||` semantics rather than the list view's `??`-only pattern, which would silently miss the empty-string case that's actually the realistic one here.
+
+**The `image_file` defensive fallback flagged for T-08 — turned out to be moot, not built.** Since `image_file` got a `NOT NULL` constraint this session (see below), the "no image at all" case that guard defended against can no longer happen — building UI for it would have been exactly the "defensive code for something that can't happen" gotcha this project explicitly watches for. Instead, fixed the still-genuinely-live gap in the same code: a failed `.download()` (network error, a Storage object missing despite the DB row referencing it) previously left the thumbnail stuck on "Loading…" forever with no recovery. New shared `useCoverImage()` hook (`lib/useCoverImage.ts`) + `CoverThumbnail` component (list) / inline `FullSizeImage` (detail) now surface a real `'failed'` state with courteous copy, in both places.
+
+**Fields shown** (name_of_cover, gi_registration_number, cancellation_description, cachet_description, overall_description, place_of_issue, full-size image) — everything from the schema the list view doesn't already show.
+
+**Verified live, end-to-end, against the one real Verified cover, not mocked**: clicked from the real Catalogue into the real Detail view. Every field matched the live database row exactly — including the correct courteous fallback ("Registration number not recorded yet") for the genuinely-null `gi_registration_number`, confirmed via a direct query before building anything. Full-size image loaded for real (`naturalWidth`/`naturalHeight` confirmed non-zero, not just "no error"). "Back to catalogue" round-tripped cleanly back to the real list. The `''`-fallback path (the other five fields) and the image-download-failure path aren't reachable live today (this one row has every field populated and a working image), so both are covered by Vitest component tests instead, same split as T-08's empty-catalogue case.
+
+**Copy — literal text, pulled from source, not paraphrased**: Loading: `Loading this cover…`. Error: heading `Well, that didn't go to plan.` / body `Give it another go?` / button `Try again` (reused verbatim from Catalogue's error state — same underlying situation, per `docs/UX-Design-Reference.md`'s tone guidance, checked _before_ writing it this time, not after). Not-found: heading `We couldn't find that cover.` / body `It may not be verified anymore — head back to the catalogue to keep browsing.` Back action: `← Back to catalogue`. Image-load failure: `Couldn't load this photo` (same string, both the list thumbnail and the detail full-size image).
+
+## `covers.image_file` NOT NULL constraint (Admin repo, same session, prerequisite for T-09)
+
+Was nullable at the schema level with only T-02's import-time validation preventing a null value in practice — same pattern as the `verify_cover()` NULL-role guard fixed earlier. **Checked empirically before applying, not assumed**: the live `covers` table had exactly one row and zero with a null `image_file`. Migration applied to the live project; re-verified after that a null-`image_file` insert is now genuinely rejected (curl POST → 400, confirmed no row created). Real fallout in five Admin-repo integration test files that seeded `covers` rows without `image_file` — all fixed; the two RLS-rejection tests that insert without one were correctly left alone (their assertions are generic, correct regardless of which constraint fires first). On Admin repo branch `covers-image-file-not-null`, not yet merged.
+
+---
+
+**Previous session (UX copy reconciliation) — `docs/UX-Design-Reference.md` finally arrived in this repo (it should have before T-08 started, but never made it), so T-08's already-shipped copy needed checking against it before T-09 began**
 
 ## Current state
 
@@ -38,16 +63,17 @@
 
 ## In progress
 
-This reconciliation is code-complete and verified (12/12 Vitest tests including a new retry-actually-works test; live-checked the real "ready" path still renders correctly against the real Verified cover) but **not yet merged**, on branch `t08-ux-copy-reconciliation`, no PR opened yet (`gh` not installed). T-07.5/T-08 themselves remain merged and unaffected (PR #1, PR #2, plus the Admin repo's PR #12).
+**T-09 is code-complete and verified live** (27/27 Vitest tests, `npm run build`/`npm run lint` clean) but **not yet merged**, on branch `t09-cover-detail-view`, no PR opened yet (`gh` not installed). The Admin repo's `covers.image_file` NOT NULL fix (a T-09 prerequisite) is in the same state, on branch `covers-image-file-not-null`. T-07.5/T-08/the UX reconciliation remain merged and unaffected.
 
 ## Next up
 
-1. **Open a PR for `t08-ux-copy-reconciliation`** and merge it.
-2. Then **T-09** (US-11, cover detail view) — the next Walking Skeleton task, builds directly on T-08's query/auth foundation (`covers`/`postal_circles` query pattern, Storage image-download pattern, and the authenticated Collector session already established). Navigation approach and a couple of other decisions for T-09 are confirmed with the user but not yet built — see conversation, not yet reflected here since building hasn't started.
+1. **Open PRs for both branches** (this repo's `t09-cover-detail-view`, the Admin repo's `covers-image-file-not-null`) and merge — Admin's constraint fix has no dependency on this repo's branch, can merge independently.
+2. **The Walking Skeleton (T-01–T-09) is complete once this merges** — spreadsheet → validated import → Draft → Verifier review → Verified → visible to a Collector, full detail view included, proven end-to-end. Next work is whatever's next in the actual backlog priority (US-08/09/10 filtering/search/sort on the catalogue, or a different epic) — confirm with Jira/backlog priority before picking, same as every task start in this project.
 
 ## Known gotchas from recent sessions
 
-- **`docs/UX-Design-Reference.md` exists now (as of this session) — check it before writing any new consumer-facing copy**, including for T-09. It never reached this repo before T-08 shipped, which is exactly why T-08's copy needed a reconciliation pass afterward. Don't repeat that gap for T-09 or later stories.
+- **`covers.image_file` is `NOT NULL` as of this session (Admin repo migration `20260812153000_covers_image_file_not_null.sql`)** — the other five T-09 detail fields (`name_of_cover`, `cancellation_description`, `cachet_description`, `overall_description`, `place_of_issue`) are NOT similarly constrained; they can still be null at the DB level even though today's only import path produces `''` instead. Don't assume DB-level guarantees from app-level behavior for those — see `withFallback()` in `covers.ts`.
+- **`docs/UX-Design-Reference.md` exists now (as of the previous session) — check it before writing any new consumer-facing copy.** Followed for T-09 from the start this time (Detail's error state reuses Catalogue's copy verbatim, deliberately, rather than inventing new wording for the same situation).
 - **The Electron/Vite scaffold's default CSP blocks Supabase entirely unless `connect-src`/`img-src` are widened** (`src/renderer/index.html`) — see above. Anyone re-scaffolding or touching this file should know the default template is not Supabase-ready out of the box.
 - **`covers` (and now `cover-images` Storage reads) have zero `anon` grant, by design** — this app has a locked no-anonymous-browsing non-goal, so any table/Storage read needs a real authenticated Collector session. Don't add an `anon`-scoped policy anywhere in this app's data path without confirming that's actually intended first (see the API-Integration-Contracts.md §4 correction this session, which fixed exactly this kind of stale "public" assumption).
 - **Test Collector provisioning**: `npm run provision:collector -- --email=... --password=...` needs `SUPABASE_SERVICE_ROLE_KEY` passed inline (not stored in this app's `.env` — the App only ever uses the anon key at runtime, per CLAUDE.md).

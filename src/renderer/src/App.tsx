@@ -3,6 +3,22 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabaseClient'
 import Login from './pages/Login'
 import Catalogue from './pages/Catalogue'
+import Detail from './pages/Detail'
+
+// Navigation is a small lifted-state value, not a router — proportionate
+// to two screens, one level deep, with no URL bar or deep-linking need in
+// this Electron shell. Revisit this decision (a lightweight router, e.g.
+// react-router's MemoryRouter) once either becomes true: more than ~4
+// screens exist, or any screen needs to preserve/restore scroll or
+// selection state across navigation — neither applies yet.
+function SignedIn(): React.JSX.Element {
+  const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
+
+  if (selectedCoverId) {
+    return <Detail coverId={selectedCoverId} onBack={() => setSelectedCoverId(null)} />
+  }
+  return <Catalogue onSelectCover={setSelectedCoverId} />
+}
 
 function App(): React.JSX.Element | null {
   // 'loading' until the initial session check resolves, so we never flash
@@ -21,7 +37,7 @@ function App(): React.JSX.Element | null {
   }, [])
 
   if (session === 'loading') return null
-  return session ? <Catalogue /> : <Login />
+  return session ? <SignedIn /> : <Login />
 }
 
 export default App

@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react'
-import {
-  downloadCoverImageUrl,
-  fetchVerifiedCovers,
-  formatDateOfIssue,
-  type VerifiedCover
-} from '../lib/covers'
+import { fetchVerifiedCovers, formatDateOfIssue, type VerifiedCover } from '../lib/covers'
+import CoverThumbnail from '../components/CoverThumbnail'
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error'
 
-export default function Catalogue(): React.JSX.Element {
+interface CatalogueProps {
+  onSelectCover: (id: string) => void
+}
+
+export default function Catalogue({ onSelectCover }: CatalogueProps): React.JSX.Element {
   const [state, setState] = useState<LoadState>('loading')
   const [covers, setCovers] = useState<VerifiedCover[]>([])
-  const [thumbnails, setThumbnails] = useState<Record<string, string>>({})
-
   const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
@@ -32,30 +30,6 @@ export default function Catalogue(): React.JSX.Element {
       cancelled = true
     }
   }, [retryCount])
-
-  useEffect(() => {
-    let cancelled = false
-    const objectUrls: string[] = []
-
-    covers.forEach((cover) => {
-      if (!cover.imageFile) return
-      downloadCoverImageUrl(cover.imageFile)
-        .then((url) => {
-          if (cancelled) return
-          objectUrls.push(url)
-          setThumbnails((prev) => ({ ...prev, [cover.id]: url }))
-        })
-        .catch(() => {
-          // A missing/failed thumbnail shouldn't take down the whole list —
-          // that row just falls back to the placeholder below.
-        })
-    })
-
-    return () => {
-      cancelled = true
-      objectUrls.forEach((url) => URL.revokeObjectURL(url))
-    }
-  }, [covers])
 
   if (state === 'loading') {
     return (
@@ -101,28 +75,24 @@ export default function Catalogue(): React.JSX.Element {
       <h1 className="text-xl font-semibold mb-6">The Catalogue</h1>
       <ul className="space-y-4">
         {covers.map((cover) => (
-          <li key={cover.id} className="flex gap-4 border rounded p-4">
-            {thumbnails[cover.id] ? (
-              <img
-                src={thumbnails[cover.id]}
-                alt={cover.giItemName ?? 'Cover'}
-                className="w-24 h-24 object-cover rounded"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-400">
-                Loading…
+          <li key={cover.id} className="border rounded">
+            <button
+              type="button"
+              onClick={() => onSelectCover(cover.id)}
+              className="flex gap-4 p-4 w-full text-left"
+            >
+              <CoverThumbnail imageFile={cover.imageFile} alt={cover.giItemName ?? 'Cover'} />
+              <div>
+                <p className="font-medium">{cover.giItemName ?? 'Name not recorded yet'}</p>
+                <p className="text-sm text-gray-500">
+                  {cover.productCategory ?? 'Category not recorded yet'}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {cover.postalCircleName ?? 'Postal circle not recorded yet'}
+                </p>
+                <p className="text-sm text-gray-500">{formatDateOfIssue(cover.dateOfIssue)}</p>
               </div>
-            )}
-            <div>
-              <p className="font-medium">{cover.giItemName ?? 'Name not recorded yet'}</p>
-              <p className="text-sm text-gray-500">
-                {cover.productCategory ?? 'Category not recorded yet'}
-              </p>
-              <p className="text-sm text-gray-500">
-                {cover.postalCircleName ?? 'Postal circle not recorded yet'}
-              </p>
-              <p className="text-sm text-gray-500">{formatDateOfIssue(cover.dateOfIssue)}</p>
-            </div>
+            </button>
           </li>
         ))}
       </ul>
