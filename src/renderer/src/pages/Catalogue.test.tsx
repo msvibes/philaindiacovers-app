@@ -37,7 +37,7 @@ describe('Catalogue', () => {
   it('shows courteous empty-catalogue copy that both explains why and sets an expectation — distinct from the error state', async () => {
     mockedFetch.mockResolvedValue([])
     render(<Catalogue />)
-    await waitFor(() => expect(screen.getByText(/dusting off the covers/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/freshly dusted/i)).toBeInTheDocument())
     expect(screen.getByText(/check back soon/i)).toBeInTheDocument()
     expect(screen.queryByText(/didn't go to plan/i)).not.toBeInTheDocument()
   })
@@ -46,7 +46,7 @@ describe('Catalogue', () => {
     mockedFetch.mockRejectedValue(new Error('network error'))
     render(<Catalogue />)
     await waitFor(() => expect(screen.getByText(/didn't go to plan/i)).toBeInTheDocument())
-    expect(screen.queryByText(/dusting off the covers/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/freshly dusted/i)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
   })
 
@@ -58,7 +58,7 @@ describe('Catalogue', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /try again/i }))
 
-    await waitFor(() => expect(screen.getByText(/dusting off the covers/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/freshly dusted/i)).toBeInTheDocument())
     expect(mockedFetch).toHaveBeenCalledTimes(2)
   })
 })

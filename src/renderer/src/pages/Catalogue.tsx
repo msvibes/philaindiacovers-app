@@ -87,7 +87,7 @@ export default function Catalogue(): React.JSX.Element {
   if (state === 'empty') {
     return (
       <main className="p-8">
-        <h1 className="text-xl font-semibold mb-2">Dusting off the covers for you…</h1>
+        <h1 className="text-xl font-semibold mb-2">The shelves are freshly dusted</h1>
         <p className="text-gray-500">
           The catalogue&apos;s still getting started — nothing&apos;s been verified in yet. Check
           back soon as more covers get verified.
