@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
 
 export interface VerifiedCover {
@@ -68,8 +69,13 @@ function mapCoverRow(row: RawCoverRow): VerifiedCover {
 // Fetches the public catalogue — only 'verified' covers, per RLS (covers has
 // no anon grant at all; this only succeeds for an authenticated Collector
 // session). No filtering/search/sort — that's US-08/09/10, not this task.
-export async function fetchVerifiedCovers(): Promise<VerifiedCover[]> {
-  const { data, error } = await supabase
+// Takes an optional client (defaults to the app's shared singleton) so
+// tests can call this as a specific, differently-authenticated real
+// session — mirrors the Admin repo's fetchReviewQueue(client) pattern.
+export async function fetchVerifiedCovers(
+  client: SupabaseClient = supabase
+): Promise<VerifiedCover[]> {
+  const { data, error } = await client
     .from('covers')
     .select('id, gi_item_name, product_category, date_of_issue, image_file, postal_circles(name)')
     .eq('verification_status', 'verified')
@@ -86,9 +92,13 @@ export async function fetchVerifiedCovers(): Promise<VerifiedCover[]> {
 // mirrors it rather than assuming UI-level trust (a Collector should never
 // be able to reach a draft/flagged cover's detail by guessing an id).
 // Returns null, not an error, when nothing matches — the caller treats
-// that as "not found" rather than "something went wrong".
-export async function fetchVerifiedCoverById(id: string): Promise<CoverDetail | null> {
-  const { data, error } = await supabase
+// that as "not found" rather than "something went wrong". Same optional
+// client parameter as fetchVerifiedCovers, for the same reason.
+export async function fetchVerifiedCoverById(
+  id: string,
+  client: SupabaseClient = supabase
+): Promise<CoverDetail | null> {
+  const { data, error } = await client
     .from('covers')
     .select(
       `id, gi_item_name, product_category, date_of_issue, image_file, postal_circles(name),
