@@ -13,6 +13,8 @@ export default function Catalogue(): React.JSX.Element {
   const [covers, setCovers] = useState<VerifiedCover[]>([])
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({})
 
+  const [retryCount, setRetryCount] = useState(0)
+
   useEffect(() => {
     let cancelled = false
 
@@ -29,7 +31,7 @@ export default function Catalogue(): React.JSX.Element {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [retryCount])
 
   useEffect(() => {
     let cancelled = false
@@ -58,7 +60,7 @@ export default function Catalogue(): React.JSX.Element {
   if (state === 'loading') {
     return (
       <main className="p-8">
-        <p className="text-gray-500">Dusting off the covers for you…</p>
+        <p className="text-gray-500">Loading the catalogue…</p>
       </main>
     )
   }
@@ -67,9 +69,17 @@ export default function Catalogue(): React.JSX.Element {
     return (
       <main className="p-8">
         <h1 className="text-xl font-semibold mb-2">Well, that didn&apos;t go to plan.</h1>
-        <p className="text-gray-500">
-          We hit a snag loading the catalogue. Please try again in a moment.
-        </p>
+        <p className="text-gray-500 mb-4">Give it another go?</p>
+        <button
+          type="button"
+          onClick={() => {
+            setState('loading')
+            setRetryCount((count) => count + 1)
+          }}
+          className="rounded bg-black px-4 py-2 text-white"
+        >
+          Try again
+        </button>
       </main>
     )
   }
@@ -77,10 +87,10 @@ export default function Catalogue(): React.JSX.Element {
   if (state === 'empty') {
     return (
       <main className="p-8">
-        <h1 className="text-xl font-semibold mb-2">The shelves are freshly dusted!</h1>
+        <h1 className="text-xl font-semibold mb-2">Dusting off the covers for you…</h1>
         <p className="text-gray-500">
-          Nothing&apos;s been verified into the catalogue just yet — check back soon, new covers
-          show up here the moment they&apos;re verified.
+          The catalogue&apos;s still getting started — nothing&apos;s been verified in yet. Check
+          back soon as more covers get verified.
         </p>
       </main>
     )
