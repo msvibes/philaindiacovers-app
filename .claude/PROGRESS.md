@@ -1,7 +1,7 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-12
-**Last session worked on:** T-09 — the cover detail view. **This is the last Walking Skeleton task** — T-01 through T-09 are now all built.
+**Last session worked on:** Standup reconciliation — T-09 (PR #4, App repo) and its prerequisite `covers.image_file` NOT NULL fix (PR #13, Admin repo) are both confirmed merged. **The Walking Skeleton (T-01–T-09) is complete.**
 
 ## T-09 (US-11) — cover detail view
 
@@ -65,12 +65,11 @@ Was nullable at the schema level with only T-02's import-time validation prevent
 
 ## In progress
 
-**T-09 is code-complete and verified live** (27/27 Vitest tests always run, plus 2 more in the new live integration test when `SUPABASE_SERVICE_ROLE_KEY` is passed inline — run twice for real, both clean; `npm run build`/`npm run lint` clean) but **not yet merged**, on branch `t09-cover-detail-view`, no PR opened yet (`gh` not installed). The Admin repo's `covers.image_file` NOT NULL fix (a T-09 prerequisite) is in the same state, on branch `covers-image-file-not-null`. T-07.5/T-08/the UX reconciliation remain merged and unaffected.
+Nothing in progress. **PR #4 (`t09-cover-detail-view`, App repo) and PR #13 (`covers-image-file-not-null`, Admin repo) are both merged** — confirmed via a fresh `git fetch` at this session's start, since neither merge was otherwise visible in conversation (same class of drift `/standup`'s fetch-first step exists to catch, for the third time this project). Both branches auto-deleted on GitHub; local copies cleaned up in both repos. Jira confirms US-11 now Done.
 
 ## Next up
 
-1. **Open PRs for both branches** (this repo's `t09-cover-detail-view`, the Admin repo's `covers-image-file-not-null`) and merge — Admin's constraint fix has no dependency on this repo's branch, can merge independently.
-2. **The Walking Skeleton (T-01–T-09) is complete once this merges** — spreadsheet → validated import → Draft → Verifier review → Verified → visible to a Collector, full detail view included, proven end-to-end. Next work is whatever's next in the actual backlog priority (US-08/09/10 filtering/search/sort on the catalogue, or a different epic) — confirm with Jira/backlog priority before picking, same as every task start in this project.
+**The Walking Skeleton (T-01–T-09) is complete** — spreadsheet → validated import → Draft → Verifier review → Verified → visible to a Collector, full detail view included, proven end-to-end, live, in both repos. **No task is currently queued** — next work depends on actual backlog priority (US-08/09/10 filtering/search/sort on the catalogue, or a different epic entirely), which hasn't been set yet as of this session. Confirm with the user/Jira before picking anything.
 
 ## Known gotchas from recent sessions
 
