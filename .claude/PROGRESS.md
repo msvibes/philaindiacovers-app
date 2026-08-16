@@ -1,7 +1,15 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-08-12
-**Last session worked on:** Standup reconciliation — T-09 (PR #4, App repo) and its prerequisite `covers.image_file` NOT NULL fix (PR #13, Admin repo) are both confirmed merged. **The Walking Skeleton (T-01–T-09) is complete.**
+**Last updated:** 2026-08-16
+**Last session worked on:** Docs housekeeping — brought this repo's `docs/` folder up to file-level parity with the Admin repo's.
+
+## Docs housekeeping (2026-08-16)
+
+Copied `Architecture-Decision-Records.md`, `Threat-Model.md`, and `Test-Strategy.md` in from the Admin repo — the three files that genuinely existed there but not here. **Checked, didn't assume, that the other four files the request named (`High-Level-Design.md`, `Low-Level-Design.md`, `Epics-UserStoryMap.md`, `PRD-v1.0.md`) actually exist in the Admin repo first — they don't.** Admin's own `docs/README.md` already marks all four as 📦 ("part of the full package, not copied here"), confirmed with a repo-wide search too. Flagged this to the user rather than fabricating or silently skipping them.
+
+`docs/README.md` rewritten to use the same ✅/📦 parity-marking convention as Admin's evolved copy, plus a new entry for `UX-Design-Reference.md` (an App-repo-specific doc with no equivalent in Admin's set, previously missing from the index entirely). `CLAUDE.md` gained a "Reference docs" section pointing at it, matching Admin's own CLAUDE.md structure.
+
+**Real gap found and flagged, not fixed**: `API-Integration-Contracts.md` and `AI-Agent-Implementation-Brief.md` already existed in both repos before this session, but turned out not to be in sync — 193 and 17 diff lines respectively. The Brief especially is stale here: missing the accumulated "✅ Built" history for T-05/T-06.5/T-07 that Admin's copy has. Out of scope for "copy in the missing files," which is what was asked — noted explicitly in `docs/README.md`'s own closing section so it isn't silently forgotten, not resynced without being asked.
 
 ## T-09 (US-11) — cover detail view
 
