@@ -1,8 +1,8 @@
 # PhilaIndiaCovers — Architecture Decision Records (ADRs)
 
-Format follows Michael Nygard's widely-adopted ADR convention (used broadly across the industry, including at companies like Spotify and Amazon): each record is short, immutable once accepted, and captures _why_, not just _what_ — so a future session (yours or Claude Code's) never has to guess whether a past decision was an oversight or a deliberate tradeoff.
+Format follows Michael Nygard's widely-adopted ADR convention (used broadly across the industry, including at companies like Spotify and Amazon): each record is short, immutable once accepted, and captures *why*, not just *what* — so a future session (yours or Claude Code's) never has to guess whether a past decision was an oversight or a deliberate tradeoff.
 
-**Relationship to the PRD:** §8.2 of the main PRD (`PhilaIndiaCovers-PRD-v1.0.md`) has a short "Alternatives Considered" table covering the same decisions at a glance. That table is the quick summary; this document is the full reasoning behind each row. Read §8.2 first for the two-second version, come here for the actual _why_.
+**Relationship to the PRD:** §8.2 of the main PRD (`PhilaIndiaCovers-PRD-v1.0.md`) has a short "Alternatives Considered" table covering the same decisions at a glance. That table is the quick summary; this document is the full reasoning behind each row. Read §8.2 first for the two-second version, come here for the actual *why*.
 
 ---
 
@@ -58,7 +58,7 @@ Format follows Michael Nygard's widely-adopted ADR convention (used broadly acro
 
 **Status:** Accepted
 
-> 📚 **Learning note:** a `SECURITY DEFINER` function in Postgres runs with the _permissions of whoever created it_, not the permissions of whoever calls it — the opposite of how database access normally works. This is what makes the pattern below possible: a Verifier can be given zero direct table access at all, yet still perform one very specific, tightly-controlled action through a function that's allowed to do more than they are individually. It's a common technique wherever you need "this role can do exactly this one privileged thing, and nothing else" — worth recognizing if you see it in other systems.
+> 📚 **Learning note:** a `SECURITY DEFINER` function in Postgres runs with the *permissions of whoever created it*, not the permissions of whoever calls it — the opposite of how database access normally works. This is what makes the pattern below possible: a Verifier can be given zero direct table access at all, yet still perform one very specific, tightly-controlled action through a function that's allowed to do more than they are individually. It's a common technique wherever you need "this role can do exactly this one privileged thing, and nothing else" — worth recognizing if you see it in other systems.
 
 **Context:** FR-25 requires that a Verifier can change a cover's status but never edit its metadata, enforced at the database level. Postgres Row-Level Security is row-level, not column-level, so it cannot natively express "this role may write this column but not that one" on the same table.
 

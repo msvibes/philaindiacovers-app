@@ -1,7 +1,17 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-16
-**Last session worked on:** Docs housekeeping, in two passes — bringing this repo's `docs/` folder up to file-level parity with the Admin repo's, then adding four planning-stage documents that never existed in either repo before now.
+**Last session worked on:** Docs housekeeping, in three passes — parity with the Admin repo's `docs/`, adding four planning-stage documents that never existed in either repo before now, then resyncing all six shared files (not just the two originally flagged) once it turned out some of the "already synced" ones weren't either.
+
+## Docs housekeeping, pass 3 (2026-08-16): all six shared files confirmed byte-identical with Admin's
+
+Started as just closing the `API-Integration-Contracts.md` / `AI-Agent-Implementation-Brief.md` gap flagged (not fixed) in pass 1. Diffed both against Admin's canonical copies first (not just overwritten blind): confirmed everything unique to this repo's prior copies was purely older/duplicate content — outdated Walking Skeleton table rows (T-04/T-05/T-07/T-08's original pre-build descriptions, superseded by Admin's "✅ Built" versions) and pre-alignment markdown table formatting — nothing App-repo-specific that would've been lost. Overwritten with Admin's current versions.
+
+**Before writing down a "byte-identical" claim, checked it was actually true — and it wasn't.** Direct `diff` against Admin's copies found the three files copied in pass 1 (`Architecture-Decision-Records.md`, `Threat-Model.md`, `Test-Strategy.md`) had also drifted, purely because `prettier --write` was run on them after copying (`*italic*` → `_italic_`, table column-width reformatting — no content change). Separately, `Postal-Circles-Reference.md` (copied even earlier this session) was missing a real section Admin's copy has: "Known Variant Names in the Real Import Spreadsheet (T-05)," 8 CSV postal-circle-name variants and their normalization mapping. Flagged both findings and confirmed with the user before touching anything further, rather than silently expanding scope again. All four re-copied (the three formatting-only ones without running the formatter again afterward); all six shared files now confirmed byte-identical via direct `diff`.
+
+**Lesson for future doc syncs, now called out in `docs/README.md` directly**: don't run this repo's `prettier` on these six shared files — it silently breaks byte-identity with Admin's copies even though the content is otherwise an exact, faithful copy.
+
+**One known gap survives all of this, inherited from Admin's own canonical copy, not introduced here**: the Implementation Brief's T-09 row is still the original pre-build placeholder text in Admin's own file — never updated to reflect T-09's actual build (full field list, the navigation decision, the per-field null audit, the retire-vs-repurpose copy story) the way T-07/T-08's rows were updated after those shipped. This repo's copy now correctly matches Admin's, including that gap — fixing it means editing Admin's canonical copy, a distinct task from what was asked here.
 
 ## Docs housekeeping, pass 2 (2026-08-16): planning-stage documents added
 
