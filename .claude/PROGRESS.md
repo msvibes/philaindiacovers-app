@@ -1,11 +1,15 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-16
-**Last session worked on:** Docs housekeeping — brought this repo's `docs/` folder up to file-level parity with the Admin repo's.
+**Last session worked on:** Docs housekeeping, in two passes — bringing this repo's `docs/` folder up to file-level parity with the Admin repo's, then adding four planning-stage documents that never existed in either repo before now.
 
-## Docs housekeeping (2026-08-16)
+## Docs housekeeping, pass 2 (2026-08-16): planning-stage documents added
 
-Copied `Architecture-Decision-Records.md`, `Threat-Model.md`, and `Test-Strategy.md` in from the Admin repo — the three files that genuinely existed there but not here. **Checked, didn't assume, that the other four files the request named (`High-Level-Design.md`, `Low-Level-Design.md`, `Epics-UserStoryMap.md`, `PRD-v1.0.md`) actually exist in the Admin repo first — they don't.** Admin's own `docs/README.md` already marks all four as 📦 ("part of the full package, not copied here"), confirmed with a repo-wide search too. Flagged this to the user rather than fabricating or silently skipping them.
+`PRD-v1.0.md`, `High-Level-Design.md`, `Low-Level-Design.md`, and `Epics-UserStoryMap.md` — provided directly by the user, confirmed to genuinely never have existed in either repo before (not a gap missed in pass 1 below). **These are planning-stage documents predating T-04 onward** — accurate on original design intent, not a record of everything actually built since. Checked, not assumed: the Low-Level-Design doc explicitly stops updating after T-02 (T-03 through T-09 are still marked "not yet built — forward design" in its own text), even though all nine Walking Skeleton tasks are now complete and merged. `docs/README.md` updated: all four flipped from (would-have-been) 📦 to ✅, plus a new note in its "Keeping This Set Honest" section flagging their planning-stage nature so this isn't lost track of later.
+
+## Docs housekeeping, pass 1 (2026-08-16): parity with Admin repo
+
+Copied `Architecture-Decision-Records.md`, `Threat-Model.md`, and `Test-Strategy.md` in from the Admin repo — the three files that genuinely existed there but not here. **Checked, didn't assume, that the other four files the request named (the same four added in pass 2 above) actually existed in the Admin repo first — they didn't.** Admin's own `docs/README.md` marked all four as 📦 ("part of the full package, not copied here"), confirmed with a repo-wide search too. Flagged this to the user rather than fabricating or silently skipping them — pass 2 above is the user separately providing the real files afterward.
 
 `docs/README.md` rewritten to use the same ✅/📦 parity-marking convention as Admin's evolved copy, plus a new entry for `UX-Design-Reference.md` (an App-repo-specific doc with no equivalent in Admin's set, previously missing from the index entirely). `CLAUDE.md` gained a "Reference docs" section pointing at it, matching Admin's own CLAUDE.md structure.
 

@@ -6,11 +6,11 @@ Start here. This tells you which document to open based on what you're actually 
 
 ## "I want the full picture, business and technical"
 
-→ **`PRD-v1.0.md`** 📦 — the main Product Requirements Document. Problem, goals, requirements, scope, everything. Start here if you're new to the project entirely.
+→ **`PRD-v1.0.md`** ✅ — the main Product Requirements Document. Problem, goals, requirements, scope, everything. Start here if you're new to the project entirely.
 
 ## "I want to understand how the system is architected, visually"
 
-→ **`High-Level-Design.md`** 📦 — context diagram, container diagram, entity relationships, the verification-status state machine, the security trust-boundary diagram, key sequence flows. Best for a technical walkthrough or architecture review conversation.
+→ **`High-Level-Design.md`** ✅ — context diagram, container diagram, entity relationships, the verification-status state machine, the security trust-boundary diagram, key sequence flows. Best for a technical walkthrough or architecture review conversation.
 
 ## "Why did we choose Electron / Supabase / two repos / Microsoft Store / this specific security pattern?"
 
@@ -18,7 +18,7 @@ Start here. This tells you which document to open based on what you're actually 
 
 ## "I'm about to actually build something — what's the detailed design?"
 
-→ **`Low-Level-Design.md`** 📦 — deliberately scoped to only what's currently being built (the Walking Skeleton, T-01–T-09), extended task-by-task as work progresses. Don't expect this to cover stories that haven't started yet — that's intentional, not a gap.
+→ **`Low-Level-Design.md`** ✅ — **stale, not current**: only covers T-01 (as-built) and T-02 (as-built, with one correction) in any real detail; T-03 through T-09 are all still marked "not yet built — forward design," even though all nine Walking Skeleton tasks are now actually complete. Never extended past its initial draft despite its own stated intent to grow task-by-task. Treat it as historical/planning-stage for anything past T-02, not as a record of what actually shipped — check the real code, or the relevant task's `AI-Agent-Implementation-Brief.md` row, instead.
 
 ## "Is this secure? What have we thought about?"
 
@@ -34,7 +34,7 @@ Start here. This tells you which document to open based on what you're actually 
 
 ## "What's the actual backlog, and why is it organized this way?"
 
-→ **`Epics-UserStoryMap.md`** 📦 — all 11 Epics and 42 User Stories, built with Jeff Patton's Story Mapping method, plus the release-slicing logic (Walking Skeleton first, then the rest).
+→ **`Epics-UserStoryMap.md`** ✅ — all 11 Epics and 42 User Stories, built with Jeff Patton's Story Mapping method, plus the release-slicing logic (Walking Skeleton first, then the rest).
 
 ## "I'm Claude Code, starting a session — what do I need to know?"
 
@@ -65,5 +65,7 @@ Yes — look for **📚 Learning Note** callouts throughout the HLD, ADRs, and T
 ## A Note on Keeping This Set Honest
 
 Several of these documents (particularly the LLD and Threat Model) describe things that change as real code gets built — they are living documents tied to actual implementation state, not one-time artifacts written once and frozen. When a task moves from "planned" to "built," the relevant document should be updated to match reality, not left describing a plan that's since diverged from what actually shipped. This index itself should be the first stop for figuring out what needs updating when that happens — if you're not sure which document a change belongs in, it's listed above.
+
+**`PRD-v1.0.md`, `High-Level-Design.md`, `Low-Level-Design.md`, and `Epics-UserStoryMap.md` were added to this repo on 2026-08-16 and are planning-stage documents — they predate T-04 onward (the LLD explicitly stops updating after T-02).** Accurate for design intent and the original plan, but not a record of everything actually built since; the Walking Skeleton (T-01–T-09) is now fully complete, which none of these four reflect. Corroborate against the real code, `docs/API-Integration-Contracts.md`, and `docs/AI-Agent-Implementation-Brief.md`'s task table for current state, not these four alone.
 
 **Keeping the two repos' `docs/` folders in sync:** the ✅-marked files that exist in both repos (`API-Integration-Contracts.md`, `Architecture-Decision-Records.md`, `Threat-Model.md`, `Test-Strategy.md`, `AI-Agent-Implementation-Brief.md`, `Postal-Circles-Reference.md`) are meant to describe the same shared system — when one repo's copy is corrected or updated, check whether the other repo's copy needs the same fix. **`Architecture-Decision-Records.md`, `Threat-Model.md`, and `Test-Strategy.md` were freshly copied from the Admin repo on 2026-08-16 and are current as of that date.** `API-Integration-Contracts.md` and `AI-Agent-Implementation-Brief.md` were **not** re-synced in that pass — both predate it, and both are now known to have drifted from the Admin repo's evolved copies (the Brief especially: it's missing the accumulated build-history for T-05/T-06.5/T-07 that Admin's copy has). Flagged, not fixed — a full resync of those two is a distinct, larger task from copying in the three missing files.
