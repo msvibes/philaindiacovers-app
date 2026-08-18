@@ -34,3 +34,7 @@ Vitest (`npm test`), same as the Admin repo — chosen per `docs/Test-Strategy.m
 ## Branch/PR conventions
 
 Branch per story: `us-##-short-description`. PR to `main`, self-reviewed before merge.
+
+**Direct-to-main exception for docs-only changes (explicit policy as of 2026-08-17, adopted for consistency with the Admin repo — not because this repo's own branch protection required it yet):** `PROGRESS.md`, `CLAUDE.md`, `docs/**`, and `README.md` — pure documentation/process, never executed — may be pushed straight to `main`, no branch/PR required. Nothing else qualifies, even for a "tiny" change: `src/**`, `package.json`/`package-lock.json`, and `.github/workflows/**` always require a real branch + PR + passing CI. (No `supabase/migrations/**` here — schema lives only in the Admin repo.)
+
+This repo is still private today, with no rulesets enabled (GitHub only allows rulesets on public repos or with a paid plan) — so unlike Admin, owner-bypass isn't yet the reason this boundary needs to be explicit. It's written down proactively so the same convention already holds if/when this repo is ever made public or gains its own branch protection, rather than being decided reactively at that point.
