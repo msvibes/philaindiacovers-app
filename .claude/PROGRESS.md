@@ -1,7 +1,7 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-18
-**Last session worked on:** Built GitHub Actions CI for this repo (`.github/workflows/ci.yml`), closing the App/Admin asymmetry flagged in the standup reconciliation below. PR #5 (`ci-github-actions-pipeline`) opened, `ci-dev-supabase` Environment/secrets now configured by the user, and a real CI run confirmed fully green — **all four original decisions now empirically settled, none still open.** Not yet merged.
+**Last session worked on:** Two related but distinct pieces of work landed today: (1) built GitHub Actions CI for this repo end-to-end, verified green against real CI-injected secrets, on branch `ci-github-actions-pipeline` (PR #5, not yet merged); (2) separately, on `main`, made the repo public and added branch-protection rulesets after a clean full git-history secret scan, closing full parity with Admin on both CI and branch protection. That second piece of work landed on `main` while PR #5's branch existed independently, which put a real conflict in this exact file (`.claude/PROGRESS.md`) once `main` was merged back into the PR branch — resolved by hand, both sections kept in full below, not one overwriting the other.
 
 ## GitHub Actions CI (2026-08-18): branch `ci-github-actions-pipeline`, PR #5 — real CI run confirmed green
 
@@ -24,6 +24,24 @@ Investigated this repo's actual CI-relevant state first rather than assuming par
 **All four original decisions are now closed, not just decided**: (A) `ci-dev-supabase` Environment/secret names — configured and proven working. (B) cross-repo concurrency risk — accepted, trigger condition logged verbatim above. (C) secret-leak guardrail — built and proven working in real CI. (D) Vite env-var mechanism — proven empirically against real GitHub Actions-injected secrets, not assumed from documentation.
 
 **Still open**: PR #5 not yet merged. Once merged, the `ci-github-actions-pipeline` branch should auto-delete (same GitHub setting as prior branches in this repo).
+
+## Repo made public + branch protection added (2026-08-18): full parity with Admin on both CI and branch protection
+
+This work happened on `main`, independently of PR #5's branch (see above) — merged into this branch via `git merge origin/main` while resolving PR #5's own conflict in this file, not authored on this branch.
+
+**Same root cause as Admin hit**: private repos on personal GitHub accounts genuinely cannot enforce branch protection or rulesets at all (confirmed via GitHub's own UI warning) — not an oversight, a plan limitation. `CLAUDE.md`'s branch/PR conventions section already flagged this repo would need the same fix once it either went public or gained its own protection. Fixed in the same order as Admin: full git-history secret scan first, then made the repo public, then added rulesets — never public before a clean scan.
+
+**Full git-history secret scan — 28 commits / 121 blobs, Gitleaks v8.21.2 (native binary, Docker Desktop's daemon wasn't running here) + five targeted pattern checks (`sb_secret_`/`sb_publishable_`, JWT-shaped tokens, generic credential assignment, AWS keys, PEM headers) run per-commit across all 28 commits, not just Gitleaks's own ruleset — all clean, zero matches on every check.** `.env`/`.env.local` confirmed never committed at any path depth in any commit reachable from any ref; the only `.env*` file ever tracked is `.env.example`, one version in its whole history, always empty placeholders. Full findings reported to the user in-session before proceeding to make the repo public.
+
+**Repo visibility and both rulesets independently confirmed via the API, not just the settings UI** (`gh api repos/msvibes/philaindiacovers-app` and `.../rulesets/{id}`), plus a direct browser check of the Rulesets page itself confirming the "won't be enforced" warning is genuinely gone, not just assumed gone because the repo is now public:
+
+- Repo: `"private": false, "visibility": "public"`.
+- **`main-1`**: `enforcement: "active"`, rules `deletion` + `non_fast_forward` (blocks branch deletion and force-push), targets `~DEFAULT_BRANCH`.
+- **`main-2`**: `enforcement: "active"`, rules `deletion` + `non_fast_forward` + `required_status_checks` (context `"ci"`, `strict_required_status_checks_policy: true`), also targeting `~DEFAULT_BRANCH`. **Note, precise rather than just repeating the summary given**: `main-2` isn't scoped to only the status check — it duplicates `main-1`'s deletion/force-push rules too, so there's real overlap between the two rulesets rather than a clean split (same as what the API actually returned, not adjusted to match a tidier assumption). Not a bug — both rules being active in both places doesn't weaken anything — just worth knowing precisely, since it differs slightly from a "one ruleset per concern" mental model.
+
+**Real gap found and fixed within minutes of writing the entry above, not hypothetical**: pushing this very PROGRESS.md update directly to `main` (the docs-only exception `CLAUDE.md` describes) was **rejected by GitHub** — `main-2`'s `required_status_checks` rule genuinely blocked it (`GH013: Repository rule violations... Required status check "ci" is expected`), because `bypass_actors` on App's `main-2` was empty (`[]`), unlike Admin's `main-2`, which has a `RepositoryRole` bypass actor (`bypass_mode: "always"`) — that's the actual mechanism that makes Admin's identical written exception work, not just the exception being written down. **This is genuine, live confirmation that the required-status-check rule enforces for real** (not just configured), the same behavioral proof Admin's own record still had as an open item — closed here as a side effect, not deliberately sought out. Fixed by matching Admin exactly: added the same bypass actor (`actor_id: 5`, `RepositoryRole`, `bypass_mode: "always"`) to App's `main-2` via `gh api .../rulesets/20987436 -X PUT`, full payload shown to the user and confirmed before running. Push retried immediately after — succeeded, with GitHub explicitly logging `Bypassed rule violations for refs/heads/main: - Required status check "ci" is expected`, direct proof the bypass is what let it through, not a fluke. Both repos' `main-2` rulesets are now genuinely identical, not just similarly described.
+
+**Still open**: the merge-button-specific version of this same check — confirming a real PR's merge button is blocked when `ci` hasn't passed (as opposed to a direct push, now confirmed) — hasn't been separately observed live yet. PR #5 (the CI pipeline PR itself) is a real candidate for this once it's ready to merge.
 
 ## Standup reconciliation (2026-08-18): Implementation Brief re-synced, doc history corrected
 
