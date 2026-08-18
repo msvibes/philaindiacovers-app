@@ -31,6 +31,16 @@ Start at `docs/README.md` — it indexes the full documentation set and tells yo
 
 Vitest (`npm test`), same as the Admin repo — chosen per `docs/Test-Strategy.md`'s stated plan, since it works identically for both the Next.js admin app and Electron's renderer code. Pure logic gets unit tests (e.g. `scripts/checkCollectorProfile.mjs`, which `scripts/provision-collector.mjs` uses to check that Admin's `handle_new_user()` trigger actually created a `profiles` row — extracted specifically so a future regression there is caught automatically, not just by a one-time manual script run; similarly `src/renderer/src/lib/covers.ts`'s pure formatting/resolution helpers). UI states that are impractical to exercise against live data (e.g. an empty catalogue when a real Verified cover already exists) get component tests with a mocked Supabase client instead — see `Catalogue.test.tsx`.
 
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every PR to `main`: lint, typecheck, the full Vitest suite (unit + live integration), then a build (which also runs the secret-leak guardrail, `scripts/check-no-secret-leak.mjs`, scanning tracked files and `out/` for the `sb_secret_...` key pattern). Mirrors the Admin repo's own CI gate (`docs/Test-Strategy.md`'s "CI Gate" section is shared across both repos).
+
+**One-time manual setup required (cannot be done from Claude Code):** a GitHub Environment named `ci-dev-supabase` (repo Settings > Environments) holding three secrets — `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — pointed at the DEV Supabase project only, never production. Until this exists, CI's "Verify integration test credentials" step fails every run, on purpose.
+
+Env var names are `VITE_`-prefixed here (not `NEXT_PUBLIC_`-prefixed like Admin), since electron-vite's renderer only exposes `VITE_`-prefixed vars via `import.meta.env`. This was deliberately verified empirically, not assumed from Vite's docs — `src/renderer/src/lib/viteEnvVarsReachTests.test.ts` runs as part of the normal `npm test` and asserts both vars actually populate `import.meta.env` in whatever environment the suite runs in, CI included.
+
+**Known accepted risk, logged rather than silently accepted:** this repo and the Admin repo share one dev Supabase project, and each has its own independent per-repo CI concurrency group — a PR pushed to both repos at once could run live integration tests against that shared project concurrently. Accepted for now given this app's genuinely small live-data footprint. **Trigger condition for revisiting:** if Supabase Auth rate-limit errors are ever actually observed in either repo's CI logs, build real cross-repo coordination then, not before.
+
 ## Branch/PR conventions
 
 Branch per story: `us-##-short-description`. PR to `main`, self-reviewed before merge.

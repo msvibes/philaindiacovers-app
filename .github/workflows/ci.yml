@@ -1,0 +1,83 @@
+# CI gate mirroring the Admin repo's own (docs/Test-Strategy.md's "CI Gate"
+# section is shared across both repos): lint, typecheck, and the full Vitest
+# suite (unit + live integration) must all pass before merge. No E2E suite
+# exists in this repo (or Admin's) yet, so nothing to run there.
+#
+# One-time manual setup this workflow depends on and cannot create itself:
+# a GitHub Environment named `ci-dev-supabase` (Settings > Environments)
+# holding three secrets — VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
+# SUPABASE_SERVICE_ROLE_KEY — pointed at the DEV Supabase project only,
+# never production. Until that environment and its secrets exist, the
+# "Verify integration test credentials" step below will fail every run,
+# on purpose (see that step for why this is intentional, not a bug).
+#
+# Note on env var names: this repo uses VITE_-prefixed names (not
+# NEXT_PUBLIC_-prefixed like Admin) because electron-vite's renderer reads
+# them via import.meta.env, which only exposes VITE_-prefixed vars — see
+# src/renderer/src/lib/viteEnvVarsReachTests.test.ts, which exists
+# specifically to prove these vars actually reach import.meta.env in CI
+# rather than assuming Vite's documented env-loading behavior holds here.
+#
+# Note on concurrency: this repo and the Admin repo share one dev Supabase
+# project, and each has its own independent per-repo concurrency group
+# below — a PR pushed to both repos at once could still run live
+# integration tests against that shared project concurrently. Accepted for
+# now given this app's genuinely small live-data footprint. Trigger
+# condition for revisiting, logged explicitly rather than silently
+# accepted: if Supabase Auth rate-limit errors are ever actually observed
+# in either repo's CI logs, build real cross-repo coordination then, not
+# before.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    environment: ci-dev-supabase
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Verify integration test credentials are present
+        run: |
+          missing=()
+          [ -z "$VITE_SUPABASE_URL" ] && missing+=("VITE_SUPABASE_URL")
+          [ -z "$VITE_SUPABASE_ANON_KEY" ] && missing+=("VITE_SUPABASE_ANON_KEY")
+          [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] && missing+=("SUPABASE_SERVICE_ROLE_KEY")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Missing required Supabase credentials for CI: ${missing[*]}. Without these, the integration test suite (src/**/*.integration.test.ts) would silently skip via describe.skipIf() instead of failing - see docs/Test-Strategy.md's CI Gate section. Add these three secrets to the 'ci-dev-supabase' GitHub Environment (Settings > Environments), pointed at the DEV Supabase project only, never production."
+            exit 1
+          fi
+          echo "All required Supabase credentials are present."
+
+      - name: Test (unit + live integration, including the Vite env-var reach check)
+        run: npm test
+
+      - name: Build (also runs the secret-leak guardrail)
+        run: npm run build
