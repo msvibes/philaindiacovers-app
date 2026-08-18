@@ -1,7 +1,21 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-18
-**Last session worked on:** Standup reconciliation — re-synced the Implementation Brief again (Admin's copy had moved on since the last pass), rewrote a confusing self-contradicting doc-history entry, and closed out two smaller known-gotcha corrections. A real App/Admin repo asymmetry (no CI in this repo) was identified here and is being addressed in the same session — see the next entry once that lands.
+**Last session worked on:** Made this repo public and added branch-protection rulesets, closing full parity with Admin on both CI and branch protection. A full git-history secret scan (28 commits, 121 blobs) ran clean first. See the dedicated entry below for the CI pipeline itself (branch `ci-github-actions-pipeline`, PR #5, not yet merged) — this entry is the separate repo-visibility/branch-protection work that depended on that scan.
+
+## Repo made public + branch protection added (2026-08-18): full parity with Admin on both CI and branch protection
+
+**Same root cause as Admin hit**: private repos on personal GitHub accounts genuinely cannot enforce branch protection or rulesets at all (confirmed via GitHub's own UI warning) — not an oversight, a plan limitation. `CLAUDE.md`'s branch/PR conventions section already flagged this repo would need the same fix once it either went public or gained its own protection. Fixed in the same order as Admin: full git-history secret scan first, then made the repo public, then added rulesets — never public before a clean scan.
+
+**Full git-history secret scan — 28 commits / 121 blobs, Gitleaks v8.21.2 (native binary, Docker Desktop's daemon wasn't running here) + five targeted pattern checks (`sb_secret_`/`sb_publishable_`, JWT-shaped tokens, generic credential assignment, AWS keys, PEM headers) run per-commit across all 28 commits, not just Gitleaks's own ruleset — all clean, zero matches on every check.** `.env`/`.env.local` confirmed never committed at any path depth in any commit reachable from any ref; the only `.env*` file ever tracked is `.env.example`, one version in its whole history, always empty placeholders. Full findings reported to the user in-session before proceeding to make the repo public.
+
+**Repo visibility and both rulesets independently confirmed via the API, not just the settings UI** (`gh api repos/msvibes/philaindiacovers-app` and `.../rulesets/{id}`), plus a direct browser check of the Rulesets page itself confirming the "won't be enforced" warning is genuinely gone, not just assumed gone because the repo is now public:
+
+- Repo: `"private": false, "visibility": "public"`.
+- **`main-1`**: `enforcement: "active"`, rules `deletion` + `non_fast_forward` (blocks branch deletion and force-push), targets `~DEFAULT_BRANCH`.
+- **`main-2`**: `enforcement: "active"`, rules `deletion` + `non_fast_forward` + `required_status_checks` (context `"ci"`, `strict_required_status_checks_policy: true`), also targeting `~DEFAULT_BRANCH`. **Note, precise rather than just repeating the summary given**: `main-2` isn't scoped to only the status check — it duplicates `main-1`'s deletion/force-push rules too, so there's real overlap between the two rulesets rather than a clean split (same as what the API actually returned, not adjusted to match a tidier assumption). Not a bug — both rules being active in both places doesn't weaken anything — just worth knowing precisely, since it differs slightly from a "one ruleset per concern" mental model.
+
+**Still open, not yet independently confirmed live**: the same behavioral check Admin's own record flagged as outstanding — watching a real PR to confirm the merge button is genuinely blocked when the `ci` check hasn't passed, not just assumed from the ruleset config being active. PR #5 (the CI pipeline PR itself) is a real candidate for this once it's ready to merge.
 
 ## Standup reconciliation (2026-08-18): Implementation Brief re-synced, doc history corrected
 
