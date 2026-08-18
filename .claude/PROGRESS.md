@@ -1,7 +1,15 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-08-16
-**Last session worked on:** Docs housekeeping, in three passes — parity with the Admin repo's `docs/`, adding four planning-stage documents that never existed in either repo before now, then resyncing all six shared files (not just the two originally flagged) once it turned out some of the "already synced" ones weren't either.
+**Last updated:** 2026-08-18
+**Last session worked on:** Standup reconciliation — re-synced the Implementation Brief again (Admin's copy had moved on since the last pass), rewrote a confusing self-contradicting doc-history entry, and closed out two smaller known-gotcha corrections. A real App/Admin repo asymmetry (no CI in this repo) was identified here and is being addressed in the same session — see the next entry once that lands.
+
+## Standup reconciliation (2026-08-18): Implementation Brief re-synced, doc history corrected
+
+Fetch-first check found `AI-Agent-Implementation-Brief.md` had drifted from Admin's canonical copy again (10 diff lines) — Admin's file had moved on since pass 3 below. Re-copied without running the formatter afterward, same approach as pass 3; confirmed byte-identical via direct `diff`, along with all five other shared docs (still in sync, untouched).
+
+**Current, accurate state, replacing the confusing back-and-forth in pass 3's entry below**: `AI-Agent-Implementation-Brief.md`'s Walking Skeleton table has **no placeholder rows left at all** — T-04, T-08, and T-09 (the three that were still pre-build placeholder text as of pass 3, in various combinations across several same-day corrections that contradicted each other) are now all "✅ Built" with full detail in Admin's canonical copy, and this repo's copy matches exactly. Pass 3's entry is left as-is below rather than re-edited again — it's a real record of how confusing this got in the moment — but treat _this_ entry as the current truth, not that one.
+
+`gh` is now installed and authenticated (account `msvibes`) — the known-gotcha entry about `/standup`/`/wrapup` being unable to check PRs automatically is corrected below to reflect this.
 
 ## Docs housekeeping, pass 3 (2026-08-16): all six shared files confirmed byte-identical with Admin's
 
@@ -12,6 +20,8 @@ Started as just closing the `API-Integration-Contracts.md` / `AI-Agent-Implement
 **Before writing down a "byte-identical" claim, checked it was actually true — and it wasn't.** Direct `diff` against Admin's copies found the three files copied in pass 1 (`Architecture-Decision-Records.md`, `Threat-Model.md`, `Test-Strategy.md`) had also drifted, purely because `prettier --write` was run on them after copying (`*italic*` → `_italic_`, table column-width reformatting — no content change). Separately, `Postal-Circles-Reference.md` (copied even earlier this session) was missing a real section Admin's copy has: "Known Variant Names in the Real Import Spreadsheet (T-05)," 8 CSV postal-circle-name variants and their normalization mapping. Flagged both findings and confirmed with the user before touching anything further, rather than silently expanding scope again. All four re-copied (the three formatting-only ones without running the formatter again afterward); all six shared files now confirmed byte-identical via direct `diff`.
 
 **Lesson for future doc syncs, now called out in `docs/README.md` directly**: don't run this repo's `prettier` on these six shared files — it silently breaks byte-identity with Admin's copies even though the content is otherwise an exact, faithful copy.
+
+**Note (2026-08-18): the "one known gap" paragraph that followed this point has been superseded — see the "Standup reconciliation" entry above.** Left unedited below for the historical record of how this was tracked in the moment, but don't treat it as current.
 
 **One known gap survives all of this, inherited from Admin's own canonical copy, not introduced here**: the Implementation Brief's T-09 row is still the original pre-build placeholder text in Admin's own file — never updated to reflect T-09's actual build (full field list, the navigation decision, the per-field null audit, the retire-vs-repurpose copy story) the way T-07's row was updated after it shipped. This repo's copy now correctly matches Admin's, including that gap — fixing it means editing Admin's canonical copy, a distinct task from what was asked here. (**T-08's row had this exact same gap too**, contrary to what this entry implies by omission — see the 2026-08-17 correction above. Both T-08 and T-09's rows were fixed in Admin's canonical copy the following session.)
 
@@ -103,4 +113,4 @@ Nothing in progress. **PR #4 (`t09-cover-detail-view`, App repo) and PR #13 (`co
 - **`covers` (and now `cover-images` Storage reads) have zero `anon` grant, by design** — this app has a locked no-anonymous-browsing non-goal, so any table/Storage read needs a real authenticated Collector session. Don't add an `anon`-scoped policy anywhere in this app's data path without confirming that's actually intended first (see the API-Integration-Contracts.md §4 correction this session, which fixed exactly this kind of stale "public" assumption).
 - **Test Collector provisioning**: `npm run provision:collector -- --email=... --password=...` needs `SUPABASE_SERVICE_ROLE_KEY` passed inline (not stored in this app's `.env` — the App only ever uses the anon key at runtime, per CLAUDE.md).
 - This session's commit (`ae5c96a`, repo/tooling setup) was pushed directly to `main` with no branch/PR — an **intentional, accepted one-off** (scaffolding/tooling, not product code). The branch-per-story/PR convention applies strictly starting with T-07.5 (this session) onward — do not extend the "one-off" exception to real story work.
-- `gh` CLI is not installed on this machine — `/standup` and `/wrapup`'s PR-check steps can't run automatically until it's installed, or PR status must be confirmed manually via GitHub's web UI.
+- **`gh` CLI is now installed and authenticated (account `msvibes`), as of 2026-08-18 — corrected from earlier entries saying otherwise.** `/standup`'s and `/wrapup`'s PR-check steps can run automatically now (`gh pr list --state merged`/`--state open`), in both this repo and the Admin repo. Any older note in this file or in memory claiming `gh` isn't available is stale as of this date.
