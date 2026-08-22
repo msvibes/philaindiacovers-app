@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabaseClient'
+import AppHeader from './components/AppHeader'
 import Login from './pages/Login'
 import Catalogue from './pages/Catalogue'
 import Detail from './pages/Detail'
@@ -14,10 +15,16 @@ import Detail from './pages/Detail'
 function SignedIn(): React.JSX.Element {
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
 
-  if (selectedCoverId) {
-    return <Detail coverId={selectedCoverId} onBack={() => setSelectedCoverId(null)} />
-  }
-  return <Catalogue onSelectCover={setSelectedCoverId} />
+  return (
+    <>
+      <AppHeader />
+      {selectedCoverId ? (
+        <Detail coverId={selectedCoverId} onBack={() => setSelectedCoverId(null)} />
+      ) : (
+        <Catalogue onSelectCover={setSelectedCoverId} />
+      )}
+    </>
+  )
 }
 
 function App(): React.JSX.Element | null {
