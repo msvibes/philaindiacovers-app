@@ -42,16 +42,18 @@ These are real, diagnosed gaps but are technical/state-management decisions, not
 
 ---
 
-## Open Questions
+## Open Questions — all resolved (2026-08-23)
 
-| # | Question | Owner | Status |
-|---|---|---|---|
-| 1 | Should filters be multi-select (Airbnb-style) or stay single-select but gain counts? | Manjunath | Open |
-| 2 | Does next/previous navigation respect the active filter set (i.e., "next" = next *filtered* result), or always the full catalogue order? | Manjunath | Open |
-| 3 | Is a full grid rebuild (Midday-style uniform card grid) in scope for the next UI pass, or is a more modest thumbnail-size increase sufficient for the friends/family trial? | Manjunath | Open |
-| 4 | Empty-state and loading-state behavior weren't part of the original diagnosed gap list — should these be added formally to the known-gaps list (e.g. in Jira) alongside the four original ones? | Manjunath | Open |
-| 5 | Midday's card is small-image/avatar-first (image is a corner accent, not the dominant element) — does this still satisfy the original "thumbnails not treated as visual centerpiece" gap, or does the card need a larger image treatment than Midday's own screens show? | Manjunath | Open |
+| # | Question | Resolution |
+|---|---|---|
+| 1 | Multi-select or single-select+counts filters? | **Multi-select** (Airbnb pattern) — matches what the prototype actually demonstrated and got directional approval on |
+| 2 | Does next/previous respect the active filter set? | **Yes** — resolved in the PRD Addendum's FR-12: navigation moves within the filtered list, not the full catalogue, when filters are active |
+| 3 | Full grid rebuild or modest thumbnail bump? | **Full rebuild.** T-13's task scope is "rebuild," and FR-05/06/08 together describe new grid/pagination/filter behavior, not incremental tweaks to the T-08 list |
+| 4 | Formalize empty/loading states as their own Jira items? | **No separate stories** — small enough to fold into whichever task touches that screen (consistent with how password-toggle, terms-checkbox, and similar small items were handled) |
+| 5 | Does Midday's own small-image card style satisfy "thumbnails as centerpiece"? | **No — enlarge the image.** Midday is the reference for structure only (uniform grid, card sizing, text stack). The image area should be the dominant visual element, deliberately bigger than Midday's own screens show. The prototype files (`catalogue-prototype.html`, `app-prototype-v3-full.html`) are the actual source of truth for card proportions — more authoritative than this doc's prose on this specific point |
+
+**Field-name note added 2026-08-23:** This doc's prose (and the prototype files' mock JS data) predates the FR-08/09/10 reconciliation and still refers to generic "region"/"year" concepts. The real fields are **Postal Circle** (filtered against the seeded `postal_circles` reference table, not free-text region names) and **Date of Issue** (a full date — show it in full in Detail view, same correctness bar as T-14's fix). Year-grouping for the browse-by-year timeline is a legitimate UI simplification *derived from* the real `date_of_issue` field — not a replacement field.
 
 ---
 
-*Last updated: 2026-08-23 — initial reference pass, pre-rebuild. No design decisions locked yet.*
+*Last updated: 2026-08-23 — all open questions resolved ahead of T-13/T-18 implementation.*
