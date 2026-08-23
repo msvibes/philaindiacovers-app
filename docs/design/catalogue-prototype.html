@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhilaIndiaCovers — Catalogue Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F1E7; --card:#FFFFFF; --ink:#1B2A4A; --ink-soft:#5B6B8C;
+    --stamp:#B23A48; --perf:#E4DCC8; --line:#E4DCC8; --line-strong:#CFC4AC;
+    --success-bg:#E7F1EA; --success-text:#2F6B4F; --success-border:#BFDBC9;
+    --shadow:0 1px 2px rgba(27,42,74,.06);
+    --font-display:'Playfair Display',Georgia,serif;
+    --font-sans:'Inter',-apple-system,sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-sans);}
+  .app{max-width:1180px;margin:0 auto;padding:0 24px 80px;}
+  .banner{background:var(--ink);color:#F6F1E7;font-size:12.5px;text-align:center;padding:7px 12px;font-family:var(--font-sans);}
+  header.top{position:sticky;top:0;z-index:20;background:var(--paper);padding:20px 0 14px;border-bottom:1px solid var(--line);}
+  .top-row{display:flex;align-items:center;gap:16px;}
+  .brand{display:flex;align-items:baseline;gap:8px;margin-right:auto;}
+  .brand h1{font-family:var(--font-display);font-weight:600;font-size:21px;margin:0;letter-spacing:.2px;}
+  .brand span{font-size:11.5px;color:var(--ink-soft);font-family:var(--font-mono);}
+  .search{flex:1;max-width:320px;position:relative;}
+  .search input{width:100%;height:38px;border-radius:8px;border:1px solid var(--line-strong);background:var(--card);padding:0 12px 0 34px;font-size:13.5px;font-family:var(--font-sans);color:var(--ink);}
+  .search input:focus{outline:none;border-color:var(--stamp);box-shadow:0 0 0 3px rgba(178,58,72,.12);}
+  .search svg{position:absolute;left:11px;top:11px;width:16px;height:16px;stroke:var(--ink-soft);}
+  .filter-btn{display:flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--line-strong);background:var(--card);font-size:13.5px;font-family:var(--font-sans);cursor:pointer;color:var(--ink);}
+  .filter-btn:hover{border-color:var(--ink-soft);}
+  .filter-badge{background:var(--stamp);color:#fff;font-size:11px;font-weight:600;border-radius:10px;padding:1px 6px;font-family:var(--font-sans);}
+  .count-row{padding:14px 0 4px;font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;}
+  .clear-link{background:none;border:none;color:var(--stamp);font-size:13px;cursor:pointer;font-family:var(--font-sans);padding:0;display:none;}
+  .clear-link.show{display:inline;}
+
+  /* grid + card */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;padding-top:8px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;text-align:left;}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(27,42,74,.09);border-color:var(--line-strong);}
+  .card:focus-visible{outline:2px solid var(--stamp);outline-offset:2px;}
+  .thumb{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;position:relative;}
+  .thumb .icon{width:44%;height:44%;opacity:.9;}
+  .perf{height:10px;background:var(--card);position:relative;
+    -webkit-mask-image:radial-gradient(circle at 6px 5px, transparent 4px, black 4.4px);
+    mask-image:radial-gradient(circle at 6px 5px, transparent 4px, black 4.4px);
+    -webkit-mask-size:12px 10px;mask-size:12px 10px;
+    -webkit-mask-repeat:repeat-x;mask-repeat:repeat-x;}
+  .card-body{padding:12px 13px 14px;}
+  .cover-name{font-family:var(--font-display);font-weight:600;font-size:14.5px;line-height:1.32;margin:0 0 3px;}
+  .gi-name{font-size:12px;color:var(--ink-soft);margin:0 0 8px;}
+  .tag-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .chip{font-size:10.5px;font-family:var(--font-sans);padding:2px 7px;border-radius:5px;background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);}
+  .verified{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;color:var(--success-text);background:var(--success-bg);border:1px solid var(--success-border);padding:2px 7px;border-radius:5px;margin-left:auto;}
+  .verified svg{width:10px;height:10px;}
+
+  /* skeleton */
+  .skel-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .skel-thumb{aspect-ratio:1/1;background:linear-gradient(90deg,#EFEAE0 25%,#F6F2E9 37%,#EFEAE0 63%);background-size:400% 100%;animation:shimmer 1.4s infinite;}
+  .skel-line{height:9px;border-radius:4px;margin:12px 13px 0;background:linear-gradient(90deg,#EFEAE0 25%,#F6F2E9 37%,#EFEAE0 63%);background-size:400% 100%;animation:shimmer 1.4s infinite;}
+  .skel-line.w60{width:60%;margin-bottom:14px;}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+  /* empty state */
+  .empty{padding:70px 20px;text-align:center;}
+  .empty svg{width:34px;height:34px;stroke:var(--ink-soft);margin-bottom:14px;}
+  .empty h3{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0 0 6px;}
+  .empty p{font-size:13.5px;color:var(--ink-soft);margin:0 0 18px;}
+  .empty-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .empty-actions button{font-size:12.5px;font-family:var(--font-sans);padding:6px 12px;border-radius:7px;border:1px solid var(--line-strong);background:var(--card);cursor:pointer;color:var(--ink);}
+  .empty-actions button:hover{border-color:var(--stamp);color:var(--stamp);}
+
+  /* filter panel */
+  .scrim{position:fixed;inset:0;background:rgba(27,42,74,.28);z-index:30;opacity:0;pointer-events:none;transition:opacity .18s ease;}
+  .scrim.open{opacity:1;pointer-events:auto;}
+  .panel{position:fixed;top:0;right:0;bottom:0;width:360px;max-width:88vw;background:var(--paper);z-index:31;box-shadow:-8px 0 24px rgba(27,42,74,.14);transform:translateX(100%);transition:transform .2s ease;display:flex;flex-direction:column;}
+  .panel.open{transform:translateX(0);}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line);}
+  .panel-head h2{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0;}
+  .icon-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;display:flex;color:var(--ink);}
+  .icon-btn:hover{background:var(--line);}
+  .panel-body{flex:1;overflow-y:auto;padding:16px 20px;}
+  .fgroup{margin-bottom:22px;}
+  .fgroup h4{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin:0 0 10px;font-weight:600;}
+  .fopt{display:flex;align-items:center;justify-content:space-between;padding:7px 0;font-size:13.5px;cursor:pointer;}
+  .fopt-left{display:flex;align-items:center;gap:9px;}
+  .fopt input{width:16px;height:16px;accent-color:var(--stamp);}
+  .fopt-count{color:var(--ink-soft);font-size:12px;font-family:var(--font-mono);}
+  .panel-foot{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:10px;}
+  .btn-ghost{flex:1;height:40px;border-radius:8px;border:1px solid var(--line-strong);background:var(--card);font-size:13.5px;cursor:pointer;color:var(--ink);font-family:var(--font-sans);}
+  .btn-primary{flex:2;height:40px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-size:13.5px;cursor:pointer;font-family:var(--font-sans);font-weight:500;}
+  .btn-ghost:hover{border-color:var(--ink-soft);}
+  .btn-primary:hover{background:#132038;}
+
+  /* detail modal */
+  .detail-wrap{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .18s ease;}
+  .detail-wrap.open{opacity:1;pointer-events:auto;background:rgba(27,42,74,.4);}
+  .detail{background:var(--card);border-radius:14px;max-width:780px;width:100%;max-height:88vh;overflow-y:auto;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.2);}
+  .detail-close{position:absolute;top:14px;right:14px;z-index:2;background:var(--card);border:1px solid var(--line);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .detail-close:hover{border-color:var(--ink-soft);}
+  .detail-grid{display:grid;grid-template-columns:280px 1fr;}
+  .detail-image{background:var(--paper);display:flex;align-items:center;justify-content:center;padding:36px;border-right:1px solid var(--line);}
+  .detail-image svg{width:60%;height:60%;}
+  .detail-content{padding:28px 30px;}
+  .detail-content h2{font-family:var(--font-display);font-weight:600;font-size:21px;margin:0 0 4px;line-height:1.28;}
+  .detail-content .gi{font-size:13.5px;color:var(--ink-soft);margin:0 0 16px;}
+  .meta-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+  .meta-table tr{border-bottom:1px solid var(--line);}
+  .meta-table tr:last-child{border-bottom:none;}
+  .meta-table td{padding:9px 0;font-size:13px;}
+  .meta-table td:first-child{color:var(--ink-soft);width:42%;}
+  .meta-table td:last-child{text-align:right;font-weight:500;}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--line);}
+  .nav-btn{display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line-strong);border-radius:7px;padding:7px 12px;font-size:12.5px;cursor:pointer;color:var(--ink);font-family:var(--font-sans);}
+  .nav-btn:hover:not(:disabled){border-color:var(--ink);}
+  .nav-btn:disabled{opacity:.35;cursor:default;}
+  .nav-count{font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);}
+
+  @media (max-width:640px){
+    .detail-grid{grid-template-columns:1fr;}
+    .detail-image{border-right:none;border-bottom:1px solid var(--line);padding:28px;}
+    .search{max-width:none;}
+    .brand span{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">Interactive prototype — mock data and placeholder artwork, for UI review only</div>
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand"><h1>PhilaIndiaCovers</h1><span>catalogue</span></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" type="text" placeholder="Search by cover name, GI tag, or region" />
+      </div>
+      <button class="filter-btn" id="filterBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        Filters
+        <span class="filter-badge" id="filterCount" style="display:none;">0</span>
+      </button>
+    </div>
+    <div class="count-row">
+      <span id="resultCount">Loading covers…</span>
+      <button class="clear-link" id="clearLink">Clear all filters</button>
+    </div>
+  </header>
+
+  <div id="skeletonZone" class="grid"></div>
+  <div id="gridZone" class="grid" style="display:none;"></div>
+  <div id="emptyZone" style="display:none;"></div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-label="Filters">
+  <div class="panel-head">
+    <h2>Filters</h2>
+    <button class="icon-btn" id="panelClose" aria-label="Close filters">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-foot">
+    <button class="btn-ghost" id="panelClear">Clear all</button>
+    <button class="btn-primary" id="panelApply">Show results</button>
+  </div>
+</aside>
+
+<div class="detail-wrap" id="detailWrap">
+  <div class="detail" id="detailCard" role="dialog" aria-modal="true">
+    <button class="detail-close" id="detailClose" aria-label="Close detail view">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="detail-grid" id="detailGrid"></div>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = ["Textile","Food & Agriculture","Handicraft","Pottery","Painting","Toy"];
+const CAT_COLOR = {"Textile":"#7F77DD","Food & Agriculture":"#639922","Handicraft":"#D85A30","Pottery":"#378ADD","Painting":"#D4537E","Toy":"#BA7517"};
+
+const RAW = [
+  ["Kanchipuram Silk Saree Release","Kanchipuram Silk","Textile","Tamil Nadu",2019,true],
+  ["Pashmina Shawl Heritage Cover","Pashmina","Textile","Jammu & Kashmir",2020,true],
+  ["Darjeeling Tea First Flush Cover","Darjeeling Tea","Food & Agriculture","West Bengal",2021,true],
+  ["Banarasi Brocade Silk Cover","Banarasi Brocade",  "Textile","Uttar Pradesh",2018,true],
+  ["Mysore Silk Centenary Cover","Mysore Silk","Textile","Karnataka",2022,false],
+  ["Channapatna Toys Craft Cover","Channapatna Toys","Toy","Karnataka",2021,true],
+  ["Kutch Embroidery Special Cover","Kutch Embroidery","Handicraft","Gujarat",2020,true],
+  ["Bikaner Bhujia Snack Cover","Bikaner Bhujia","Food & Agriculture","Rajasthan",2019,true],
+  ["Tirupati Laddu Prasadam Cover","Tirupati Laddu","Food & Agriculture","Andhra Pradesh",2023,true],
+  ["Nagpur Orange Harvest Cover","Nagpur Orange","Food & Agriculture","Maharashtra",2022,false],
+  ["Alphonso Mango Season Cover","Alphonso Mango","Food & Agriculture","Maharashtra",2021,true],
+  ["Kolhapuri Chappal Craft Cover","Kolhapuri Chappal","Handicraft","Maharashtra",2020,true],
+  ["Madhubani Painting Release Cover","Madhubani Painting","Painting","Bihar",2019,true],
+  ["Pochampally Ikat Weave Cover","Pochampally Ikat","Textile","Telangana",2022,true],
+  ["Warli Painting Tribal Art Cover","Warli Painting","Painting","Maharashtra",2020,false],
+  ["Jaipur Blue Pottery Cover","Blue Pottery","Pottery","Rajasthan",2021,true],
+  ["Coorg Orange Estate Cover","Coorg Orange","Food & Agriculture","Karnataka",2023,true],
+  ["Malabar Pepper Spice Cover","Malabar Pepper","Food & Agriculture","Kerala",2018,true],
+  ["Kashmiri Saffron Harvest Cover","Kashmiri Saffron","Food & Agriculture","Jammu & Kashmir",2022,true],
+  ["Odisha Pattachitra Art Cover","Pattachitra","Painting","Odisha",2019,false],
+  ["Chanderi Fabric Weave Cover","Chanderi Fabric","Textile","Madhya Pradesh",2021,true],
+  ["Mysore Sandalwood Craft Cover","Mysore Sandalwood","Handicraft","Karnataka",2020,true],
+  ["Assam Muga Silk Cover","Muga Silk","Textile","Assam",2023,true],
+  ["Basmati Rice Origin Cover","Basmati Rice","Food & Agriculture","Punjab",2018,true]
+];
+const DATA = RAW.map((r,i)=>({id:i+1,coverName:r[0],giName:r[1],category:r[2],region:r[3],year:r[4],verified:r[5]}));
+
+let filters = { category:new Set(), region:new Set(), year:new Set() };
+let pendingFilters = null;
+let searchTerm = "";
+let currentList = DATA.slice();
+let detailIndex = -1;
+
+function stampIcon(color){
+  return `<svg viewBox="0 0 48 48" fill="none"><rect x="4" y="4" width="40" height="40" rx="3" fill="${color}22" stroke="${color}" stroke-width="1.5"/><circle cx="24" cy="20" r="7" fill="${color}55" stroke="${color}" stroke-width="1.3"/><path d="M12 34c3-4 7-4 12-4s9 0 12 4" stroke="${color}" stroke-width="1.3" fill="none"/></svg>`;
+}
+
+function applyFilterAndSearch(){
+  const term = searchTerm.trim().toLowerCase();
+  currentList = DATA.filter(d=>{
+    if(filters.category.size && !filters.category.has(d.category)) return false;
+    if(filters.region.size && !filters.region.has(d.region)) return false;
+    if(filters.year.size && !filters.year.has(String(d.year))) return false;
+    if(term && !(d.coverName.toLowerCase().includes(term) || d.giName.toLowerCase().includes(term) || d.region.toLowerCase().includes(term))) return false;
+    return true;
+  });
+}
+
+function activeFilterCount(){
+  return filters.category.size + filters.region.size + filters.year.size;
+}
+
+function renderGrid(){
+  applyFilterAndSearch();
+  const gridZone = document.getElementById('gridZone');
+  const emptyZone = document.getElementById('emptyZone');
+  const resultCount = document.getElementById('resultCount');
+  const clearLink = document.getElementById('clearLink');
+  const fc = activeFilterCount();
+  document.getElementById('filterCount').style.display = fc? 'inline':'none';
+  document.getElementById('filterCount').textContent = fc;
+  clearLink.classList.toggle('show', fc>0 || searchTerm.trim().length>0);
+
+  if(currentList.length===0){
+    gridZone.style.display='none';
+    emptyZone.style.display='block';
+    resultCount.textContent = '0 covers found';
+    emptyZone.innerHTML = `
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <h3>No covers match these filters</h3>
+        <p>Try removing a filter, or search a different GI tag, category, or region.</p>
+        <div class="empty-actions">
+          <button id="emptyClear">Clear all filters</button>
+          <button id="emptyCat1">Try: Textile</button>
+          <button id="emptyCat2">Try: Food & Agriculture</button>
+        </div>
+      </div>`;
+    document.getElementById('emptyClear').onclick = clearAll;
+    document.getElementById('emptyCat1').onclick = ()=>{ clearAll(); filters.category.add('Textile'); renderGrid(); };
+    document.getElementById('emptyCat2').onclick = ()=>{ clearAll(); filters.category.add('Food & Agriculture'); renderGrid(); };
+    return;
+  }
+
+  emptyZone.style.display='none';
+  gridZone.style.display='grid';
+  resultCount.textContent = `${currentList.length} of ${DATA.length} covers`;
+  gridZone.innerHTML = currentList.map(d=>{
+    const color = CAT_COLOR[d.category];
+    return `
+    <button class="card" data-id="${d.id}">
+      <div class="thumb" style="background:${color}10;"><div class="icon">${stampIcon(color)}</div></div>
+      <div class="perf"></div>
+      <div class="card-body">
+        <p class="cover-name">${d.coverName}</p>
+        <p class="gi-name">${d.giName}</p>
+        <div class="tag-row">
+          <span class="chip">${d.category}</span>
+          <span class="chip">${d.region}</span>
+          ${d.verified?'<span class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 13 4 4L19 7"/></svg>Verified</span>':''}
+        </div>
+      </div>
+    </button>`;
+  }).join('');
+  gridZone.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('click', ()=> openDetail(Number(el.dataset.id)));
+  });
+}
+
+function clearAll(){
+  filters = { category:new Set(), region:new Set(), year:new Set() };
+  searchTerm = "";
+  document.getElementById('searchInput').value = "";
+  renderGrid();
+}
+document.getElementById('clearLink').onclick = clearAll;
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  searchTerm = e.target.value;
+  renderGrid();
+});
+
+/* ---------- filter panel ---------- */
+function buildPanel(){
+  const catCounts = {}, regCounts = {}, yearCounts = {};
+  DATA.forEach(d=>{
+    catCounts[d.category]=(catCounts[d.category]||0)+1;
+    regCounts[d.region]=(regCounts[d.region]||0)+1;
+    yearCounts[d.year]=(yearCounts[d.year]||0)+1;
+  });
+  const regions = [...new Set(DATA.map(d=>d.region))].sort();
+  const years = [...new Set(DATA.map(d=>d.year))].sort((a,b)=>b-a);
+
+  function group(title, key, items, counts){
+    return `<div class="fgroup"><h4>${title}</h4>${items.map(v=>{
+      const checked = pendingFilters[key].has(String(v)) ? 'checked' : '';
+      return `<label class="fopt"><span class="fopt-left"><input type="checkbox" data-group="${key}" value="${v}" ${checked}/> ${v}</span><span class="fopt-count">${counts[v]}</span></label>`;
+    }).join('')}</div>`;
+  }
+
+  document.getElementById('panelBody').innerHTML =
+    group('Product category','category', CATEGORIES, catCounts) +
+    group('State / region','region', regions, regCounts) +
+    group('Year of release','year', years, yearCounts);
+
+  document.querySelectorAll('#panelBody input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const g = cb.dataset.group, v = cb.value;
+      if(cb.checked) pendingFilters[g].add(v); else pendingFilters[g].delete(v);
+      updateApplyLabel();
+    });
+  });
+  updateApplyLabel();
+}
+
+function updateApplyLabel(){
+  const term = searchTerm.trim().toLowerCase();
+  const n = DATA.filter(d=>{
+    if(pendingFilters.category.size && !pendingFilters.category.has(d.category)) return false;
+    if(pendingFilters.region.size && !pendingFilters.region.has(d.region)) return false;
+    if(pendingFilters.year.size && !pendingFilters.year.has(String(d.year))) return false;
+    if(term && !(d.coverName.toLowerCase().includes(term)||d.giName.toLowerCase().includes(term)||d.region.toLowerCase().includes(term))) return false;
+    return true;
+  }).length;
+  document.getElementById('panelApply').textContent = `Show ${n} cover${n===1?'':'s'}`;
+}
+
+function openPanel(){
+  pendingFilters = { category:new Set(filters.category), region:new Set(filters.region), year:new Set(filters.year) };
+  buildPanel();
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+}
+function closePanel(){
+  document.getElementById('scrim').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+}
+document.getElementById('filterBtn').onclick = openPanel;
+document.getElementById('panelClose').onclick = closePanel;
+document.getElementById('scrim').onclick = closePanel;
+document.getElementById('panelClear').onclick = ()=>{
+  pendingFilters = { category:new Set(), region:new Set(), year:new Set() };
+  buildPanel();
+};
+document.getElementById('panelApply').onclick = ()=>{
+  filters = pendingFilters;
+  closePanel();
+  renderGrid();
+};
+
+/* ---------- detail modal ---------- */
+function renderDetail(){
+  const d = currentList[detailIndex];
+  const color = CAT_COLOR[d.category];
+  document.getElementById('detailGrid').innerHTML = `
+    <div class="detail-image" style="background:${color}10;">${stampIcon(color)}</div>
+    <div class="detail-content">
+      <h2>${d.coverName}</h2>
+      <p class="gi">${d.giName} — Geographical Indication</p>
+      <table class="meta-table">
+        <tr><td>Product category</td><td>${d.category}</td></tr>
+        <tr><td>State / region</td><td>${d.region}</td></tr>
+        <tr><td>Year of release</td><td>${d.year}</td></tr>
+        <tr><td>Verification status</td><td>${d.verified? '<span style="color:var(--success-text)">Verified</span>' : 'Pending verification'}</td></tr>
+        <tr><td>Cover ID</td><td style="font-family:var(--font-mono);font-weight:400;">PIC-${String(d.id).padStart(4,'0')}</td></tr>
+      </table>
+      <div class="nav-row">
+        <button class="nav-btn" id="prevBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Previous</button>
+        <span class="nav-count">${detailIndex+1} of ${currentList.length}</span>
+        <button class="nav-btn" id="nextBtn">Next <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+    </div>`;
+  document.getElementById('prevBtn').disabled = detailIndex<=0;
+  document.getElementById('nextBtn').disabled = detailIndex>=currentList.length-1;
+  document.getElementById('prevBtn').onclick = ()=>{ if(detailIndex>0){ detailIndex--; renderDetail(); } };
+  document.getElementById('nextBtn').onclick = ()=>{ if(detailIndex<currentList.length-1){ detailIndex++; renderDetail(); } };
+}
+function openDetail(id){
+  detailIndex = currentList.findIndex(d=>d.id===id);
+  renderDetail();
+  document.getElementById('detailWrap').classList.add('open');
+}
+function closeDetail(){
+  document.getElementById('detailWrap').classList.remove('open');
+  detailIndex=-1;
+}
+document.getElementById('detailClose').onclick = closeDetail;
+document.getElementById('detailWrap').addEventListener('click', (e)=>{
+  if(e.target.id==='detailWrap') closeDetail();
+});
+document.addEventListener('keydown', (e)=>{
+  if(document.getElementById('detailWrap').classList.contains('open')){
+    if(e.key==='Escape') closeDetail();
+    if(e.key==='ArrowLeft' && detailIndex>0){ detailIndex--; renderDetail(); }
+    if(e.key==='ArrowRight' && detailIndex<currentList.length-1){ detailIndex++; renderDetail(); }
+  } else if(document.getElementById('panel').classList.contains('open')){
+    if(e.key==='Escape') closePanel();
+  }
+});
+
+/* ---------- initial load: skeleton -> grid ---------- */
+function renderSkeleton(){
+  const zone = document.getElementById('skeletonZone');
+  zone.innerHTML = Array.from({length:8}).map(()=>`
+    <div class="skel-card">
+      <div class="skel-thumb"></div>
+      <div class="skel-line" style="width:80%"></div>
+      <div class="skel-line w60"></div>
+    </div>`).join('');
+}
+renderSkeleton();
+setTimeout(()=>{
+  document.getElementById('skeletonZone').style.display='none';
+  document.getElementById('gridZone').style.display='grid';
+  renderGrid();
+}, 850);
+</script>
+</body>
+</html>
