@@ -111,6 +111,11 @@ export default function Detail({ coverId, onBack }: DetailProps): React.JSX.Elem
             {withFallback(cover.nameOfCover, 'Name not recorded yet')}
           </h1>
           <dl className="space-y-4">
+            <Field label="GI Item Name" value={cover.giItemName ?? 'Item name not recorded yet'} />
+            <Field
+              label="Product Category"
+              value={cover.productCategory ?? 'Category not recorded yet'}
+            />
             <Field
               label="GI Registration Number"
               value={withFallback(cover.giRegistrationNumber, 'Registration number not recorded yet')}
