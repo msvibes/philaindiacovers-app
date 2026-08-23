@@ -1,9 +1,9 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-08-22
-**Last session worked on:** US-05 (FR-30) — Collector logout. **Genuinely absent before this session**: confirmed via direct code search (`signOut()` appeared exactly once in the whole renderer, inside `Login.tsx`'s defensive non-Collector kickback, never user-facing) — precise, not assumed, the same standard as the original Admin logout gap. Built on branch `us-05-collector-logout`, not yet merged as this entry is written; see the dedicated entry below for full detail.
+**Last updated:** 2026-08-23
+**Last session worked on:** US-05 (FR-30) — Collector logout. **Genuinely absent before this session**: confirmed via direct code search (`signOut()` appeared exactly once in the whole renderer, inside `Login.tsx`'s defensive non-Collector kickback, never user-facing) — precise, not assumed, the same standard as the original Admin logout gap. **US-05 is Done** — PR #6 merged 2026-08-23T13:51:03Z (`2360887`), branch auto-deleted on GitHub, local copy cleaned up. See the dedicated entry below for full build/verification detail.
 
-## US-05 (FR-30) — Collector logout (2026-08-22): branch `us-05-collector-logout`
+## US-05 (FR-30) — Collector logout (2026-08-22/23): PR #6, merged
 
 **FR-30/US-05, worth stating precisely**: `docs/PRD-v1.0.md`/`docs/Epics-UserStoryMap.md` write this requirement literally for the Collector persona ("As a collector, I want to log out..."). Admin's own earlier logout fix was actually the *adaptation* of this consumer-facing requirement to the back-office — this App-repo fix is closer to FR-30's original literal target, not a "companion" to Admin's version, despite how the request that started this session framed it.
 
@@ -18,7 +18,9 @@
 
 **Cleanup**: the throwaway Collector from the live verification was deleted by the user afterward via a one-off script (`admin.auth.admin.deleteUser`), same pattern as every other throwaway test account this project has used.
 
-**Not yet done as this entry is written**: `npm run lint`/`typecheck`/`npm test` (unit tiers) confirmed clean locally; full push, PR, and CI confirmation still pending — see git history for what actually landed.
+**PR #6 opened and CI confirmed green the same session**, individually per-step (not just "overall success") — every step (`Lint`, `Typecheck`, `Verify integration test credentials are present`, `Test`, `Build`) confirmed `success`, and the new `logout.integration.test.ts` confirmed passing by name in the raw run log (`1 test, 2990ms`), alongside the existing test suite (7 files, 32 tests, 0 skipped).
+
+**Merged 2026-08-23T13:51:03Z (`2360887`)**, after the user's own independent manual re-verification post-merge: logout returns to the login screen, session genuinely invalidates (a protected route was confirmed to refuse access post-logout, not just a visual redirect), re-login works cleanly, no console errors. **US-05 is Done.** Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up.
 
 ## GitHub Actions CI (2026-08-18): branch `ci-github-actions-pipeline`, PR #5 — real CI run confirmed green
 
