@@ -1,5 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { formatDateOfIssue, resolvePostalCircleName, withFallback } from './covers'
+import { formatDateOfIssue, resolvePostalCircleName, sanitizeSearchTerm, withFallback } from './covers'
+
+describe('sanitizeSearchTerm', () => {
+  // Left unescaped, these characters either break the .or() filter
+  // string's own parsing or get misread as ilike wildcards — a real risk
+  // found during T-13/T-18 planning, not a defensive nicety.
+  it('strips commas, parentheses, percent signs, and asterisks', () => {
+    expect(sanitizeSearchTerm('silk, (100%)*')).toBe('silk 100')
+  })
+
+  it('trims surrounding whitespace', () => {
+    expect(sanitizeSearchTerm('  silk  ')).toBe('silk')
+  })
+
+  it('leaves an ordinary search term untouched', () => {
+    expect(sanitizeSearchTerm('Adamchini Chawal')).toBe('Adamchini Chawal')
+  })
+
+  it('returns an empty string for undefined/empty input, not a crash', () => {
+    expect(sanitizeSearchTerm(undefined)).toBe('')
+    expect(sanitizeSearchTerm('')).toBe('')
+  })
+})
 
 describe('formatDateOfIssue', () => {
   it('formats a real ISO date courteously', () => {
@@ -13,11 +35,13 @@ describe('formatDateOfIssue', () => {
 
 describe('resolvePostalCircleName', () => {
   it('resolves a single embedded object (the shape Supabase actually returns for this FK)', () => {
-    expect(resolvePostalCircleName({ name: 'Uttar Pradesh' })).toBe('Uttar Pradesh')
+    expect(resolvePostalCircleName({ id: 'circle-1', name: 'Uttar Pradesh' })).toBe('Uttar Pradesh')
   })
 
   it('resolves an array shape defensively, in case PostgREST embeds it that way', () => {
-    expect(resolvePostalCircleName([{ name: 'Uttar Pradesh' }])).toBe('Uttar Pradesh')
+    expect(resolvePostalCircleName([{ id: 'circle-1', name: 'Uttar Pradesh' }])).toBe(
+      'Uttar Pradesh'
+    )
   })
 
   it('returns null, not a crash, when there is no postal circle at all', () => {

@@ -1,5 +1,27 @@
 @import 'tailwindcss';
 
+/* Design tokens carried over from the approved design-reference prototypes
+   (docs/design/catalogue-prototype.html, app-prototype-v3-full.html) — read
+   directly from their source, not re-derived. Tailwind v4 is CSS-first here
+   (no tailwind.config.js), so this @theme block is what makes bg-paper,
+   text-ink, border-line, font-display, etc. real Tailwind utilities. */
+@theme {
+  --color-paper: #f6f1e7;
+  --color-card: #ffffff;
+  --color-ink: #1b2a4a;
+  --color-ink-soft: #5b6b8c;
+  --color-stamp: #b23a48;
+  --color-line: #e4dcc8;
+  --color-line-strong: #cfc4ac;
+  --color-success-bg: #e7f1ea;
+  --color-success-text: #2f6b4f;
+  --color-success-border: #bfdbc9;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,19 +30,9 @@ body {
   min-height: 100vh;
   margin: 0;
   line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-sans);
+  background: var(--color-paper);
+  color: var(--color-ink);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
