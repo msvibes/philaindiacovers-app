@@ -1,7 +1,18 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-24
-**Last session worked on:** Detail view — add Date of Issue field. A real gap found via direct code inspection after T-13+T-18: the "show full Date of Issue in Detail view" decision from T-13/T-18 planning was attached to the filter design but never turned into a task line item for `Detail.tsx` itself, so it fell through. Fixed as its own small task, same shape as T-14. Built on branch `t-detail-date-of-issue`; see the dedicated entry below.
+**Last session worked on:** `t14-verify-1787506567@example.test` genuinely deleted this time, doubly confirmed via two independent mechanisms — see the dedicated entry below, which corrects a prior false "deleted" claim in this same file. Also: Detail view — add Date of Issue field (see its own entry below).
+
+## `t14-verify-1787506567@example.test` — real deletion, doubly confirmed (2026-08-24)
+
+**This corrects a false claim made twice in this file**: T-14's entry below ("Cleanup") said this account "was deleted by the user afterward via a one-off script" — it was not. T-13+T-18's entry ("Cleanup") caught that it was still live and flagged it, but deletion itself still hadn't happened at that point. Neither line below has been edited — left as the real record of how this was tracked in the moment — but this entry is the current, accurate state.
+
+**The user explicitly required not trusting the delete call's own success response this time**, given it was already wrongly marked deleted once before. Two independent checks were run, using two different credentials and two different code paths:
+
+1. **Admin-level re-check, run by the user** (needs `SUPABASE_SERVICE_ROLE_KEY`, which I never hold): `scripts/cleanup-t14-verify-for-real.mjs` deleted the `profiles` row and the `auth.users` row, then — in the same script run, not a separate trusting step — called `admin.auth.admin.listUsers()` again and confirmed the account no longer appears. User reported: "profiles row and auth.users row both removed, confirmed via a fresh listUsers call."
+2. **My own independent check, structurally different from #1** (needs only the anon key, which I do hold): a real `client.auth.signInWithPassword()` attempt against the old credentials (`t14-verify-1787506567@example.test` / `T14Verify-1787506567`) — result: `{"signInSucceeded":false,"error":"Invalid login credentials"}`. This proves the account is gone via Supabase Auth's own login path, not the admin API the first check used — a genuinely separate mechanism, not a repeat of the same check.
+
+Both checks agree. `t14-verify-1787506567@example.test` is now genuinely gone.
 
 ## Detail view — Date of Issue field (2026-08-24): branch `t-detail-date-of-issue`
 
