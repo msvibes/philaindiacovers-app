@@ -79,6 +79,7 @@ describe('Detail', () => {
 
     await waitFor(() => expect(screen.getByText('Adamchini Chawal')).toBeInTheDocument())
     expect(screen.getByText('Adamchini Chawal (Rice)')).toBeInTheDocument()
+    expect(screen.getByText('19 May 2023')).toBeInTheDocument()
     expect(screen.getByText('Pictorial: Depicts grains and husks.')).toBeInTheDocument()
     expect(screen.getByText('Golden ripe paddy stalks in the field.')).toBeInTheDocument()
     expect(
@@ -95,6 +96,14 @@ describe('Detail', () => {
     await waitFor(() =>
       expect(screen.getByText('Category not recorded yet')).toBeInTheDocument()
     )
+  })
+
+  it('shows courteous fallback copy for a null Date of Issue, via the same formatDateOfIssue() helper Catalogue already uses', async () => {
+    mockedFetch.mockResolvedValue({ ...fullCover, dateOfIssue: null })
+    mockedDownload.mockResolvedValue('blob:mock-url')
+    render(<Detail coverId="cover-1" onBack={() => {}} />)
+
+    await waitFor(() => expect(screen.getByText('Date not recorded yet')).toBeInTheDocument())
   })
 
   it('shows courteous fallback copy for a null field — gi_registration_number, the shape that is real and live today', async () => {

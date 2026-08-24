@@ -1,7 +1,19 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-24
-**Last session worked on:** T-13+T-18 (PRD Addendum) — catalogue grid rebuild + pagination/filter/search/sort against real fields, landed together as one vertical slice per the confirmed sequencing decision. **Done** — PR #8 merged 2026-08-24T08:26:08Z (`1bd7a68`), branch auto-deleted on GitHub, local copy cleaned up. See the dedicated entry below for full build/verification detail.
+**Last session worked on:** Detail view — add Date of Issue field. A real gap found via direct code inspection after T-13+T-18: the "show full Date of Issue in Detail view" decision from T-13/T-18 planning was attached to the filter design but never turned into a task line item for `Detail.tsx` itself, so it fell through. Fixed as its own small task, same shape as T-14. Built on branch `t-detail-date-of-issue`; see the dedicated entry below.
+
+## Detail view — Date of Issue field (2026-08-24): branch `t-detail-date-of-issue`
+
+**Confirmed the gap precisely before fixing it, not assumed from the summary**: direct read of `Detail.tsx` plus a full-file grep for "date"/"Date" — zero matches. `cover.dateOfIssue` was already fetched (`CoverDetail` inherits it from `VerifiedCover`, which has carried it since before T-13/T-18), and `formatDateOfIssue()` already existed and was already used by `Catalogue.tsx` — this was a pure JSX omission, not a data-layer gap, the exact same shape as T-14's original GI Item Name/Product Category fix.
+
+**Fix**: one new `<Field label="Date of Issue" value={formatDateOfIssue(cover.dateOfIssue)} />` in `Detail.tsx`'s `<dl>`, positioned right after Product Category (grouping the core identity/metadata fields together, same placement convention T-14 established). Reuses the existing helper — no new formatting logic.
+
+**Tests** (`Detail.test.tsx`): extended the existing "renders every real field value" test with a `'19 May 2023'` assertion (the `fullCover` fixture's `dateOfIssue: '2023-05-19'` was already present, just unasserted); added one new dedicated test for the null-`dateOfIssue` fallback (`'Date not recorded yet'`). 49 passed (was 48), 2 integration files correctly skipped locally.
+
+**Verified live** against a real cover ("Kosa: Fabric of Chhattisgarh"): Detail view now shows `Date of Issue: 28 January 2017`, matching that same cover's date exactly as already shown on its Catalogue card. The null-fallback path is Vitest-only-verified, consistent with this project's established precedent for fields not reachable live — `date_of_issue` appears to be universally populated across the real 286-cover dataset (never once seen "Date not recorded yet" during this session's extensive live browsing), the inverse situation to `product_category`'s universally-null state.
+
+**Not yet done as this entry is written**: commit, push, PR, and CI confirmation — see git history for what actually landed.
 
 ## T-13+T-18 — Catalogue grid rebuild + pagination/filter/search/sort (2026-08-24): PR #8, merged
 

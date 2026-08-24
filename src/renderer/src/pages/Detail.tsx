@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { fetchVerifiedCoverById, withFallback, type CoverDetail } from '../lib/covers'
+import {
+  fetchVerifiedCoverById,
+  formatDateOfIssue,
+  withFallback,
+  type CoverDetail
+} from '../lib/covers'
 import { useCoverImage } from '../lib/useCoverImage'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
@@ -116,6 +121,7 @@ export default function Detail({ coverId, onBack }: DetailProps): React.JSX.Elem
               label="Product Category"
               value={cover.productCategory ?? 'Category not recorded yet'}
             />
+            <Field label="Date of Issue" value={formatDateOfIssue(cover.dateOfIssue)} />
             <Field
               label="GI Registration Number"
               value={withFallback(cover.giRegistrationNumber, 'Registration number not recorded yet')}
