@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { catalogueReducer, initialCatalogueQueryState, EMPTY_FILTERS } from './catalogueQuery'
+import {
+  catalogueReducer,
+  initialCatalogueQueryState,
+  EMPTY_FILTERS
+} from './catalogueQuery'
 
 describe('catalogueReducer', () => {
   it('SET_FILTERS applies the filters and resets to page 1', () => {
