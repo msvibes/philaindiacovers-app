@@ -87,6 +87,9 @@ export interface CatalogueQueryParams {
   productCategories?: string[]
   years?: number[]
   searchTerm?: string
+  // Set only via FR-14's tappable GI Tag Name — an exact match against
+  // gi_item_name, distinct from the free-text search fields above.
+  giItemName?: string
   sort: 'newest' | 'alphabetical'
   page: number // 1-indexed
   pageSize?: number
@@ -127,9 +130,18 @@ function buildSearchFilter(term: string): string {
 // appends a new query-string param rather than overwriting a prior one, so
 // they combine as independent ANDed filters. Confirmed live against the
 // dev project before this was relied on for real (see PROGRESS.md).
-function applyCatalogueFilters<T extends { or: (filters: string) => T; in: (column: string, values: (string | number)[]) => T }>(
+function applyCatalogueFilters<
+  T extends {
+    or: (filters: string) => T
+    in: (column: string, values: (string | number)[]) => T
+    eq: (column: string, value: string) => T
+  }
+>(
   query: T,
-  params: Pick<CatalogueQueryParams, 'postalCircleIds' | 'productCategories' | 'years' | 'searchTerm'>
+  params: Pick<
+    CatalogueQueryParams,
+    'postalCircleIds' | 'productCategories' | 'years' | 'searchTerm' | 'giItemName'
+  >
 ): T {
   let q = query
   if (params.postalCircleIds?.length) {
@@ -140,6 +152,9 @@ function applyCatalogueFilters<T extends { or: (filters: string) => T; in: (colu
   }
   if (params.years?.length) {
     q = q.or(buildYearFilter(params.years))
+  }
+  if (params.giItemName) {
+    q = q.eq('gi_item_name', params.giItemName)
   }
   const term = sanitizeSearchTerm(params.searchTerm)
   if (term) {
@@ -186,7 +201,10 @@ export async function fetchCataloguePage(
 // the pending (not-yet-applied) filter draft. head: true means no rows are
 // transferred, just the count.
 export async function countCatalogueMatches(
-  params: Pick<CatalogueQueryParams, 'postalCircleIds' | 'productCategories' | 'years' | 'searchTerm'>,
+  params: Pick<
+    CatalogueQueryParams,
+    'postalCircleIds' | 'productCategories' | 'years' | 'searchTerm' | 'giItemName'
+  >,
   client: SupabaseClient = supabase
 ): Promise<number> {
   let query = client
@@ -199,6 +217,37 @@ export async function countCatalogueMatches(
   const { count, error } = await query
   if (error) throw error
   return count ?? 0
+}
+
+// Full ordered id list for the currently active filtered/searched/sorted
+// query — no pagination. Powers FR-12's prev/next navigation: Detail view
+// needs to know a cover's position within the same set Catalogue is
+// showing, not just the 24-row page it happened to be clicked from.
+// Deliberately id-only (cheap, same cost profile already accepted for
+// fetchCatalogueFacets' own full-table scan) — the caller indexes into
+// this array rather than re-fetching per navigation step.
+export async function fetchCatalogueOrderedIds(
+  params: Pick<
+    CatalogueQueryParams,
+    'postalCircleIds' | 'productCategories' | 'years' | 'searchTerm' | 'giItemName' | 'sort'
+  >,
+  client: SupabaseClient = supabase
+): Promise<string[]> {
+  let query = client
+    .from('covers')
+    .select('id')
+    .eq('verification_status', 'verified')
+
+  query = applyCatalogueFilters(query, params)
+
+  query =
+    params.sort === 'alphabetical'
+      ? query.order('name_of_cover', { ascending: true, nullsFirst: false })
+      : query.order('verified_at', { ascending: false })
+
+  const { data, error } = await query
+  if (error) throw error
+  return (data ?? []).map((row) => (row as { id: string }).id)
 }
 
 export interface CatalogueFacetOption<T = string> {

@@ -1,11 +1,11 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   fetchCataloguePage,
   fetchCatalogueFacets,
   type CatalogueFacets,
-  type CatalogueQueryParams,
   type VerifiedCover
 } from '../lib/covers'
+import { EMPTY_FILTERS, type CatalogueAction, type CatalogueQueryState } from '../lib/catalogueQuery'
 import { useDebouncedValue } from '../lib/useDebouncedValue'
 import CatalogueCard from '../components/CatalogueCard'
 import CatalogueToolbar from '../components/CatalogueToolbar'
@@ -14,52 +14,24 @@ import CatalogueEmptyState from '../components/CatalogueEmptyState'
 import Pagination from '../components/Pagination'
 import FilterPanel, { type AppliedFilters } from '../components/FilterPanel'
 
-const EMPTY_FILTERS: AppliedFilters = { postalCircleIds: [], productCategories: [], years: [] }
 const PAGE_SIZE = 24
-
-interface CatalogueQueryState {
-  appliedFilters: AppliedFilters
-  searchTerm: string
-  sort: CatalogueQueryParams['sort']
-  page: number
-}
-
-type CatalogueAction =
-  | { type: 'SET_FILTERS'; filters: AppliedFilters }
-  | { type: 'SET_SEARCH'; term: string }
-  | { type: 'SET_SORT'; sort: CatalogueQueryParams['sort'] }
-  | { type: 'SET_PAGE'; page: number }
-
-// Changing a filter, the search term, or the sort mode all reset to page
-// 1 — staying on page 6 of a now-3-page result set would be nonsensical.
-// Centralized here so every setter gets this for free, rather than each
-// handler needing to remember it.
-function catalogueReducer(state: CatalogueQueryState, action: CatalogueAction): CatalogueQueryState {
-  switch (action.type) {
-    case 'SET_FILTERS':
-      return { ...state, appliedFilters: action.filters, page: 1 }
-    case 'SET_SEARCH':
-      return { ...state, searchTerm: action.term, page: 1 }
-    case 'SET_SORT':
-      return { ...state, sort: action.sort, page: 1 }
-    case 'SET_PAGE':
-      return { ...state, page: action.page }
-  }
-}
 
 type LoadState = 'loading' | 'ready' | 'error'
 
 interface CatalogueProps {
+  query: CatalogueQueryState
+  dispatch: (action: CatalogueAction) => void
   onSelectCover: (id: string) => void
 }
 
-export default function Catalogue({ onSelectCover }: CatalogueProps): React.JSX.Element {
-  const [query, dispatch] = useReducer(catalogueReducer, {
-    appliedFilters: EMPTY_FILTERS,
-    searchTerm: '',
-    sort: 'newest',
-    page: 1
-  })
+// Filter/search/sort/page state is owned by App.tsx (T-25) — Detail view
+// needs to know the same active query to support prev/next navigation
+// within it (FR-12), which isn't possible while this state lived only
+// here and unmounted along with this component whenever a cover was
+// selected. Everything genuinely local to this screen (the fetch itself,
+// loading/error, the filter panel's own open/pending-draft UI state)
+// stays here — only the cross-page-relevant query moved up.
+export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueProps): React.JSX.Element {
   const [state, setState] = useState<LoadState>('loading')
   const [covers, setCovers] = useState<VerifiedCover[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -123,6 +95,7 @@ export default function Catalogue({ onSelectCover }: CatalogueProps): React.JSX.
       productCategories: query.appliedFilters.productCategories,
       years: query.appliedFilters.years,
       searchTerm: debouncedSearchTerm,
+      giItemName: query.giItemNameFilter ?? undefined,
       sort: query.sort,
       page: query.page,
       pageSize: PAGE_SIZE
@@ -143,6 +116,7 @@ export default function Catalogue({ onSelectCover }: CatalogueProps): React.JSX.
   }, [
     query.appliedFilters,
     debouncedSearchTerm,
+    query.giItemNameFilter,
     query.sort,
     query.page,
     retryCount
@@ -152,6 +126,7 @@ export default function Catalogue({ onSelectCover }: CatalogueProps): React.JSX.
     query.appliedFilters.postalCircleIds.length > 0 ||
     query.appliedFilters.productCategories.length > 0 ||
     query.appliedFilters.years.length > 0 ||
+    query.giItemNameFilter !== null ||
     debouncedSearchTerm.trim() !== ''
 
   const activeFilterCount =
@@ -215,10 +190,29 @@ export default function Catalogue({ onSelectCover }: CatalogueProps): React.JSX.
         onSortChange={(sort) => dispatch({ type: 'SET_SORT', sort })}
       />
 
+      {query.giItemNameFilter !== null && (
+        <div className="flex items-center gap-2 mb-4 text-sm text-ink-soft">
+          <span>
+            Showing covers tagged: <span className="font-semibold text-ink">{query.giItemNameFilter}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: 'CLEAR_GI_TAG_FILTER' })}
+            className="text-ink-soft underline"
+            aria-label="Clear GI tag filter"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {totalCount === 0 ? (
         <CatalogueEmptyState
           quickCategories={facets.productCategories.slice(0, 2).map((f) => f.value)}
           onClearFilters={() => {
+            // SET_FILTERS/SET_SEARCH each already clear giItemNameFilter
+            // (see catalogueReducer's mutual-exclusivity comment) — no
+            // separate CLEAR_GI_TAG_FILTER dispatch needed here.
             dispatch({ type: 'SET_FILTERS', filters: EMPTY_FILTERS })
             dispatch({ type: 'SET_SEARCH', term: '' })
           }}
