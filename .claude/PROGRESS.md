@@ -1,7 +1,15 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-24
-**Last session worked on:** T-25 (Detail-view state lift + FR-11/12/13/14/28) — Done, PR #10 merged, branch cleaned up. See its own entry below.
+**Last session worked on:** Cross-repo `CLAUDE.md` follow-up — confirmed the App repo's "Decision-Making Autonomy" section had only ever been committed manually by the user (`ed10980`), added the same section to the Admin repo's `CLAUDE.md` and actually pushed it this time (`b41738c`, confirmed synced with `origin/main`), and doubly-confirmed `t25-verify-1@example.test`'s deletion. See the dedicated entry below. Also: T-25 (Detail-view state lift + FR-11/12/13/14/28) — Done, PR #10 merged, branch cleaned up.
+
+## Cross-repo CLAUDE.md follow-up + t25-verify cleanup (2026-08-24)
+
+**CLAUDE.md commit status, confirmed via `git log`, not assumed**: the App repo has exactly one commit in its entire history touching the "Decision-Making Autonomy" section — `ed10980`, authored by the user directly, adding all 67 lines in one shot. No earlier commit added or pushed it. (Git can't show whether an uncommitted working-tree version existed before that — only that nothing was ever committed for it until the user's own manual commit.)
+
+**Added the same section to the Admin repo's `CLAUDE.md`** — same content verbatim, placed after "Roles this app serves" / before "Known gotchas" (Admin's equivalent slots to App's "Conventions"/"Known gotchas"), heading levels verified matching (`##` section, `###` Tiers, `####` Tier 3's six categories). **Actually committed and pushed this time**: `b41738c`, fetched back from `origin/main` and confirmed in sync — not left as an uncommitted local change the way the App repo's copy apparently was.
+
+**`t25-verify-1@example.test` deleted, doubly confirmed** — same standard as `t14-verify`'s cleanup: the user ran an admin-level delete + immediate `listUsers` re-query (needs `SUPABASE_SERVICE_ROLE_KEY`, which I never hold); I separately ran a `signInWithPassword` attempt against the old credentials using only the anon key — `{"signInSucceeded":false,"error":"Invalid login credentials"}`, a structurally different check. Both cleanup scripts were created directly in `scripts/` this time (the scratchpad path used for `t14-verify`'s independent check caused a module-resolution error previously) and deleted immediately after use.
 
 ## T-25 — Detail-view state lift + FR-11/12/13/14/28 (2026-08-24): PR #10, merged
 
