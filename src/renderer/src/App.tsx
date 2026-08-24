@@ -1,10 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabaseClient'
+import { fetchCatalogueOrderedIds } from './lib/covers'
+import {
+  catalogueReducer,
+  initialCatalogueQueryState,
+  type CatalogueQueryState
+} from './lib/catalogueQuery'
+import { useRecentlyViewed } from './lib/useRecentlyViewed'
 import AppHeader from './components/AppHeader'
 import Login from './pages/Login'
 import Catalogue from './pages/Catalogue'
-import Detail from './pages/Detail'
+import Detail, { type DetailNavPosition } from './pages/Detail'
+
+// A stable string key for "what query is currently active" — used to
+// decide whether a cached ordered-id list (below) is still valid, or
+// needs refetching. Deliberately excludes `page`: the ordered list spans
+// every page of the active query, not just the one currently shown.
+function queryCacheKey(query: CatalogueQueryState): string {
+  return JSON.stringify({
+    postalCircleIds: query.appliedFilters.postalCircleIds,
+    productCategories: query.appliedFilters.productCategories,
+    years: query.appliedFilters.years,
+    giItemNameFilter: query.giItemNameFilter,
+    searchTerm: query.searchTerm,
+    sort: query.sort
+  })
+}
 
 // Navigation is a small lifted-state value, not a router — proportionate
 // to two screens, one level deep, with no URL bar or deep-linking need in
@@ -12,16 +34,83 @@ import Detail from './pages/Detail'
 // react-router's MemoryRouter) once either becomes true: more than ~4
 // screens exist, or any screen needs to preserve/restore scroll or
 // selection state across navigation — neither applies yet.
+//
+// T-25: filter/search/sort/page state moved up here from Catalogue.tsx
+// (which is now a controlled component) — Detail view needs the same
+// active query to support prev/next navigation within it (FR-12), which
+// wasn't possible while Catalogue owned that state privately and unmounted
+// it whenever a cover was selected.
 function SignedIn(): React.JSX.Element {
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
+  const [query, dispatch] = useReducer(catalogueReducer, initialCatalogueQueryState)
+  const { recordView } = useRecentlyViewed()
+
+  // Ordered id list for the currently active query, cached against the
+  // query it was fetched for — refetched only when that query actually
+  // changes, not on every navigation step within it. Fetched lazily, only
+  // once a cover is actually opened, so browsing the grid alone never
+  // triggers this extra query.
+  const navCache = useRef<{ key: string; ids: string[] } | null>(null)
+  const [navIds, setNavIds] = useState<string[] | null>(null)
+
+  function selectCover(id: string): void {
+    recordView(id)
+    setSelectedCoverId(id)
+
+    const key = queryCacheKey(query)
+    if (navCache.current?.key === key) {
+      setNavIds(navCache.current.ids)
+      return
+    }
+
+    setNavIds(null)
+    fetchCatalogueOrderedIds({
+      postalCircleIds: query.appliedFilters.postalCircleIds,
+      productCategories: query.appliedFilters.productCategories,
+      years: query.appliedFilters.years,
+      giItemName: query.giItemNameFilter ?? undefined,
+      searchTerm: query.searchTerm,
+      sort: query.sort
+    })
+      .then((ids) => {
+        navCache.current = { key, ids }
+        setNavIds(ids)
+      })
+      .catch(() => {
+        // Prev/next is a nice-to-have on top of an already-loaded Detail
+        // view — a failure here shouldn't block the cover itself from
+        // showing, it just means no nav controls render (position stays
+        // null).
+      })
+  }
+
+  function filterByGiTag(giItemName: string): void {
+    dispatch({ type: 'SET_GI_TAG_FILTER', giItemName })
+    setSelectedCoverId(null)
+  }
+
+  const currentIndex = navIds && selectedCoverId ? navIds.indexOf(selectedCoverId) : -1
+  const position: DetailNavPosition | null =
+    navIds && currentIndex >= 0 ? { index: currentIndex, total: navIds.length } : null
+  const previousCoverId = navIds && currentIndex > 0 ? navIds[currentIndex - 1] : null
+  const nextCoverId =
+    navIds && currentIndex >= 0 && currentIndex < navIds.length - 1 ? navIds[currentIndex + 1] : null
 
   return (
     <>
       <AppHeader />
       {selectedCoverId ? (
-        <Detail coverId={selectedCoverId} onBack={() => setSelectedCoverId(null)} />
+        <Detail
+          coverId={selectedCoverId}
+          onBack={() => setSelectedCoverId(null)}
+          onSelectCover={selectCover}
+          previousCoverId={previousCoverId}
+          nextCoverId={nextCoverId}
+          position={position}
+          onFilterByGiTag={filterByGiTag}
+        />
       ) : (
-        <Catalogue onSelectCover={setSelectedCoverId} />
+        <Catalogue query={query} dispatch={dispatch} onSelectCover={selectCover} />
       )}
     </>
   )
