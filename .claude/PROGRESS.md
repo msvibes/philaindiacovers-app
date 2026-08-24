@@ -1,7 +1,21 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-24
-**Last session worked on:** T-13+T-18 (PRD Addendum) — catalogue grid rebuild + pagination/filter/search/sort against real fields, landed together as one vertical slice per the confirmed sequencing decision. **Done** — PR #8 merged 2026-08-24T08:26:08Z (`1bd7a68`), branch auto-deleted on GitHub, local copy cleaned up. See the dedicated entry below for full build/verification detail.
+**Last session worked on:** Detail view — add Date of Issue field. A real gap found via direct code inspection after T-13+T-18: the "show full Date of Issue in Detail view" decision from T-13/T-18 planning was attached to the filter design but never turned into a task line item for `Detail.tsx` itself, so it fell through. Fixed as its own small task, same shape as T-14. Built on branch `t-detail-date-of-issue`; see the dedicated entry below.
+
+## Detail view — Date of Issue field (2026-08-24): branch `t-detail-date-of-issue`
+
+**Confirmed the gap precisely before fixing it, not assumed from the summary**: direct read of `Detail.tsx` plus a full-file grep for "date"/"Date" — zero matches. `cover.dateOfIssue` was already fetched (`CoverDetail` inherits it from `VerifiedCover`, which has carried it since before T-13/T-18), and `formatDateOfIssue()` already existed and was already used by `Catalogue.tsx` — this was a pure JSX omission, not a data-layer gap, the exact same shape as T-14's original GI Item Name/Product Category fix.
+
+**Fix**: one new `<Field label="Date of Issue" value={formatDateOfIssue(cover.dateOfIssue)} />` in `Detail.tsx`'s `<dl>`, positioned right after Product Category (grouping the core identity/metadata fields together, same placement convention T-14 established). Reuses the existing helper — no new formatting logic.
+
+**Tests** (`Detail.test.tsx`): extended the existing "renders every real field value" test with a `'19 May 2023'` assertion (the `fullCover` fixture's `dateOfIssue: '2023-05-19'` was already present, just unasserted); added one new dedicated test for the null-`dateOfIssue` fallback (`'Date not recorded yet'`). 49 passed (was 48), 2 integration files correctly skipped locally.
+
+**Verified live** against a real cover ("Kosa: Fabric of Chhattisgarh"): Detail view now shows `Date of Issue: 28 January 2017`, matching that same cover's date exactly as already shown on its Catalogue card. The null-fallback path is Vitest-only-verified, consistent with this project's established precedent for fields not reachable live — `date_of_issue` appears to be universally populated across the real 286-cover dataset (never once seen "Date not recorded yet" during this session's extensive live browsing), the inverse situation to `product_category`'s universally-null state.
+
+**Real mid-session incident, caught and fixed cleanly, not silently left**: the fix commit briefly landed directly on `main` instead of this branch — `git reflog` showed the shared working directory got checked back to `main` between this branch's creation and the commit (likely a concurrent `git checkout main` elsewhere in the same working directory, around the same time a legitimate docs-only commit — T-28's addendum entry — was pushed directly to `main`). Caught immediately by checking `git branch --show-current` right after committing rather than assuming the commit landed where intended. Fixed while it was still purely local and unpushed (confirmed via `git log origin/main..main` before touching anything): moved the fix commit onto `t-detail-date-of-issue` via `git branch -f`, then `git reset --hard origin/main` to restore `main` to exactly its pushed state, keeping the legitimate T-28 docs commit in place and removing only the errant `src/**` commit. No force-push, no rewritten shared history — the fix commit was never pushed until it was on the correct branch. Re-ran lint/typecheck/test from the corrected branch before pushing, to be certain nothing was lost or altered in the move.
+
+**PR #9 opened and CI confirmed green**, individually per-step — every step (`Lint`, `Typecheck`, `Verify integration test credentials are present`, `Test`, `Build`) confirmed `success`, and `Detail.test.tsx` confirmed passing by name in the raw run log (`10 tests`, up from 8 before T-14/this fix). Full suite: 11 test files, 52 tests passed.
 
 ## T-13+T-18 — Catalogue grid rebuild + pagination/filter/search/sort (2026-08-24): PR #8, merged
 
