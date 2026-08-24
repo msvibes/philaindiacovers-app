@@ -22,6 +22,7 @@ const fullCover: CoverDetail = {
   productCategory: null,
   dateOfIssue: '2023-05-19',
   imageFile: 'some/path.jpg',
+  postalCircleId: 'circle-1',
   postalCircleName: 'Uttar Pradesh',
   nameOfCover: 'Adamchini Chawal',
   giRegistrationNumber: null,
