@@ -1,9 +1,9 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-24
-**Last session worked on:** T-13+T-18 (PRD Addendum) — catalogue grid rebuild + pagination/filter/search/sort against real fields, landed together as one vertical slice per the confirmed sequencing decision. Built on branch `t13-t18-catalogue-rebuild`; see the dedicated entry below for full build/verification detail.
+**Last session worked on:** T-13+T-18 (PRD Addendum) — catalogue grid rebuild + pagination/filter/search/sort against real fields, landed together as one vertical slice per the confirmed sequencing decision. **Done** — PR #8 merged 2026-08-24T08:26:08Z (`1bd7a68`), branch auto-deleted on GitHub, local copy cleaned up. See the dedicated entry below for full build/verification detail.
 
-## T-13+T-18 — Catalogue grid rebuild + pagination/filter/search/sort (2026-08-24): branch `t13-t18-catalogue-rebuild`
+## T-13+T-18 — Catalogue grid rebuild + pagination/filter/search/sort (2026-08-24): PR #8, merged
 
 **Planned via formal Plan Mode, twice** — investigated first (3 parallel Explore agents covering current code state, the two design prototypes' actual source, and the exact locked PRD/Jira AC text; 1 Plan agent synthesizing a concrete design), plan approved, then **revised a second time after two real user pushbacks mid-review**: the Date of Issue filter was reconsidered from a date-range picker to a year-based multi-select (matching the checkbox+count pattern the other two filters use — see below), and the RLS backstop was explicitly re-confirmed by reading the actual policy migration directly rather than assumed, precisely because this was the first time `.or()` filter-string interpolation entered this codebase.
 
@@ -23,7 +23,11 @@
 
 **Cleanup**: reused the still-live `t14-verify-...` throwaway account for this session's live checks (confirmed it was never actually deleted despite T-14's PROGRESS.md entry claiming so — flagged to the user, not silently corrected away; still needs real deletion).
 
-**PR #8 opened and CI confirmed green**, individually per-step (not just "overall success") — every step (`Lint`, `Typecheck`, `Verify integration test credentials are present`, `Test`, `Build`) confirmed `success`, and all five `Catalogue*.test.tsx` files confirmed passing by name in the raw run log (11 test files, 51 tests passed — the two live-integration tests actually ran in CI, not skipped, unlike the local run which lacks credentials).
+**PR #8 opened and CI confirmed green**, individually per-step (not just "overall success") — every step (`Lint`, `Typecheck`, `Verify integration test credentials are present`, `Test`, `Build`) confirmed `success`, and all five `Catalogue*.test.tsx` files confirmed passing by name in the raw run log (11 test files, 51 tests passed — the two live-integration tests actually ran in CI, not skipped, unlike the local run which lacks credentials). **Clarified for the record, not new in this session**: those two live-integration tests each create and delete their own fresh, timestamped throwaway account per run (confirmed via direct read of both test files) — no new secret was added, and neither `t14-verify` nor the plan's own Step 0 became a CI fixture. The `SUPABASE_SERVICE_ROLE_KEY` they use comes from the `ci-dev-supabase` GitHub Environment, unchanged since PR #5 (confirmed: `.github/workflows/ci.yml` has exactly one commit in its history, untouched this session).
+
+**Confirmed before merge, at the user's explicit request**: `ci-dev-supabase` is an environment *name*, not yet a genuinely separate project — both this app's `.env` (`VITE_SUPABASE_URL`) and Admin's `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`) point at the identical project, `hcaivtygzwjemjngcmji`. This is a pre-existing, already-logged condition from the original CI setup (see Admin's `PROGRESS.md`, 2026-08-17 entry), not something new here — surfaced again because it's a real fact worth confirming plainly before every merge that touches CI, not just inferring from the name.
+
+**Merged 2026-08-24T08:26:08Z (`1bd7a68`)**. Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up. **T-13+T-18 is Done.**
 
 ## T-14 — Detail view field fix (2026-08-23): branch `t14-detail-view-fields`
 
