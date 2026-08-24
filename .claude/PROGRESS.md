@@ -21,9 +21,9 @@
 
 **Real gap found, not the app's fault**: repeated `computer`-tool ref-clicks on `FilterPanel`'s checkboxes failed with "outside the viewport" at three different window widths (1280/1600), despite confirming directly (`documentElement.scrollWidth === clientWidth`, no real horizontal overflow) that this is a benign click-tool coordinate-system quirk (comparing against `window.innerWidth` rather than the scrollbar-adjusted CSS viewport), not a real CSS bug in the panel. Worked around via direct, genuine DOM `.click()` calls on the real checkbox/button elements (exercising the actual React `onChange` handlers, equivalent to a real click for verification purposes) — noted here so a future session doesn't re-diagnose the same tool quirk from scratch.
 
-**Cleanup**: reused the still-live `t14-verify-...` throwaway account for this session's live checks (confirmed it was never actually deleted despite T-14's PROGRESS.md entry claiming so — flagged to the user, not silently correted away; still needs real deletion).
+**Cleanup**: reused the still-live `t14-verify-...` throwaway account for this session's live checks (confirmed it was never actually deleted despite T-14's PROGRESS.md entry claiming so — flagged to the user, not silently corrected away; still needs real deletion).
 
-**Not yet done as this entry is written**: commit, push, PR, and CI confirmation — see git history for what actually landed.
+**PR #8 opened and CI confirmed green**, individually per-step (not just "overall success") — every step (`Lint`, `Typecheck`, `Verify integration test credentials are present`, `Test`, `Build`) confirmed `success`, and all five `Catalogue*.test.tsx` files confirmed passing by name in the raw run log (11 test files, 51 tests passed — the two live-integration tests actually ran in CI, not skipped, unlike the local run which lacks credentials).
 
 ## T-14 — Detail view field fix (2026-08-23): branch `t14-detail-view-fields`
 
