@@ -1,7 +1,25 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-25
-**Last session worked on:** T-24 (native Electron menu bar) — **Done, PR #12 merged, branch cleaned up.** See its own entry below. US-01+US-02 (previous entry, still below) is unchanged and still Done.
+**Last session worked on:** T-29 (Home/landing screen + cross-screen navigation) — **Done, PR #13 merged, branch cleaned up.** See its own entry below — includes a real navigation bug found and fixed during live verification. T-24 (previous entry, still below) is unchanged and still Done.
+
+## T-29 — Home/landing screen + cross-screen navigation (2026-08-25): PR #13, merged
+
+**Planned via formal Plan Mode** — this touches `App.tsx`'s top-level state shape, same category as T-25. Scope came pre-audited: the product owner had already pushed a direct-to-main doc commit (`a2d178e`) expanding T-29 after a full PRD-v1.0 scope audit — confirmed the account-menu nav reuses the v3 prototype's already-approved dropdown pattern (`#accountMenu`) rather than inventing a new one, confirmed which menu entries are real (Home/Catalogue/Settings) vs. visible-but-genuinely-inert placeholders (Collection Manager/Wish List/My Progress — KAN-5), and confirmed Reports/Monitor Product Progress (KAN-11) is Admin-only, not App scope at all — no placeholder needed for it.
+
+**Architecture**: new top-level `screen: 'home' | 'catalogue' | 'settings'` state in `App.tsx`, defaulting to `'home'` (FR-01: lands there on every sign-in/launch, not the grid) — kept deliberately independent of T-25's `selectedCoverId`, so `Detail`'s existing overlay behavior (prev/next, GI-tag filtering, `onBack`) needed zero changes. `Home.tsx` gives T-25's FR-28 recently-viewed tracking the rendering surface it was always meant to have but didn't exist yet (`fetchCoversByIds()`, new in `covers.ts`, hydrates the stored ids — re-sorted to match input order since `.in()` doesn't preserve it). `Settings.tsx` is deliberately minimal — T-29 only needs it to exist and be reachable; its real content is T-27/T-30's scope, not rebuilt here.
+
+**A real `react-hooks/set-state-in-effect` violation found and fixed properly during implementation** (`Home.tsx`'s recently-viewed effect) — same anti-pattern already fixed twice before in this project (T-13+T-18). Fixed by driving the empty-state check off `recentIds.length` directly rather than a separately-reset `recentCovers` state, avoiding the sync-setState-in-effect entirely rather than suppressing the lint rule.
+
+**A real navigation bug found and fixed via live verification the user specifically asked for, not assumed correct from the design**: the user's exact request was to confirm live that opening a cover from Home's Recently Viewed strip and hitting Back returns to Home, not Catalogue — since Home was a new entry point `Detail.onBack` had never been exercised against. That specific path was correct by design. But testing around it surfaced a real, different bug: **navigating via the account menu while `Detail` was open silently changed the background `screen` state without closing `Detail`** — so `Detail`'s own "← Back to catalogue" button, unaware `screen` had changed underneath it, would then land on Home instead of Catalogue despite its own literal label. Fixed with a real `navigateTo()` that always closes `Detail` as part of any menu navigation (matching what "navigate to X" actually means to a user), not just a `setScreen()` call — re-verified live afterward that both the original bug scenario and the always-correct path now behave correctly.
+
+**A real, logged test-coverage gap, not silently skipped**: no automated regression test was added for the menu-navigation-while-Detail-open bug specifically — `App.tsx` has zero test coverage in this project (an established, deliberate gap since T-25), and building the mocking surface needed to test this one cross-component interaction (Supabase auth, `Catalogue`/`Home`/`Detail`/`covers.ts` all at once) would mean standing up a new testing layer for a single scenario already re-verified live twice. Logged here as a real, considered tradeoff rather than pretending it's covered.
+
+**Tests**: `Home.test.tsx` (5 tests — real count line, empty/populated recently-viewed states, card click, CTA), `Settings.test.tsx` (1 test), `AppHeader.test.tsx` (5 tests, zero coverage existed for this file before — menu open/close, working entries navigate, disabled entries genuinely inert, click-outside closes, Log out still works). 97 tests passed in CI (up from 90).
+
+**PR #13 opened and CI confirmed green twice** (once per pushed commit — the second was the navigation-bug fix), every step individually both times.
+
+**Merged 2026-08-25, fast-forward.** Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up. **T-29 is Done.**
 
 ## T-24 — native Electron menu bar (File/Edit/View/Help) (2026-08-25): PR #12, merged
 
