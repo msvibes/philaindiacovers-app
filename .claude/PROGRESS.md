@@ -1,7 +1,19 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-25
-**Last session worked on:** US-01 (KAN-12) + US-02 (email/password signup + verification gating) — **Done, PR #11 merged, branch cleaned up.** See its own entry below for the full Step 0 investigation, the two real corrections it produced, and live verification. Prior session's work (T-25, cross-repo CLAUDE.md follow-up, t25-verify cleanup) is unchanged and still accurately described further down this file.
+**Last session worked on:** T-24 (native Electron menu bar) — **Done, PR #12 merged, branch cleaned up.** See its own entry below. US-01+US-02 (previous entry, still below) is unchanged and still Done.
+
+## T-24 — native Electron menu bar (File/Edit/View/Help) (2026-08-25): PR #12, merged
+
+Quick-scoped task, no formal Plan Mode — already fully specified in the addendum, no design reference needed for native OS chrome. **One real finding before implementing**: `src/main/index.ts`'s `BrowserWindow` config had `autoHideMenuBar: true`, which hides any menu behind the Alt key — directly conflicting with the point of building a permanently-visible native menu. Removed it.
+
+**Implementation**: new `src/main/menu.ts` — a pure `buildMenuTemplate(isDev)` function (extracted for testability, no existing sub-module precedent in `src/main/` either way, a low-stakes organizational call). File (Quit), Edit (standard Undo/Redo/Cut/Copy/Paste/Select All roles), View (Reload/Force Reload/dev-only Toggle DevTools/Fullscreen), Help (View Source on GitHub, Report an Issue — both via `shell.openExternal`, same pattern already used in `index.ts`). Deliberately minimal — no About/disclaimer content, that's T-27's Settings-screen territory, not this menu.
+
+**A real verification limitation, stated plainly rather than glossed over**: a native `BrowserWindow`'s menu bar and window chrome don't exist in a browser-based preview — every prior task's live verification opened `http://localhost:5173` directly in a web browser, which loads the same renderer code but bypasses the real Electron window entirely. This task's actual visual result (the menu bar itself, and whether the layout looks right now that `autoHideMenuBar` is gone) could only be confirmed by the user running `npm run dev` and looking at the real app — done, **user confirmed both look correct** before merge.
+
+**Tests**: `menu.test.ts` (4 tests, pure template assertions — the four top-level menus in order, dev-only DevTools item excluded/included correctly, a real Quit role present). CI: 18 test files, 90 tests passed (up from 86), the real production build succeeded and bundled the main-process code (`out/main/index.js`).
+
+**Merged 2026-08-25, fast-forward.** Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up. **T-24 is Done.**
 
 ## US-01 (KAN-12) + US-02 — email/password signup + verification gating (2026-08-24/25): PR #11, merged
 
