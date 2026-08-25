@@ -1,7 +1,8 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { buildMenuTemplate } from './menu'
 
 function createWindow(): void {
   // Create the browser window.
@@ -9,7 +10,9 @@ function createWindow(): void {
     width: 900,
     height: 670,
     show: false,
-    autoHideMenuBar: true,
+    // T-24: a real native menu bar is now always visible — no longer
+    // hidden behind Alt (autoHideMenuBar), since a permanently-visible
+    // menu is the whole point of building one.
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -41,6 +44,8 @@ function createWindow(): void {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(buildMenuTemplate(is.dev)))
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
