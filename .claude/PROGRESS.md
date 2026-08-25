@@ -21,6 +21,8 @@
 
 **Merged 2026-08-25, fast-forward.** Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up. **T-29 is Done.**
 
+**`t29-verify-1@example.test` deleted, doubly confirmed** — same standard as every prior throwaway-account cleanup this project has done: the user ran an admin-level delete + immediate `listUsers` re-query (needs `SUPABASE_SERVICE_ROLE_KEY`, which I never hold); I separately ran a `signInWithPassword` attempt against the old credentials using only the anon key — `{"signInSucceeded":false,"error":"Invalid login credentials"}`, a structurally different check. Both scripts created directly in `scripts/` and deleted immediately after use.
+
 ## T-24 — native Electron menu bar (File/Edit/View/Help) (2026-08-25): PR #12, merged
 
 Quick-scoped task, no formal Plan Mode — already fully specified in the addendum, no design reference needed for native OS chrome. **One real finding before implementing**: `src/main/index.ts`'s `BrowserWindow` config had `autoHideMenuBar: true`, which hides any menu behind the Alt key — directly conflicting with the point of building a permanently-visible native menu. Removed it.
