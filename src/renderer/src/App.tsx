@@ -97,12 +97,11 @@ function SignedIn(): React.JSX.Element {
 
   function filterByGiTag(giItemName: string): void {
     dispatch({ type: 'SET_GI_TAG_FILTER', giItemName })
-    setSelectedCoverId(null)
     // Always lands on the grid to see the filtered result, regardless of
     // which screen Detail was opened from (e.g. a Home recently-viewed
     // card) — the whole point of tapping a tag is to see the filtered
     // Catalogue, not to stay wherever the cover happened to be opened.
-    setScreen('catalogue')
+    navigateTo('catalogue')
   }
 
   const currentIndex = navIds && selectedCoverId ? navIds.indexOf(selectedCoverId) : -1
@@ -111,6 +110,18 @@ function SignedIn(): React.JSX.Element {
   const previousCoverId = navIds && currentIndex > 0 ? navIds[currentIndex - 1] : null
   const nextCoverId =
     navIds && currentIndex >= 0 && currentIndex < navIds.length - 1 ? navIds[currentIndex + 1] : null
+
+  // A real navigation action, not just a background state change — closes
+  // Detail if it's open, matching what "navigate to X" actually means to
+  // a user. Found live: navigating via the menu while Detail was open
+  // silently changed `screen` underneath it, so Detail's own "Back to
+  // catalogue" button (unaffected, unaware `screen` had changed) landed
+  // on Home instead of Catalogue — a real, confusing bug, not a
+  // hypothetical one.
+  function navigateTo(target: Screen): void {
+    setSelectedCoverId(null)
+    setScreen(target)
+  }
 
   function renderScreen(): React.JSX.Element {
     if (selectedCoverId) {
@@ -128,7 +139,7 @@ function SignedIn(): React.JSX.Element {
     }
     switch (screen) {
       case 'home':
-        return <Home onEnterCatalogue={() => setScreen('catalogue')} onSelectCover={selectCover} />
+        return <Home onEnterCatalogue={() => navigateTo('catalogue')} onSelectCover={selectCover} />
       case 'catalogue':
         return <Catalogue query={query} dispatch={dispatch} onSelectCover={selectCover} />
       case 'settings':
@@ -138,7 +149,7 @@ function SignedIn(): React.JSX.Element {
 
   return (
     <>
-      <AppHeader currentScreen={screen} onNavigate={setScreen} />
+      <AppHeader currentScreen={screen} onNavigate={navigateTo} />
       {renderScreen()}
     </>
   )
