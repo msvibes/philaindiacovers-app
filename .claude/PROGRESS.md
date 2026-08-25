@@ -28,7 +28,12 @@
 
 **Merged 2026-08-25, fast-forward.** Branch auto-deleted on GitHub via `gh pr merge --delete-branch`; local branch and stale remote-tracking ref both cleaned up. **US-01+US-02 is Done.**
 
-**Cleanup still open, not yet confirmed**: several real throwaway accounts (`indocrat+retest2@gmail.com`, `indocrat+livecheck1@gmail.com`, and possibly bare `indocrat@gmail.com`) were created against the real hosted project during Step 0 and live verification. `scripts/__cleanup-us01-test-accounts.mjs` was written and handed to the user to run (needs the service-role key) — **not yet confirmed run**. Deliberately did not touch `krutimlogic@gmail.com` (the user's own primary address, ambiguous whether it pre-existed this session's testing) — worth the user confirming its status separately, since it's real and theirs, not a throwaway.
+**Cleanup — fully closed, confirmed 2026-08-25, do not re-investigate:**
+- **`krutimlogic@gmail.com` resolved definitively — nothing to clean up, unrelated to US-01/US-02 testing.** Queried directly: `created_at` is 2026-08-11 (well before any of this task's work) and `email_confirmed_at` matches `created_at` exactly — the specific signature of `admin.auth.admin.createUser({ email_confirm: true })`, not a real self-service signup. It was never touched by this task's `signUp()` testing; the earlier `identities.length: 0` result during Step 0 was this pre-existing account's anti-enumeration response, exactly as suspected at the time. Leave this account alone.
+- **`indocrat+retest2@gmail.com` and `indocrat+livecheck1@gmail.com`**: both confirmed deleted (the first cleanup run, right after they were created, held — a later re-run of the same script confirmed neither still exists).
+- **Bare `indocrat@gmail.com`**: confirmed no `auth.users` row was ever created for it — the `500 Error sending confirmation email` failure (from the pre-App-Password-fix SMTP misconfiguration) genuinely failed before user creation, not after. Nothing to delete.
+
+No real throwaway accounts or ambiguous real-address entanglements remain from this task.
 
 ## Cross-repo CLAUDE.md follow-up + t25-verify cleanup (2026-08-24)
 
