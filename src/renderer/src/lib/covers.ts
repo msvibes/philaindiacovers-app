@@ -250,6 +250,33 @@ export async function fetchCatalogueOrderedIds(
   return (data ?? []).map((row) => (row as { id: string }).id)
 }
 
+// FR-28/US-53's recently-viewed strip (T-29's Home screen) hydrates raw
+// stored ids into real cover objects here. .in() doesn't preserve input
+// order, so the result is re-sorted to match `ids` — recentIds is already
+// most-recent-first, and that order matters, not just tidiness. Still
+// filtered to verification_status='verified' (same defense-in-depth as
+// every other query in this file) — a cover viewed while verified but
+// since flagged/unverified simply won't reappear, rather than leaking.
+export async function fetchCoversByIds(
+  ids: string[],
+  client: SupabaseClient = supabase
+): Promise<VerifiedCover[]> {
+  if (ids.length === 0) return []
+
+  const { data, error } = await client
+    .from('covers')
+    .select(SELECT_COVER_ROW)
+    .in('id', ids)
+    .eq('verification_status', 'verified')
+
+  if (error) throw error
+
+  const rows = (data ?? []) as unknown as RawCoverRow[]
+  const covers = rows.map(mapCoverRow)
+  const byId = new Map(covers.map((cover) => [cover.id, cover]))
+  return ids.map((id) => byId.get(id)).filter((cover): cover is VerifiedCover => cover !== undefined)
+}
+
 export interface CatalogueFacetOption<T = string> {
   value: T
   count: number
