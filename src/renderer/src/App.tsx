@@ -10,8 +10,17 @@ import {
 import { useRecentlyViewed } from './lib/useRecentlyViewed'
 import AppHeader from './components/AppHeader'
 import Login from './pages/Login'
+import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
+import Settings from './pages/Settings'
 import Detail, { type DetailNavPosition } from './pages/Detail'
+
+// T-29: the three real, navigable screens once signed in. Detail is
+// deliberately not part of this union — it's an overlay-like state
+// (selectedCoverId) independent of which of these three is active, so
+// returning from it lands back on whichever one was showing, with zero
+// extra state to track that.
+export type Screen = 'home' | 'catalogue' | 'settings'
 
 // A stable string key for "what query is currently active" — used to
 // decide whether a cached ordered-id list (below) is still valid, or
@@ -41,6 +50,8 @@ function queryCacheKey(query: CatalogueQueryState): string {
 // wasn't possible while Catalogue owned that state privately and unmounted
 // it whenever a cover was selected.
 function SignedIn(): React.JSX.Element {
+  // FR-01: lands on Home, not the grid, on every sign-in/launch.
+  const [screen, setScreen] = useState<Screen>('home')
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
   const [query, dispatch] = useReducer(catalogueReducer, initialCatalogueQueryState)
   const { recordView } = useRecentlyViewed()
@@ -86,7 +97,11 @@ function SignedIn(): React.JSX.Element {
 
   function filterByGiTag(giItemName: string): void {
     dispatch({ type: 'SET_GI_TAG_FILTER', giItemName })
-    setSelectedCoverId(null)
+    // Always lands on the grid to see the filtered result, regardless of
+    // which screen Detail was opened from (e.g. a Home recently-viewed
+    // card) — the whole point of tapping a tag is to see the filtered
+    // Catalogue, not to stay wherever the cover happened to be opened.
+    navigateTo('catalogue')
   }
 
   const currentIndex = navIds && selectedCoverId ? navIds.indexOf(selectedCoverId) : -1
@@ -96,10 +111,21 @@ function SignedIn(): React.JSX.Element {
   const nextCoverId =
     navIds && currentIndex >= 0 && currentIndex < navIds.length - 1 ? navIds[currentIndex + 1] : null
 
-  return (
-    <>
-      <AppHeader />
-      {selectedCoverId ? (
+  // A real navigation action, not just a background state change — closes
+  // Detail if it's open, matching what "navigate to X" actually means to
+  // a user. Found live: navigating via the menu while Detail was open
+  // silently changed `screen` underneath it, so Detail's own "Back to
+  // catalogue" button (unaffected, unaware `screen` had changed) landed
+  // on Home instead of Catalogue — a real, confusing bug, not a
+  // hypothetical one.
+  function navigateTo(target: Screen): void {
+    setSelectedCoverId(null)
+    setScreen(target)
+  }
+
+  function renderScreen(): React.JSX.Element {
+    if (selectedCoverId) {
+      return (
         <Detail
           coverId={selectedCoverId}
           onBack={() => setSelectedCoverId(null)}
@@ -109,9 +135,22 @@ function SignedIn(): React.JSX.Element {
           position={position}
           onFilterByGiTag={filterByGiTag}
         />
-      ) : (
-        <Catalogue query={query} dispatch={dispatch} onSelectCover={selectCover} />
-      )}
+      )
+    }
+    switch (screen) {
+      case 'home':
+        return <Home onEnterCatalogue={() => navigateTo('catalogue')} onSelectCover={selectCover} />
+      case 'catalogue':
+        return <Catalogue query={query} dispatch={dispatch} onSelectCover={selectCover} />
+      case 'settings':
+        return <Settings />
+    }
+  }
+
+  return (
+    <>
+      <AppHeader currentScreen={screen} onNavigate={navigateTo} />
+      {renderScreen()}
     </>
   )
 }
