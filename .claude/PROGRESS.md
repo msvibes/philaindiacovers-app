@@ -1,7 +1,23 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-08-25
-**Last session worked on:** T-29 (Home/landing screen + cross-screen navigation) — **Done, PR #13 merged, branch cleaned up.** See its own entry below — includes a real navigation bug found and fixed during live verification. T-24 (previous entry, still below) is unchanged and still Done.
+**Last session worked on:** CSS fidelity fix for AppHeader/Login/Signup — **Done, PR #14 merged, branch cleaned up.** See its own entry below. T-29 (previous entry, still below) is unchanged and still Done.
+
+## CSS fidelity fix — AppHeader/Login/Signup vs. v3 prototype (2026-08-25): PR #14, merged
+
+**A real, user-flagged gap, not something this session caught on its own**: `AppHeader.tsx`, `Login.tsx`, and `Signup.tsx` were all built quickly during T-24/US-01/US-02 and used generic Tailwind defaults (plain `border`/`rounded-lg`/`shadow-lg`, `bg-black`, `text-gray-500`) instead of this app's actual design tokens or the approved `app-prototype-v3-full.html`'s exact CSS values. The user asked for an explicit audit, not a "checked, looks fine" — findings reported precisely, with exact old-vs-prototype values, before any fix was made.
+
+**Real, confirmed gaps found**: account-menu dropdown was `border-radius: 8px`/default-gray-border/Tailwind's `shadow-lg` against the prototype's exact `border-radius: 10px`, `border-line`, and `box-shadow: 0 10px 24px rgba(0,0,0,.12)` (a genuinely different shadow shape, not an approximation); the trigger was a plain "Menu" text button instead of the prototype's 36×36 icon button. Login/Signup headings had no `font-display`, subtitles/labels used `text-gray-500` instead of `ink-soft`, inputs used a plain default border instead of `border-line-strong`/`bg-card` with no themed focus ring at all, and — the most visually significant one — submit buttons used `bg-black`, not the design system's real primary color `var(--ink)` (`#1b2a4a`, dark navy) — a genuine, visible color difference, not cosmetic rounding.
+
+**A real process correction from the user, applied immediately**: this fix was initially made directly on `main` (uncommitted), inconsistent with every other task this session. Caught by the user before anything was committed — confirmed `main` had zero local commits ahead of `origin/main` (only uncommitted working-tree changes), created `t24-css-fidelity-fix` properly, and the uncommitted changes carried onto it cleanly with `main` untouched. Committed there, not on `main`, going forward.
+
+**Verification was evidence-based, not screenshot-based** — the Browser pane's screenshot capture wasn't working in this session ("the Browser pane is not displayed, so the page is not compositing frames"), flagged plainly rather than faked. Instead, every claimed fix was checked against the **live browser's own computed styles** on a real signed-in session: dropdown `border-radius: 10px`, `border-color: rgb(228,220,200)` (`--line`), `box-shadow` resolving to `rgba(0,0,0,.12) 0 10px 24px` exactly; trigger `36×36px`, `border-radius: 8px`, `border-color: rgb(207,196,172)` (`--line-strong`); menu items `font-size: 12.5px`, `padding: 10px 14px`, disabled entries `opacity: 0.4`; Login/Signup headings in Playfair Display at `20px/600`, inputs at `border-radius: 8px`/`height: 40px`, buttons at `background: rgb(27,42,74)` (`--ink`). **User independently verified every value against the actual prototype file themselves before accepting the fix** — held for that confirmation before merging, not merged unilaterally.
+
+**PR #14 opened and CI confirmed green**, every step individually (`Lint`, `Typecheck`, `Verify integration test credentials are present`, `Test`, `Build`) — 97 tests passed, unchanged count (a pure styling fix, no new test surface).
+
+**Merged 2026-08-25, fast-forward**, only after the user's own independent verification against the prototype. Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up.
+
+**Cleanup still open**: `t24-css-verify-1@example.test` was used for the live computed-style checks and hasn't been deleted yet.
 
 ## T-29 — Home/landing screen + cross-screen navigation (2026-08-25): PR #13, merged
 
