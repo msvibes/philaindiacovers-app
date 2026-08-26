@@ -61,17 +61,19 @@ export default function Login(): React.JSX.Element {
   }
 
   return (
-    <main className="mx-auto max-w-sm w-full p-8 space-y-6">
+    <main className="mx-auto flex min-h-screen max-w-[380px] w-full flex-col justify-center p-8">
       <div>
-        <h1 className="text-2xl font-semibold">Welcome back, collector!</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="font-display text-[20px] font-semibold text-center text-ink mb-1">
+          Welcome back, collector!
+        </h1>
+        <p className="text-[13px] text-ink-soft text-center mb-6">
           Sign in to browse the catalogue and pick up right where you left off.
         </p>
       </div>
 
-      <form onSubmit={handleSignIn} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="email">
+      <form onSubmit={handleSignIn}>
+        <div className="mb-3.5">
+          <label className="block text-[12.5px] text-ink-soft mb-1.5" htmlFor="email">
             Email
           </label>
           <input
@@ -81,11 +83,11 @@ export default function Login(): React.JSX.Element {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="password">
+        <div className="mb-3.5">
+          <label className="block text-[12.5px] text-ink-soft mb-1.5" htmlFor="password">
             Password
           </label>
           <input
@@ -95,34 +97,38 @@ export default function Login(): React.JSX.Element {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
           />
         </div>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+          className="mt-1 w-full h-[42px] rounded-[9px] bg-ink text-[13.5px] font-medium text-white hover:bg-[#132038] disabled:opacity-50"
         >
           {isSubmitting ? 'Letting you in…' : 'Sign in'}
         </button>
       </form>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="mt-4 text-red-600 text-[13px]">{error}</p>}
 
       {unconfirmedEmail && (
-        <div className="text-sm space-y-2">
+        <div className="mt-4 text-[13px] space-y-2">
           <p className="text-red-600">
             That email hasn&apos;t been verified yet — check your inbox for the link, or send it
             again.
           </p>
-          <button type="button" onClick={handleResend} className="underline">
+          <button type="button" onClick={handleResend} className="text-stamp underline">
             Resend verification email
           </button>
-          {resendStatus && <p className="text-gray-500">{resendStatus}</p>}
+          {resendStatus && <p className="text-ink-soft">{resendStatus}</p>}
         </div>
       )}
 
-      <button type="button" onClick={() => setMode('sign-up')} className="text-sm underline">
+      <button
+        type="button"
+        onClick={() => setMode('sign-up')}
+        className="mt-6 text-[13px] text-ink-soft text-center underline"
+      >
         Don&apos;t have an account? Sign up
       </button>
     </main>

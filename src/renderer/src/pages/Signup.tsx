@@ -48,16 +48,27 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
     setAwaitingVerification(true)
   }
 
+  // Styling below matches docs/design/app-prototype-v3-full.html's
+  // .auth-card/.field/.btn-cta exactly (font-display headings, ink-soft
+  // labels/subtitles, border-line-strong + bg-card inputs with a stamp
+  // focus ring, bg-ink buttons — not pure black) rather than generic
+  // Tailwind defaults, same fix applied to Login.tsx.
   if (awaitingVerification) {
     return (
-      <main className="mx-auto max-w-sm w-full p-8 space-y-4">
-        <h1 className="text-2xl font-semibold">Check your email</h1>
-        <p className="text-sm text-gray-500">
+      <main className="mx-auto flex min-h-screen max-w-[380px] w-full flex-col justify-center p-8">
+        <h1 className="font-display text-[20px] font-semibold text-center text-ink mb-1">
+          Check your email
+        </h1>
+        <p className="text-[13px] text-ink-soft text-center mb-6">
           If that address doesn&apos;t already have an account, we&apos;ve sent a link to verify it
           — click it, then come back here and sign in. (The page it opens may not look like much —
           that&apos;s expected, just return to the app afterward.)
         </p>
-        <button type="button" onClick={onSwitchToSignIn} className="text-sm underline">
+        <button
+          type="button"
+          onClick={onSwitchToSignIn}
+          className="text-[13px] text-ink-soft text-center underline"
+        >
           Back to sign in
         </button>
       </main>
@@ -65,17 +76,19 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
   }
 
   return (
-    <main className="mx-auto max-w-sm w-full p-8 space-y-6">
+    <main className="mx-auto flex min-h-screen max-w-[380px] w-full flex-col justify-center p-8">
       <div>
-        <h1 className="text-2xl font-semibold">Join the catalogue</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="font-display text-[20px] font-semibold text-center text-ink mb-1">
+          Join the catalogue
+        </h1>
+        <p className="text-[13px] text-ink-soft text-center mb-6">
           Create an account to start browsing India&apos;s GI Tag Special Covers.
         </p>
       </div>
 
-      <form onSubmit={handleSignUp} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="signup-email">
+      <form onSubmit={handleSignUp}>
+        <div className="mb-3.5">
+          <label className="block text-[12.5px] text-ink-soft mb-1.5" htmlFor="signup-email">
             Email
           </label>
           <input
@@ -85,11 +98,11 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="signup-password">
+        <div className="mb-3.5">
+          <label className="block text-[12.5px] text-ink-soft mb-1.5" htmlFor="signup-password">
             Password
           </label>
           <input
@@ -100,11 +113,14 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="signup-confirm-password">
+        <div className="mb-3.5">
+          <label
+            className="block text-[12.5px] text-ink-soft mb-1.5"
+            htmlFor="signup-confirm-password"
+          >
             Confirm password
           </label>
           <input
@@ -114,15 +130,15 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
           />
           {passwordsMismatch && (
             <p className="text-red-600 text-xs mt-1">Passwords don&apos;t match yet.</p>
           )}
         </div>
 
-        <div>
-          <label className="flex items-start gap-2 text-sm">
+        <div className="mb-3.5">
+          <label className="flex items-start gap-2 text-[12.5px] text-ink-soft">
             <input
               type="checkbox"
               checked={acknowledged}
@@ -131,7 +147,11 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
             />
             <span>
               I have read and understand the{' '}
-              <button type="button" onClick={() => setShowDisclaimer(true)} className="underline">
+              <button
+                type="button"
+                onClick={() => setShowDisclaimer(true)}
+                className="text-stamp underline"
+              >
                 Disclaimer
               </button>{' '}
               — including that this catalogue is independently maintained and not an official
@@ -143,32 +163,36 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
         <button
           type="submit"
           disabled={!canSubmit || isSubmitting}
-          className="w-full rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+          className="mt-1 w-full h-[42px] rounded-[9px] bg-ink text-[13.5px] font-medium text-white hover:bg-[#132038] disabled:opacity-50"
         >
           {isSubmitting ? 'Creating your account…' : 'Create account'}
         </button>
       </form>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="mt-4 text-red-600 text-[13px]">{error}</p>}
 
-      <button type="button" onClick={onSwitchToSignIn} className="text-sm underline">
+      <button
+        type="button"
+        onClick={onSwitchToSignIn}
+        className="mt-6 text-[13px] text-ink-soft text-center underline"
+      >
         Already have an account? Sign in
       </button>
 
       {showDisclaimer && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center p-6 z-50"
+          className="fixed inset-0 bg-ink/40 flex items-center justify-center p-6 z-50"
           onClick={() => setShowDisclaimer(false)}
         >
           <div
-            className="bg-card max-w-lg w-full max-h-[80vh] overflow-y-auto rounded-lg p-6"
+            className="bg-card max-w-lg w-full max-h-[80vh] overflow-y-auto rounded-[10px] border border-line p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <DisclaimerContent />
             <button
               type="button"
               onClick={() => setShowDisclaimer(false)}
-              className="mt-4 rounded bg-black px-4 py-2 text-white text-sm"
+              className="mt-4 h-9 rounded-lg bg-ink px-4 text-[13px] font-medium text-white hover:bg-[#132038]"
             >
               Close
             </button>

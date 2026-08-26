@@ -53,21 +53,30 @@ export default function AppHeader({
   }
 
   return (
-    <header className="flex items-center justify-between border-b px-8 py-4">
-      <span className="font-semibold">PhilaIndiaCovers</span>
+    <header className="flex items-center justify-between border-b border-line bg-paper px-8 py-4">
+      <span className="font-display font-semibold text-ink">PhilaIndiaCovers</span>
 
       <div className="relative" ref={menuRef}>
+        {/* Exact match to the v3 prototype's .icon-only trigger button —
+            36x36, border-line-strong, bg-card — not a plain text button. */}
         <button
           type="button"
           onClick={() => setIsOpen((open) => !open)}
           aria-label="Account menu"
-          className="rounded border px-3 py-1.5 text-sm"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-line-strong bg-card text-ink"
         >
-          Menu
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+          </svg>
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-[calc(100%+6px)] w-52 rounded-lg border bg-card shadow-lg overflow-hidden z-20">
+          // Exact match to the v3 prototype's .account-menu: border-radius
+          // 10px, border-line (not a default border), and its precise
+          // box-shadow (0 10px 24px rgba(0,0,0,.12)) — Tailwind's own
+          // shadow-lg has a different shape, not an equivalent.
+          <div className="absolute right-0 top-[calc(100%+6px)] w-[190px] rounded-[10px] border border-line bg-card shadow-[0_10px_24px_rgba(0,0,0,0.12)] overflow-hidden z-20">
             {WORKING_ENTRIES.map((entry) => (
               <button
                 key={entry.screen}
@@ -77,31 +86,31 @@ export default function AppHeader({
                   setIsOpen(false)
                 }}
                 aria-current={currentScreen === entry.screen ? 'page' : undefined}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-paper"
+                className="w-full text-left px-[14px] py-2.5 text-[12.5px] text-ink hover:bg-paper"
               >
                 {entry.label}
               </button>
             ))}
 
-            <div className="border-t" />
+            <div className="border-t border-line" />
 
             {DISABLED_ENTRIES.map((label) => (
               <button
                 key={label}
                 type="button"
                 disabled
-                className="w-full text-left px-4 py-2 text-sm text-ink-soft opacity-40 cursor-not-allowed"
+                className="w-full text-left px-[14px] py-2.5 text-[12.5px] text-ink-soft opacity-40 cursor-not-allowed"
               >
                 {label} — Coming soon
               </button>
             ))}
 
-            <div className="border-t" />
+            <div className="border-t border-line" />
 
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-paper"
+              className="w-full text-left px-[14px] py-2.5 text-[12.5px] text-ink hover:bg-paper"
             >
               Log out
             </button>
