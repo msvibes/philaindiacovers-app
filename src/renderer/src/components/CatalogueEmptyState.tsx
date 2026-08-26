@@ -28,7 +28,7 @@ export default function CatalogueEmptyState({
         <button
           type="button"
           onClick={onClearFilters}
-          className="rounded bg-black px-4 py-2 text-white text-sm"
+          className="rounded bg-ink px-4 py-2 text-white text-sm hover:bg-[#132038]"
         >
           Clear all filters
         </button>

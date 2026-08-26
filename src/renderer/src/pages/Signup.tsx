@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import DisclaimerContent from '../components/DisclaimerContent'
+import { useEscapeToClose } from '../lib/useEscapeToClose'
 
 interface SignupProps {
   onSwitchToSignIn: () => void
@@ -25,6 +26,11 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
 
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword
   const canSubmit = email.length > 0 && password.length > 0 && !passwordsMismatch && acknowledged
+
+  // T-33: Escape now closes this modal too — the new ShortcutsModal's own
+  // help text claims "Esc closes any dialog," so this one needs to
+  // actually honor that, not just the two built after it.
+  useEscapeToClose(showDisclaimer, () => setShowDisclaimer(false))
 
   const handleSignUp = async (e: FormEvent): Promise<void> => {
     e.preventDefault()

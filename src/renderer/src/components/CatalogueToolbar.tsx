@@ -35,7 +35,7 @@ export default function CatalogueToolbar({
       >
         Filters
         {activeFilterCount > 0 && (
-          <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-stamp text-white text-[10px] w-4 h-4">
+          <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-stamp font-mono text-white text-[10px] w-4 h-4">
             {activeFilterCount}
           </span>
         )}
