@@ -23,7 +23,7 @@
 
 **Merged 2026-08-27, fast-forward.** Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up. **Jira KAN-66 (US-55) moved to Done directly by the user**, with a note that the shipped shortcut list correctly excludes Ctrl/Cmd+K since no command palette exists yet. **T-33 is Done.**
 
-**Cleanup still open**: `t33-verify-1@example.test` (used for this task's live verification) and `t24-css-verify-1@example.test` (older, from the CSS-fidelity task — a cleanup script was written and handed over but never confirmed run) both still need the doubly-confirmed delete.
+**Cleanup fully closed, 2026-08-27, doubly confirmed — do not re-investigate.** Both `t33-verify-1@example.test` and `t24-css-verify-1@example.test` are deleted. Two independent checks, same standard as every prior throwaway account this project has used: (1) the user ran an admin-level delete (`profiles` row + `auth.users` row) for both accounts plus an immediate `listUsers` re-query confirming both gone; (2) a separate `signInWithPassword` attempt against both accounts' old credentials, using only the anon key, returned `{"signInSucceeded":false,"error":"Invalid login credentials"}` for each. Both cleanup scripts (`__cleanup-verify-accounts.mjs`, `__check-verify-accounts-deleted.mjs`) were created directly in `scripts/` and deleted immediately after use, per this project's standing convention.
 
 ## CSS fidelity fix — AppHeader/Login/Signup vs. v3 prototype (2026-08-25): PR #14, merged
 
@@ -39,7 +39,7 @@
 
 **Merged 2026-08-25, fast-forward**, only after the user's own independent verification against the prototype. Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up.
 
-**Cleanup still open**: `t24-css-verify-1@example.test` was used for the live computed-style checks and hasn't been deleted yet.
+**Cleanup**: `t24-css-verify-1@example.test` was used for the live computed-style checks — see the T-33 entry above for the doubly-confirmed delete, closed 2026-08-27 alongside `t33-verify-1@example.test`.
 
 ## T-29 — Home/landing screen + cross-screen navigation (2026-08-25): PR #13, merged
 
