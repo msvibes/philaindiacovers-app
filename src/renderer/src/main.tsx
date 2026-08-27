@@ -8,6 +8,7 @@ import '@fontsource/inter/500.css'
 import '@fontsource/inter/600.css'
 import '@fontsource/playfair-display/500.css'
 import '@fontsource/playfair-display/600.css'
+import '@fontsource/ibm-plex-mono/400.css'
 import './assets/base.css'
 
 import { StrictMode } from 'react'

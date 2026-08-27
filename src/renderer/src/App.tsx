@@ -8,7 +8,8 @@ import {
   type CatalogueQueryState
 } from './lib/catalogueQuery'
 import { useRecentlyViewed } from './lib/useRecentlyViewed'
-import AppHeader from './components/AppHeader'
+import Sidebar from './components/Sidebar'
+import ShortcutsModal from './components/ShortcutsModal'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
@@ -55,6 +56,23 @@ function SignedIn(): React.JSX.Element {
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
   const [query, dispatch] = useReducer(catalogueReducer, initialCatalogueQueryState)
   const { recordView } = useRecentlyViewed()
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
+
+  // US-55: global "?" opens the shortcuts modal — guarded so typing a
+  // literal "?" into a form field (e.g. a password) doesn't pop it open.
+  // Escape-to-close is handled by ShortcutsModal itself via
+  // useEscapeToClose, not duplicated here.
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent): void {
+      if (event.key !== '?') return
+      const target = event.target as HTMLElement | null
+      const tag = target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return
+      setIsShortcutsOpen(true)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Ordered id list for the currently active query, cached against the
   // query it was fetched for — refetched only when that query actually
@@ -149,8 +167,14 @@ function SignedIn(): React.JSX.Element {
 
   return (
     <>
-      <AppHeader currentScreen={screen} onNavigate={navigateTo} />
-      {renderScreen()}
+      <Sidebar
+        currentScreen={screen}
+        onNavigate={navigateTo}
+        isShortcutsOpen={isShortcutsOpen}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+      />
+      <div className="ml-[220px] flex-1">{renderScreen()}</div>
+      {isShortcutsOpen && <ShortcutsModal onClose={() => setIsShortcutsOpen(false)} />}
     </>
   )
 }

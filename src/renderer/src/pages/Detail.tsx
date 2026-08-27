@@ -7,6 +7,7 @@ import {
 } from '../lib/covers'
 import { useCoverImage } from '../lib/useCoverImage'
 import VerifiedBadge from '../components/VerifiedBadge'
+import Eyebrow from '../components/Eyebrow'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
@@ -46,14 +47,14 @@ function FullSizeImage({ images, alt }: { images: string[]; alt: string }): Reac
 
   if (image.status === 'failed') {
     return (
-      <div className="w-full max-w-md aspect-square rounded bg-gray-100 flex items-center justify-center text-sm text-gray-400">
+      <div className="w-full max-w-md aspect-square rounded bg-paper flex items-center justify-center text-sm text-ink-soft">
         Couldn&apos;t load this photo
       </div>
     )
   }
 
   return (
-    <div className="w-full max-w-md aspect-square rounded bg-gray-100 flex items-center justify-center text-sm text-gray-400">
+    <div className="w-full max-w-md aspect-square rounded bg-paper flex items-center justify-center text-sm text-ink-soft">
       Loading…
     </div>
   )
@@ -70,7 +71,7 @@ function Field({
 }): React.JSX.Element {
   return (
     <div>
-      <dt className="text-sm text-gray-500">{label}</dt>
+      <dt className="text-sm text-ink-soft">{label}</dt>
       <dd>
         {onValueClick ? (
           <button
@@ -136,23 +137,25 @@ export default function Detail({
 
   return (
     <main className="p-8">
-      <button type="button" onClick={onBack} className="text-sm text-gray-500 mb-6">
+      <button type="button" onClick={onBack} className="text-sm text-ink-soft mb-6">
         ← Back to catalogue
       </button>
 
-      {state === 'loading' && <p className="text-gray-500">Loading this cover…</p>}
+      {state === 'loading' && <p className="text-ink-soft">Loading this cover…</p>}
 
       {state === 'error' && (
         <div>
-          <h1 className="text-xl font-semibold mb-2">Well, that didn&apos;t go to plan.</h1>
-          <p className="text-gray-500 mb-4">Give it another go?</p>
+          <h1 className="text-xl font-semibold mb-2 font-display text-ink">
+            Well, that didn&apos;t go to plan.
+          </h1>
+          <p className="text-ink-soft mb-4">Give it another go?</p>
           <button
             type="button"
             onClick={() => {
               setState('loading')
               setRetryCount((count) => count + 1)
             }}
-            className="rounded bg-black px-4 py-2 text-white"
+            className="rounded bg-ink px-4 py-2 text-white hover:bg-[#132038]"
           >
             Try again
           </button>
@@ -161,8 +164,10 @@ export default function Detail({
 
       {state === 'not-found' && (
         <div>
-          <h1 className="text-xl font-semibold mb-2">We couldn&apos;t find that cover.</h1>
-          <p className="text-gray-500">
+          <h1 className="text-xl font-semibold mb-2 font-display text-ink">
+            We couldn&apos;t find that cover.
+          </h1>
+          <p className="text-ink-soft">
             It may not be verified anymore — head back to the catalogue to keep browsing.
           </p>
         </div>
@@ -180,7 +185,7 @@ export default function Detail({
               >
                 Previous
               </button>
-              <span className="text-ink-soft">
+              <span className="font-mono text-ink-soft">
                 {position.index + 1} of {position.total}
               </span>
               <button
@@ -197,11 +202,14 @@ export default function Detail({
             images={[cover.imageFile]}
             alt={withFallback(cover.nameOfCover, 'Cover')}
           />
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold">
-              {withFallback(cover.nameOfCover, 'Name not recorded yet')}
-            </h1>
-            <VerifiedBadge />
+          <div>
+            <Eyebrow>Special Cover</Eyebrow>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-semibold font-display text-ink">
+                {withFallback(cover.nameOfCover, 'Name not recorded yet')}
+              </h1>
+              <VerifiedBadge />
+            </div>
           </div>
           <dl className="space-y-4">
             <Field

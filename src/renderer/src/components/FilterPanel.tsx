@@ -46,7 +46,7 @@ function FilterGroup<T extends string | number>({
               onChange={() => onToggle(option.value)}
             />
             <span className="flex-1">
-              {option.label} <span className="text-ink-soft text-xs">({option.count})</span>
+              {option.label} <span className="font-mono text-ink-soft text-xs">({option.count})</span>
             </span>
           </label>
         ))}
@@ -101,7 +101,7 @@ export default function FilterPanel({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} aria-hidden="true" />
+        <div className="fixed inset-0 bg-ink/40 z-40" onClick={onClose} aria-hidden="true" />
       )}
       <aside
         className={`fixed top-0 right-0 bottom-0 w-[360px] max-w-[88vw] bg-card z-50 shadow-xl transition-transform duration-200 overflow-y-auto ${
@@ -158,7 +158,7 @@ export default function FilterPanel({
           <button
             type="button"
             onClick={onApply}
-            className="flex-1 rounded bg-black px-4 py-2 text-sm text-white"
+            className="flex-1 rounded bg-ink px-4 py-2 text-sm text-white hover:bg-[#132038]"
           >
             {pendingCount === null ? 'Show results' : `Show ${pendingCount} cover${pendingCount === 1 ? '' : 's'}`}
           </button>

@@ -97,6 +97,18 @@ describe('Signup', () => {
     expect(screen.queryByText(/data accuracy & independence disclaimer/i)).not.toBeInTheDocument()
   })
 
+  // T-33: Escape now closes every modal in the app, including this
+  // already-shipped one — the new ShortcutsModal's own help text claims
+  // "Esc closes any dialog," so this needs to actually be true here too.
+  it('closes the Disclaimer view on Escape', async () => {
+    render(<Signup onSwitchToSignIn={() => {}} />)
+    await userEvent.click(screen.getByRole('button', { name: /disclaimer/i }))
+    expect(screen.getByText(/data accuracy & independence disclaimer/i)).toBeInTheDocument()
+
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByText(/data accuracy & independence disclaimer/i)).not.toBeInTheDocument()
+  })
+
   it('calls onSwitchToSignIn when "Already have an account?" is clicked', async () => {
     const onSwitchToSignIn = vi.fn()
     render(<Signup onSwitchToSignIn={onSwitchToSignIn} />)

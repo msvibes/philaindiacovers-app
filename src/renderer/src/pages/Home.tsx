@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { countCatalogueMatches, fetchCoversByIds, type VerifiedCover } from '../lib/covers'
 import { useRecentlyViewed } from '../lib/useRecentlyViewed'
 import CatalogueCard from '../components/CatalogueCard'
+import Eyebrow from '../components/Eyebrow'
 
 interface HomeProps {
   onEnterCatalogue: () => void
@@ -60,9 +61,14 @@ export default function Home({ onEnterCatalogue, onSelectCover }: HomeProps): Re
 
   return (
     <main className="p-8 space-y-8">
-      <div className="space-y-3">
-        <h1 className="text-2xl font-semibold font-display">Welcome back!</h1>
-        <p className="text-gray-500">
+      {/* T-33 consistency audit: left-alignment is the default everywhere
+          else in the app — this hero is one of the two named, deliberate
+          exceptions (the other is CatalogueEmptyState), not an
+          inconsistency. */}
+      <div className="space-y-3 text-center">
+        <Eyebrow>Collector&apos;s Desk</Eyebrow>
+        <h1 className="text-2xl font-semibold font-display text-ink">Welcome back!</h1>
+        <p className="text-ink-soft">
           {totalCount === null
             ? 'Loading the catalogue…'
             : `${totalCount} verified cover${totalCount === 1 ? '' : 's'} ready to browse.`}
@@ -70,7 +76,7 @@ export default function Home({ onEnterCatalogue, onSelectCover }: HomeProps): Re
         <button
           type="button"
           onClick={onEnterCatalogue}
-          className="rounded bg-black px-6 py-2 text-white"
+          className="rounded bg-ink px-6 py-2 text-white hover:bg-[#132038]"
         >
           Enter the catalogue
         </button>
@@ -81,7 +87,7 @@ export default function Home({ onEnterCatalogue, onSelectCover }: HomeProps): Re
           Recently viewed
         </h2>
         {recentIds.length === 0 ? (
-          <p className="text-sm text-gray-500">Covers you view will show up here.</p>
+          <p className="text-sm text-ink-soft">Covers you view will show up here.</p>
         ) : (
           <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
             {recentCovers.map((cover) => (

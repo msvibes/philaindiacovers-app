@@ -13,6 +13,7 @@ import CatalogueGridSkeleton from '../components/CatalogueGridSkeleton'
 import CatalogueEmptyState from '../components/CatalogueEmptyState'
 import Pagination from '../components/Pagination'
 import FilterPanel, { type AppliedFilters } from '../components/FilterPanel'
+import Eyebrow from '../components/Eyebrow'
 
 const PAGE_SIZE = 24
 
@@ -137,6 +138,8 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
   if (state === 'loading' && covers.length === 0) {
     return (
       <main className="p-8">
+        <Eyebrow>The Archive</Eyebrow>
+        <h1 className="text-xl font-semibold mb-4 font-display text-ink">The Catalogue</h1>
         <CatalogueToolbar
           searchTerm={query.searchTerm}
           onSearchChange={(term) => dispatch({ type: 'SET_SEARCH', term })}
@@ -153,12 +156,15 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
   if (state === 'error') {
     return (
       <main className="p-8">
-        <h1 className="text-xl font-semibold mb-2">Well, that didn&apos;t go to plan.</h1>
-        <p className="text-gray-500 mb-4">Give it another go?</p>
+        <Eyebrow>The Archive</Eyebrow>
+        <h1 className="text-xl font-semibold mb-2 font-display text-ink">
+          Well, that didn&apos;t go to plan.
+        </h1>
+        <p className="text-ink-soft mb-4">Give it another go?</p>
         <button
           type="button"
           onClick={() => setRetryCount((count) => count + 1)}
-          className="rounded bg-black px-4 py-2 text-white"
+          className="rounded bg-ink px-4 py-2 text-white hover:bg-[#132038]"
         >
           Try again
         </button>
@@ -169,8 +175,11 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
   if (totalCount === 0 && !hasActiveFiltersOrSearch) {
     return (
       <main className="p-8">
-        <h1 className="text-xl font-semibold mb-2">The shelves are freshly dusted</h1>
-        <p className="text-gray-500">
+        <Eyebrow>The Archive</Eyebrow>
+        <h1 className="text-xl font-semibold mb-2 font-display text-ink">
+          The shelves are freshly dusted
+        </h1>
+        <p className="text-ink-soft">
           The catalogue&apos;s still getting started — nothing&apos;s been verified in yet. Check
           back soon as more covers get verified.
         </p>
@@ -180,7 +189,8 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
 
   return (
     <main className="p-8">
-      <h1 className="text-xl font-semibold mb-4 font-display">The Catalogue</h1>
+      <Eyebrow>The Archive</Eyebrow>
+      <h1 className="text-xl font-semibold mb-4 font-display text-ink">The Catalogue</h1>
       <CatalogueToolbar
         searchTerm={query.searchTerm}
         onSearchChange={(term) => dispatch({ type: 'SET_SEARCH', term })}
