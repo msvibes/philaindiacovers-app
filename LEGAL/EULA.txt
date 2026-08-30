@@ -1,0 +1,32 @@
+﻿PHILAINDIACOVERS — LICENSE & DISCLAIMER AGREEMENT
+
+By installing this application, you acknowledge and agree to the
+following:
+
+1. INDEPENDENCE. PhilaIndiaCovers is an independent, community-run
+   catalogue of India's Geographical Indication (GI) Tag Special
+   Covers. It is not affiliated with, endorsed by, sponsored by, or
+   officially connected to India Post, the Geographical Indications
+   Registry of India, the Government of India, or any of their
+   subsidiaries or affiliates.
+
+2. DATA ACCURACY. Information in this catalogue is compiled and
+   reviewed on a best-effort basis by a volunteer subject-matter
+   expert in philately. No warranty, express or implied, is made as
+   to the completeness, accuracy, or currency of any information
+   presented.
+
+3. NO LIABILITY. This application and its content are provided "as
+   is," for informational and hobbyist reference purposes only. The
+   developer accepts no liability for any loss or damage arising
+   from reliance on information provided through this application.
+
+4. INTELLECTUAL PROPERTY. Geographical Indication names and related
+   marks referenced in this catalogue remain the property of their
+   respective registered proprietors.
+
+Developer: Manjunath Shanmugam (Krutim Logic, Bangalore, India)
+Contact: krutimlogic@gmail.com
+
+By clicking "I Agree," you confirm you have read and understood this
+agreement.
