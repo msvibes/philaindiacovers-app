@@ -3,6 +3,8 @@
 **Last updated:** 2026-08-30
 **Last session worked on:** T-38, Windows installer packaging (electron-builder) — **Done, PR #16 merged, branch cleaned up.** See its own entry below. T-33 (previous entry, still below) is unchanged and still Done.
 
+**Next step (a suggestion, not a locked sequencing decision — confirm before starting):** T-27 (disclaimer screen/component, Settings integration, About/developer-info display) is the most naturally unblocked candidate — T-38 already handled its packaging-side counterpart (EULA file, `nsis.license`), and T-27's own remaining scope (in-app UI only) has no dependency left waiting on it. Still open on the Trial Readiness checklist (§3.5) besides T-27: US-01–04's Google SSO half (KAN-12 still genuinely In Progress), T-26 (browse-by-year timeline), FR-16/17 (offline caching+banner), FR-04 (guided tour), US-47 (update-available prompt — would also need real `electron-updater` wiring, not just the `publish` config T-38 already set up), and the separate dev/prod Supabase project split.
+
 ## T-38 — Windows installer packaging (electron-builder) (2026-08-30): PR #16, merged
 
 **Closes the addendum's Trial Readiness checklist item (§3.5)** — installer packaging had sat "untouched so far; not started" with no task ID until this session gave it one (T-38) directly in `docs/PRD-Addendum-App-Catalogue-UX.md`. Investigation found `electron-builder.yml`/`build/icon.*`/`resources/icon.png` were still the **unmodified electron-vite scaffold defaults** from the Aug 11 scaffolding commit — generic Electron atom logo, `appId: com.electron.app`, mac/linux targets configured despite this being a Windows-only app, a fake `publish` URL — and CI's own "Build" step only ever ran `electron-vite build`, never `electron-builder`.
