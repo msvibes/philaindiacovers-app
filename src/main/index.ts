@@ -42,8 +42,9 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  // Set app user model id for windows — matches electron-builder.yml's
+  // appId (T-38), not the scaffold default.
+  electronApp.setAppUserModelId('com.krutimlogic.philaindiacovers')
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(buildMenuTemplate(is.dev)))
 

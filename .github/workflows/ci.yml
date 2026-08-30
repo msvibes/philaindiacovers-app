@@ -27,6 +27,11 @@
 # accepted: if Supabase Auth rate-limit errors are ever actually observed
 # in either repo's CI logs, build real cross-repo coordination then, not
 # before.
+#
+# T-38 added a second job, package-windows (windows-latest), that proves
+# the electron-builder packaging step actually works on every PR — see
+# that job's own inline comment for why its output is a smoke test only,
+# never the real distributed installer.
 name: CI
 
 on:
@@ -81,3 +86,37 @@ jobs:
 
       - name: Build (also runs the secret-leak guardrail)
         run: npm run build
+
+  # T-38: proves the packaging *mechanism* (electron-builder.yml, icon,
+  # NSIS config) actually produces a working installer on every PR — the
+  # existing `ci` job above only ever ran `electron-vite build`, never
+  # `electron-builder`, so a packaging regression could land silently.
+  #
+  # IMPORTANT — this job's output artifact is NOT the real trial
+  # installer and is never distributed anywhere. It's a smoke test only,
+  # built with the same ci-dev-supabase (DEV project) credentials as the
+  # rest of CI purely for consistency. The actual installer sent to real
+  # friends/family testers must be a deliberate, manual `npm run build:win`
+  # run locally with the real .env — see PROGRESS.md's T-38 entry.
+  #
+  # Not currently a required status check in branch protection (only `ci`
+  # is) — that's a separate, manual GitHub Settings change if ever wanted.
+  package-windows:
+    runs-on: windows-latest
+    environment: ci-dev-supabase
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build Windows installer (electron-builder)
+        run: npm run build:win
