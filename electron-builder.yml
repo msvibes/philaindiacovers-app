@@ -1,5 +1,12 @@
 appId: com.krutimlogic.philaindiacovers
-productName: philaindiacovers-app
+# T-38 fix, found via a real install test: this was still the scaffold's
+# literal package.json `name` value (lowercase, hyphenated) — NSIS uses
+# `productName` (not `name`) for user-visible strings: the installer
+# window title ("<productName> Setup"), the Start Menu/desktop shortcut
+# name, and the Control Panel uninstall entry. `name`/`win.executableName`
+# stay "philaindiacovers-app" deliberately (the installer filename and the
+# actual .exe filename), unaffected by this change.
+productName: PhilaIndiaCovers
 directories:
   buildResources: build
 files:
