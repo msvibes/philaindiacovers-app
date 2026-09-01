@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-01
 **Last session worked on:** T-27, Settings content + disclaimer wiring — **Done, PR #19 merged, branch cleaned up.** See its own entry below. T-40 (previous entry, still below) is unchanged and still Done.
 
-**Next step (a suggestion, not a locked sequencing decision — confirm before starting):** T-41 (password reset, US-04/FR-29, Jira KAN-15) is the other item freshly scoped 2026-08-31 — real architectural approach already decided (a GitHub-Pages-hosted static recovery page, since this app has no web hosting and Electron deep-linking would be disproportionate scope). Otherwise, T-26 (browse-by-year timeline), FR-16/17 (offline caching+banner), FR-04 (guided tour), US-47 (update-available prompt), T-30 (dark mode), and US-01–04's Google SSO half (KAN-12) remain open on the Trial Readiness checklist.
+**Next up — a real, locked sequencing decision made directly by the user on 2026-09-01, not a suggestion of mine (supersedes this file's own prior "next step" framing):** T-37 (generic error boundary) → T-16/T-17 (offline SQLite cache) → T-36 (styled splash/session-loading state) → T-34 (guided tour, FR-04) → T-30 (dark mode) → T-35 (toast/confirmation feedback) → T-26 (browse-by-year timeline) → **T-41 (password reset) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
 
 ## T-27 — Settings content + disclaimer wiring (2026-09-01): PR #19, merged
 
