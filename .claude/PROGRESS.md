@@ -1,7 +1,27 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-08-31
-**Last session worked on:** T-40, real transactional SMTP (KAN-70) — **Done, revised/narrower scope, see below.** T-39 (previous entry, still below) is unchanged and still Done.
+**Last updated:** 2026-09-01
+**Last session worked on:** T-27, Settings content + disclaimer wiring — **Done, PR #19 merged, branch cleaned up.** See its own entry below. T-40 (previous entry, still below) is unchanged and still Done.
+
+**Next step (a suggestion, not a locked sequencing decision — confirm before starting):** T-41 (password reset, US-04/FR-29, Jira KAN-15) is the other item freshly scoped 2026-08-31 — real architectural approach already decided (a GitHub-Pages-hosted static recovery page, since this app has no web hosting and Electron deep-linking would be disproportionate scope). Otherwise, T-26 (browse-by-year timeline), FR-16/17 (offline caching+banner), FR-04 (guided tour), US-47 (update-available prompt), T-30 (dark mode), and US-01–04's Google SSO half (KAN-12) remain open on the Trial Readiness checklist.
+
+## T-27 — Settings content + disclaimer wiring (2026-09-01): PR #19, merged
+
+**Revised, narrow scope, per the addendum's 2026-08-31 update** — most of what this task originally asked for already existed as side effects of other tasks: `DisclaimerContent.tsx` (US-01/US-02), `LEGAL/EULA.txt` + `win.signtoolOptions.publisherName` (T-38), Settings' eyebrow/tokens (T-33). What was actually left was small, real wiring — no new architecture, matching the quick-plan request this task was given.
+
+**New shared `DisclaimerModal.tsx`**, extracted from `Signup.tsx`'s own inline modal (previously the only place `DisclaimerContent` was shown) — a genuine, low-risk reuse call rather than duplicating the same ~15-line overlay/close-button shell a second time for Settings. `Signup.tsx` now imports this instead of its own copy; behavior confirmed identical live (Escape-to-close, open/close via the linked word) after the extraction.
+
+**`Settings.tsx`**: real About content per `docs/legal/DISCLAIMER-and-Developer-Details.md` §5a — Version (imported live from `package.json` via `resolveJsonModule`, already enabled in the base tsconfig — confirmed with a real typecheck, not assumed), Developer, Published by, Contact, a Source-code link, a Report-an-Issue link, and a View Disclaimer trigger opening the shared modal.
+
+**`package.json`**: `author` is now the structured `{name, email}` object from §5b, replacing the plain string `"PhilaIndiaCovers"` — deliberately left untouched by T-38 for this exact task, per that task's own logged scope boundary.
+
+**`Signup.tsx` checkbox copy**: updated to the sharper 2026-08-26 Lovable-comparison text ("I agree to the terms and acknowledge the catalogue disclaimer"), keeping "disclaimer" as the clickable link word — checked the existing test's query (`getByRole('button', { name: /disclaimer/i })`) before changing the copy and confirmed it's case-insensitive, so no test churn was needed there, exactly as planned.
+
+**Verified live**, not just Vitest: a throwaway `t27-verify-1@example.test` (doubly-confirmed deleted after use — admin delete + `listUsers` re-query, plus an independent anon-key sign-in attempt returning `Invalid login credentials`) confirmed Settings renders the real content with the correct live version, the same disclaimer text opens identically from both Signup and Settings, and Escape still closes it post-extraction. A real tool-level quirk was hit twice during this verification (both already-known from prior sessions, not new): `computer`-tool ref-clicks landing "outside the viewport" (worked around via direct DOM `.click()`) and `computer{action:"key"}` not reaching the app's real `keydown` listener (worked around via a dispatched `KeyboardEvent`, same fix as T-33's `?`-key verification).
+
+**Tests**: `Settings.test.tsx` rewritten from its single placeholder-text assertion to real coverage (About fields present, live version matches, disclaimer modal opens/closes). `lint`/`typecheck`/`test` all pass — 106 passed, 4 skipped (up from 105/4).
+
+**Merged 2026-09-01, fast-forward.** Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up. **T-27 is Done.**
 
 ## T-40 — real transactional SMTP (KAN-70) — revised, narrower scope (2026-08-31)
 
