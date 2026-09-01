@@ -40,7 +40,7 @@ async function signIn(email = 'collector@example.test', password = 'a-password')
 describe('Login — sign-in', () => {
   it('signs in and lets a real Collector session stand', async () => {
     mockedSignIn.mockResolvedValue({ data: {}, error: null } as never)
-    mockedFetchRole.mockResolvedValue('collector')
+    mockedFetchRole.mockResolvedValue({ status: 'ok', role: 'collector' })
     render(<Login />)
 
     await signIn()
@@ -56,7 +56,7 @@ describe('Login — sign-in', () => {
 
   it('signs back out and shows a clear message for a non-Collector role', async () => {
     mockedSignIn.mockResolvedValue({ data: {}, error: null } as never)
-    mockedFetchRole.mockResolvedValue('verifier')
+    mockedFetchRole.mockResolvedValue({ status: 'ok', role: 'verifier' })
     render(<Login />)
 
     await signIn()
@@ -65,6 +65,42 @@ describe('Login — sign-in', () => {
       expect(screen.getByText(/isn't set up as a Collector/i)).toBeInTheDocument()
     )
     expect(mockedSignOut).toHaveBeenCalledOnce()
+  })
+
+  it('signs back out and shows a clear message when the RPC confirms no role is assigned', async () => {
+    mockedSignIn.mockResolvedValue({ data: {}, error: null } as never)
+    mockedFetchRole.mockResolvedValue({ status: 'no-role' })
+    render(<Login />)
+
+    await signIn()
+
+    await waitFor(() =>
+      expect(screen.getByText(/isn't set up as a Collector/i)).toBeInTheDocument()
+    )
+    expect(mockedSignOut).toHaveBeenCalledOnce()
+  })
+
+  // Real bug, T-16/T-17 offline-cache investigation: a role-lookup RPC
+  // FAILURE (permission error, network blip, timing gap) was being treated
+  // identically to a confirmed non-Collector role, signing a valid,
+  // just-authenticated session back out. A failed lookup must leave the
+  // session alone and say so, not silently sign the user out.
+  it('does NOT sign out on a role-lookup RPC failure — shows a distinct message and leaves the session alone', async () => {
+    mockedSignIn.mockResolvedValue({ data: {}, error: null } as never)
+    mockedFetchRole.mockResolvedValue({
+      status: 'error',
+      code: '42501',
+      message: 'permission denied for function current_profile_role'
+    })
+    render(<Login />)
+
+    await signIn()
+
+    await waitFor(() =>
+      expect(screen.getByText(/couldn't confirm your account/i)).toBeInTheDocument()
+    )
+    expect(mockedSignOut).not.toHaveBeenCalled()
+    expect(screen.queryByText(/isn't set up as a Collector/i)).not.toBeInTheDocument()
   })
 
   it('shows a courteous generic message for a genuine wrong-password/invalid-credentials failure', async () => {

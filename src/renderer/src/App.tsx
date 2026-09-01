@@ -1,15 +1,17 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabaseClient'
-import { fetchCatalogueOrderedIds } from './lib/covers'
+import { fetchCatalogueOrderedIds, syncCacheFromSupabase } from './lib/covers'
 import {
   catalogueReducer,
   initialCatalogueQueryState,
   type CatalogueQueryState
 } from './lib/catalogueQuery'
 import { useRecentlyViewed } from './lib/useRecentlyViewed'
+import { useOnlineStatus } from './lib/useOnlineStatus'
 import Sidebar from './components/Sidebar'
 import ShortcutsModal from './components/ShortcutsModal'
+import OfflineBanner from './components/OfflineBanner'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
@@ -57,6 +59,23 @@ function SignedIn(): React.JSX.Element {
   const [query, dispatch] = useReducer(catalogueReducer, initialCatalogueQueryState)
   const { recordView } = useRecentlyViewed()
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
+  const isOnline = useOnlineStatus()
+
+  // T-16: "synced from Supabase on successful connection" — once right
+  // after sign-in (this effect's first run, since this component only
+  // mounts once signed in) and again on every real reconnect (isOnline
+  // flipping back to true). Deliberately not guarded on isOnline being
+  // true before attempting — a doomed attempt while genuinely offline
+  // just fails and is swallowed below, same cost as not trying. Errors
+  // are swallowed deliberately: a failed sync just means the cache stays
+  // at whatever it last held (or empty, on a genuinely first run) — it
+  // must never block the app from using the real, direct online queries
+  // that already work.
+  useEffect(() => {
+    syncCacheFromSupabase().catch(() => {
+      // Swallowed deliberately — see the comment above this effect.
+    })
+  }, [isOnline])
 
   // US-55: global "?" opens the shortcuts modal — guarded so typing a
   // literal "?" into a form field (e.g. a password) doesn't pop it open.
@@ -127,7 +146,9 @@ function SignedIn(): React.JSX.Element {
     navIds && currentIndex >= 0 ? { index: currentIndex, total: navIds.length } : null
   const previousCoverId = navIds && currentIndex > 0 ? navIds[currentIndex - 1] : null
   const nextCoverId =
-    navIds && currentIndex >= 0 && currentIndex < navIds.length - 1 ? navIds[currentIndex + 1] : null
+    navIds && currentIndex >= 0 && currentIndex < navIds.length - 1
+      ? navIds[currentIndex + 1]
+      : null
 
   // A real navigation action, not just a background state change — closes
   // Detail if it's open, matching what "navigate to X" actually means to
@@ -173,7 +194,10 @@ function SignedIn(): React.JSX.Element {
         isShortcutsOpen={isShortcutsOpen}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
       />
-      <div className="ml-[220px] flex-1">{renderScreen()}</div>
+      <div className="ml-[220px] flex-1">
+        {!isOnline && <OfflineBanner />}
+        {renderScreen()}
+      </div>
       {isShortcutsOpen && <ShortcutsModal onClose={() => setIsShortcutsOpen(false)} />}
     </>
   )
@@ -186,11 +210,15 @@ function App(): React.JSX.Element | null {
   const [session, setSession] = useState<Session | null | 'loading'>('loading')
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+    })
 
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange((_event, newSession) => setSession(newSession))
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession)
+    })
 
     return () => subscription.unsubscribe()
   }, [])
