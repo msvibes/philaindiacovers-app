@@ -1,9 +1,21 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-01
-**Last session worked on:** T-27, Settings content + disclaimer wiring — **Done, PR #19 merged, branch cleaned up.** See its own entry below. T-40 (previous entry, still below) is unchanged and still Done.
+**Last session worked on:** T-37, generic error boundary — **Done, PR #20 merged, branch cleaned up.** See its own entry below. T-27 (previous entry, still below) is unchanged and still Done.
 
-**Next up — a real, locked sequencing decision made directly by the user on 2026-09-01, not a suggestion of mine (supersedes this file's own prior "next step" framing):** T-37 (generic error boundary) → T-16/T-17 (offline SQLite cache) → T-36 (styled splash/session-loading state) → T-34 (guided tour, FR-04) → T-30 (dark mode) → T-35 (toast/confirmation feedback) → T-26 (browse-by-year timeline) → **T-41 (password reset) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → **T-16/T-17 (offline SQLite cache)** → T-36 (styled splash/session-loading state) → T-34 (guided tour, FR-04) → T-30 (dark mode) → T-35 (toast/confirmation feedback) → T-26 (browse-by-year timeline) → **T-41 (password reset) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+
+## T-37 — generic error boundary (2026-09-01): PR #20, merged
+
+**First in the real task sequencing order set 2026-09-01** (T-37 → T-16/T-17 → T-36 → T-34 → T-30 → T-35 → T-26 → T-41 last). No fallback existed today for an unexpected render crash — previously a blank/broken screen with no recovery path, confirmed via the addendum's own T-37 row, re-read fresh and unchanged since 2026-08-25.
+
+**New `ErrorBoundary.tsx`** — a class component, the one deliberate exception to this codebase's otherwise all-function-component convention (React error boundaries have no hook equivalent, flagged explicitly rather than worked around or hidden). Fallback UI matches real design tokens (`bg-paper`/`font-display`/`text-ink-soft`/`bg-ink`), not a generic browser error page — a calm message plus a Reload button calling `window.location.reload()`. Wraps `<App />` in `main.tsx`, inside `StrictMode` — covers Login, SignedIn, and every screen without restructuring `App.tsx` itself.
+
+**Verified live, not just Vitest, exactly per the addendum's own fit criteria** ("verified by deliberately triggering a real render error"): temporarily threw a real error from `Home.tsx`, using a throwaway `t37-verify-1@example.test` account — confirmed the fallback genuinely renders (not a blank screen), with correct styling and a working Reload button. **Reverted the temporary throw and explicitly confirmed via `git diff` that `Home.tsx` came back byte-identical — zero diff, not even listed in `git status`** — checked deliberately before committing, per the user's own explicit reminder to watch for exactly this. Throwaway account doubly-confirmed deleted after use (admin delete + `listUsers` re-query, plus an independent anon-key sign-in attempt returning `Invalid login credentials`).
+
+**Tests**: `ErrorBoundary.test.tsx` (3 new tests — fallback renders instead of a deliberately-throwing child, Reload calls `window.location.reload` via a jsdom `window.location` mock, children render normally when nothing throws). `lint`/`typecheck`/`test` all pass — 109 passed, 4 skipped (up from 106/4).
+
+**Merged 2026-09-01, fast-forward.** Branch auto-deleted on GitHub; local branch and stale remote-tracking ref both cleaned up. **T-37 is Done.**
 
 ## T-27 — Settings content + disclaimer wiring (2026-09-01): PR #19, merged
 
