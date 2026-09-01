@@ -3,6 +3,41 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { buildMenuTemplate } from './menu'
+import {
+  type CachedCoverRow,
+  type CacheFilterParams,
+  type CachePageParams,
+  type CacheQueryParams,
+  getFacets,
+  getLastSyncedAt,
+  openCacheDb,
+  queryCount,
+  queryCoverById,
+  queryCoversByIds,
+  queryOrderedIds,
+  queryPage,
+  replaceCache
+} from './localCache'
+
+// T-16: one cache DB for the app's lifetime, opened once app.whenReady()
+// fires (needs app.getPath('userData'), only available after that point).
+function registerCacheIpcHandlers(): void {
+  const dbPath = join(app.getPath('userData'), 'cache.db')
+  const db = openCacheDb(dbPath)
+
+  ipcMain.handle('cache:replaceCache', (_event, rows: CachedCoverRow[], facets: unknown) =>
+    replaceCache(db, rows, facets)
+  )
+  ipcMain.handle('cache:queryPage', (_event, params: CachePageParams) => queryPage(db, params))
+  ipcMain.handle('cache:queryCount', (_event, params: CacheFilterParams) => queryCount(db, params))
+  ipcMain.handle('cache:queryOrderedIds', (_event, params: CacheQueryParams) =>
+    queryOrderedIds(db, params)
+  )
+  ipcMain.handle('cache:queryCoverById', (_event, id: string) => queryCoverById(db, id))
+  ipcMain.handle('cache:queryCoversByIds', (_event, ids: string[]) => queryCoversByIds(db, ids))
+  ipcMain.handle('cache:getFacets', () => getFacets(db))
+  ipcMain.handle('cache:getLastSyncedAt', () => getLastSyncedAt(db))
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -57,6 +92,8 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  registerCacheIpcHandlers()
 
   createWindow()
 

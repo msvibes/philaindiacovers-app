@@ -37,11 +37,25 @@ export default function Login(): React.JSX.Element {
     // Every self-service signup defaults to 'collector' today, so this is
     // future-proofing rather than an expected path — but we still never
     // want to leave the browser signed in with a role this app can't serve.
-    const role = await fetchCurrentRole(supabase)
+    const roleResult = await fetchCurrentRole(supabase)
     setIsSubmitting(false)
 
-    if (role === 'collector') return // App.tsx's auth-state listener takes it from here
+    if (roleResult.status === 'ok' && roleResult.role === 'collector') return // App.tsx's auth-state listener takes it from here
 
+    if (roleResult.status === 'error') {
+      // The lookup itself failed (permission error, network blip, timing
+      // gap) — this tells us nothing about the account's actual role.
+      // Signing out here was a real bug: it bounced a valid, just-signed-in
+      // session back to Login over a failed check, not a confirmed
+      // ineligible account. Leave the session alone; App.tsx's own
+      // auth-state listener still governs what the user sees next.
+      console.error('current_profile_role() lookup failed:', roleResult.code, roleResult.message)
+      setError("Couldn't confirm your account just now — please try signing in again.")
+      return
+    }
+
+    // roleResult.status is 'no-role', or a confirmed role that isn't
+    // 'collector' — both are genuine "not set up as a Collector" cases.
     await supabase.auth.signOut()
     setError("This account isn't set up as a Collector here yet — nothing more we can do for now.")
   }
