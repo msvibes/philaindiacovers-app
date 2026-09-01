@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "PhilaIndiaCovers Windows Desktop App",
   "main": "./out/main/index.js",
-  "author": "PhilaIndiaCovers",
+  "author": {
+    "name": "Manjunath Shanmugam",
+    "email": "krutimlogic@gmail.com"
+  },
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",

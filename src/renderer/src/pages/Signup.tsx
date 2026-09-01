@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import DisclaimerContent from '../components/DisclaimerContent'
-import { useEscapeToClose } from '../lib/useEscapeToClose'
+import DisclaimerModal from '../components/DisclaimerModal'
 
 interface SignupProps {
   onSwitchToSignIn: () => void
@@ -26,11 +25,6 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
 
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword
   const canSubmit = email.length > 0 && password.length > 0 && !passwordsMismatch && acknowledged
-
-  // T-33: Escape now closes this modal too — the new ShortcutsModal's own
-  // help text claims "Esc closes any dialog," so this one needs to
-  // actually honor that, not just the two built after it.
-  useEscapeToClose(showDisclaimer, () => setShowDisclaimer(false))
 
   const handleSignUp = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
@@ -152,16 +146,15 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
               className="mt-0.5"
             />
             <span>
-              I have read and understand the{' '}
+              I agree to the terms and acknowledge the catalogue{' '}
               <button
                 type="button"
                 onClick={() => setShowDisclaimer(true)}
                 className="text-stamp underline"
               >
-                Disclaimer
-              </button>{' '}
-              — including that this catalogue is independently maintained and not an official
-              government source.
+                disclaimer
+              </button>
+              .
             </span>
           </label>
         </div>
@@ -185,26 +178,7 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
         Already have an account? Sign in
       </button>
 
-      {showDisclaimer && (
-        <div
-          className="fixed inset-0 bg-ink/40 flex items-center justify-center p-6 z-50"
-          onClick={() => setShowDisclaimer(false)}
-        >
-          <div
-            className="bg-card max-w-lg w-full max-h-[80vh] overflow-y-auto rounded-[10px] border border-line p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <DisclaimerContent />
-            <button
-              type="button"
-              onClick={() => setShowDisclaimer(false)}
-              className="mt-4 h-9 rounded-lg bg-ink px-4 text-[13px] font-medium text-white hover:bg-[#132038]"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      <DisclaimerModal isOpen={showDisclaimer} onClose={() => setShowDisclaimer(false)} />
     </main>
   )
 }
