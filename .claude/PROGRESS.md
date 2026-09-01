@@ -5,7 +5,7 @@
 
 **Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → **T-36 (styled splash/session-loading state)** → T-34 (guided tour, FR-04) → T-30 (dark mode) → T-35 (toast/confirmation feedback) → T-26 (browse-by-year timeline) → **T-41 (password reset) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
 
-## T-16/T-17 — local SQLite cache layer + offline banner (2026-09-01): branch `t16-t17-offline-cache`, PR not yet opened
+## T-16/T-17 — local SQLite cache layer + offline banner (2026-09-01): PR #21, merged
 
 **Second in the real task sequencing order set 2026-09-01** (T-37 → T-16/T-17 → T-36 → ...). Built the addendum's FR-16/17 (catalogue reads from a local cache when offline; T-17's banner + manual refresh on top) — writes stay explicitly not queued offline, per this repo's own `CLAUDE.md` scope decision.
 
@@ -31,7 +31,9 @@
 
 **Tests**: `localCache.test.ts` (15 tests — 14 against `:memory:`, plus a new real-file-persistence suite proving `openCacheDb`/`replaceCache` genuinely write to and read back from a real file path, not just an in-process handle — added directly in response to a user concern that turned out to be caused by repeated manual deletions during investigation, not a real persistence bug). `Login.test.tsx` — 7 tests (2 new: no-role and RPC-failure cases). `currentRole.integration.test.ts` — new, live-Supabase tier (same pattern as `logout.integration.test.ts`), written and passing the skip-without-credentials check; not yet run against live credentials (declined this session — relying on the packaged-install confirming test instead). Full suite: **126 passed, 5 skipped**. `lint`/`typecheck` both clean.
 
-**Not yet done**: PR not yet opened; branch not yet pushed. Doubly-confirmed cleanup still owed for any T-16/T-17 throwaway test accounts and the 3 marked test cover rows inserted into the dev project.
+**Merged 2026-09-01** ([PR #21](https://github.com/msvibes/philaindiacovers-app/pull/21), squash, both `ci` and `package-windows` checks green). Branch cleaned up both remote and local. Jira: **KAN-55 (T-16, US-44) and KAN-56 (T-17, US-45) both moved to Done directly.** **T-16/T-17 is Done.**
+
+**Not yet done**: doubly-confirmed cleanup still owed for any T-16/T-17 throwaway test accounts and the 3 marked test cover rows inserted into the dev project. KAN-71 and KAN-72 (filed above) remain open, uninvestigated.
 
 ## T-37 — generic error boundary (2026-09-01): PR #20, merged
 
