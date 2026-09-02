@@ -25,7 +25,7 @@ export default function ShortcutsModal({ onClose }: ShortcutsModalProps): React.
 
   return (
     <div
-      className="fixed inset-0 bg-ink/40 flex items-center justify-center p-6 z-50"
+      className="fixed inset-0 bg-scrim/40 flex items-center justify-center p-6 z-50"
       onClick={onClose}
     >
       <div
@@ -55,7 +55,7 @@ export default function ShortcutsModal({ onClose }: ShortcutsModalProps): React.
           <button
             type="button"
             onClick={onClose}
-            className="h-9 rounded-lg bg-ink px-4 text-[13px] font-medium text-white hover:bg-[#132038]"
+            className="h-9 rounded-lg bg-accent px-4 text-[13px] font-medium text-white hover:bg-accent-hover"
           >
             Got it
           </button>

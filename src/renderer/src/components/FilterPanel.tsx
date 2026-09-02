@@ -101,7 +101,7 @@ export default function FilterPanel({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 bg-ink/40 z-40" onClick={onClose} aria-hidden="true" />
+        <div className="fixed inset-0 bg-scrim/40 z-40" onClick={onClose} aria-hidden="true" />
       )}
       <aside
         className={`fixed top-0 right-0 bottom-0 w-[360px] max-w-[88vw] bg-card z-50 shadow-xl transition-transform duration-200 overflow-y-auto ${
@@ -158,7 +158,7 @@ export default function FilterPanel({
           <button
             type="button"
             onClick={onApply}
-            className="flex-1 rounded bg-ink px-4 py-2 text-sm text-white hover:bg-[#132038]"
+            className="flex-1 rounded bg-accent px-4 py-2 text-sm text-white hover:bg-accent-hover"
           >
             {pendingCount === null ? 'Show results' : `Show ${pendingCount} cover${pendingCount === 1 ? '' : 's'}`}
           </button>

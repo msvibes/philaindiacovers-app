@@ -117,7 +117,7 @@ export default function Login(): React.JSX.Element {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-1 w-full h-[42px] rounded-[9px] bg-ink text-[13.5px] font-medium text-white hover:bg-[#132038] disabled:opacity-50"
+          className="mt-1 w-full h-[42px] rounded-[9px] bg-accent text-[13.5px] font-medium text-white hover:bg-accent-hover disabled:opacity-50"
         >
           {isSubmitting ? 'Letting you in…' : 'Sign in'}
         </button>

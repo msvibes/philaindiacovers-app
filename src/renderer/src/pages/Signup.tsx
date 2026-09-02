@@ -51,8 +51,10 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
   // Styling below matches docs/design/app-prototype-v3-full.html's
   // .auth-card/.field/.btn-cta exactly (font-display headings, ink-soft
   // labels/subtitles, border-line-strong + bg-card inputs with a stamp
-  // focus ring, bg-ink buttons — not pure black) rather than generic
-  // Tailwind defaults, same fix applied to Login.tsx.
+  // focus ring, bg-accent buttons — not pure black) rather than generic
+  // Tailwind defaults, same fix applied to Login.tsx. (bg-accent, not
+  // bg-ink, since T-30: ink now means text color only, split out once
+  // dark mode required ink to invert while buttons needed to stay put.)
   if (awaitingVerification) {
     return (
       <main className="mx-auto flex min-h-screen max-w-[380px] w-full flex-col justify-center p-8">
@@ -162,7 +164,7 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
         <button
           type="submit"
           disabled={!canSubmit || isSubmitting}
-          className="mt-1 w-full h-[42px] rounded-[9px] bg-ink text-[13.5px] font-medium text-white hover:bg-[#132038] disabled:opacity-50"
+          className="mt-1 w-full h-[42px] rounded-[9px] bg-accent text-[13.5px] font-medium text-white hover:bg-accent-hover disabled:opacity-50"
         >
           {isSubmitting ? 'Creating your account…' : 'Create account'}
         </button>

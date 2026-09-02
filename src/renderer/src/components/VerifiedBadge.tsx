@@ -14,7 +14,7 @@ export default function VerifiedBadge(): React.JSX.Element {
       Verified
       <span
         role="tooltip"
-        className="hidden group-hover:block group-focus-visible:block absolute bottom-[calc(100%+6px)] left-0 w-52 text-left font-normal normal-case text-[11px] leading-relaxed bg-ink text-paper rounded-lg px-2.5 py-2 z-10"
+        className="hidden group-hover:block group-focus-visible:block absolute bottom-[calc(100%+6px)] left-0 w-52 text-left font-normal normal-case text-[11px] leading-relaxed bg-accent text-white rounded-lg px-2.5 py-2 z-10"
       >
         Reviewed and confirmed accurate by a philately subject-matter-expert verifier before
         publishing to the catalogue.
