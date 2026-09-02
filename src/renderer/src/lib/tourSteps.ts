@@ -97,14 +97,42 @@ const TOOLTIP_WIDTH = 280
 const TOOLTIP_ESTIMATED_HEIGHT = 150
 const TOOLTIP_GAP = 14
 
+// A target at least as tall as the viewport itself (the sidebar step —
+// a fixed, full-height <aside>) has no meaningful "above" or "below": a
+// real live test caught this exactly — flipping "above" a full-height
+// element still lands the tooltip off the top of the screen, clipped to
+// a sliver. Position beside it instead, on whichever side has room.
+function computeTooltipPositionBesideTallTarget(
+  target: Rect,
+  viewport: Viewport
+): { top: number; left: number } {
+  let left = target.left + target.width + TOOLTIP_GAP
+  if (left + TOOLTIP_WIDTH > viewport.width) {
+    left = target.left - TOOLTIP_WIDTH - TOOLTIP_GAP
+  }
+  const top = Math.min(
+    Math.max(16, (viewport.height - TOOLTIP_ESTIMATED_HEIGHT) / 2),
+    viewport.height - TOOLTIP_ESTIMATED_HEIGHT - 16
+  )
+  return { top, left }
+}
+
 // Positions the tooltip below the highlighted element, flipping above it
 // if there isn't room, and clamping horizontally to the viewport — same
 // formula as the prototype's renderTourStep, extracted here as a pure
 // function so the flip/clamp logic is unit-testable without a real DOM.
+// Every real step target is small relative to the viewport except the
+// sidebar, which gets its own positioning above — this below/above
+// logic assumes room to flip into exists, which isn't true for
+// something that spans the whole window height.
 export function computeTooltipPosition(
   target: Rect,
   viewport: Viewport
 ): { top: number; left: number } {
+  if (target.height >= viewport.height * 0.8) {
+    return computeTooltipPositionBesideTallTarget(target, viewport)
+  }
+
   let top = target.top + target.height + TOOLTIP_GAP
   if (top + TOOLTIP_ESTIMATED_HEIGHT > viewport.height) {
     top = target.top - TOOLTIP_ESTIMATED_HEIGHT - TOOLTIP_GAP

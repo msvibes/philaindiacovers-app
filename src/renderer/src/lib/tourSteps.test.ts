@@ -46,5 +46,26 @@ describe('tourSteps', () => {
       const result = computeTooltipPosition(target, viewport)
       expect(result.left).toBe(1024 - 280 - 16)
     })
+
+    // Real bug, caught by a live test: the sidebar step's target spans
+    // the full viewport height, so "flip above if no room below" still
+    // lands off the top of the screen — there's no meaningful above or
+    // below for something that tall. Confirms the fix stays within the
+    // viewport on both axes for exactly this shape of target.
+    it('positions beside (not above/below) a target as tall as the viewport, e.g. the sidebar', () => {
+      const sidebar = { top: 0, left: 0, width: 220, height: 768 }
+      const result = computeTooltipPosition(sidebar, viewport)
+
+      expect(result.left).toBe(220 + 14) // to the right of the sidebar, not clipped at 0
+      expect(result.top).toBeGreaterThanOrEqual(0)
+      expect(result.top + 150).toBeLessThanOrEqual(viewport.height)
+    })
+
+    it('flips to the left of a tall target when there is no room to its right', () => {
+      const tallTargetOnRightEdge = { top: 0, left: 900, width: 100, height: 768 }
+      const result = computeTooltipPosition(tallTargetOnRightEdge, viewport)
+
+      expect(result.left).toBe(900 - 280 - 14)
+    })
   })
 })
