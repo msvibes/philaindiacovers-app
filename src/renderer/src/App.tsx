@@ -12,6 +12,7 @@ import { useOnlineStatus } from './lib/useOnlineStatus'
 import Sidebar from './components/Sidebar'
 import ShortcutsModal from './components/ShortcutsModal'
 import OfflineBanner from './components/OfflineBanner'
+import SplashScreen from './components/SplashScreen'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
@@ -203,7 +204,7 @@ function SignedIn(): React.JSX.Element {
   )
 }
 
-function App(): React.JSX.Element | null {
+function App(): React.JSX.Element {
   // 'loading' until the initial session check resolves, so we never flash
   // the Login screen before redirecting an already-signed-in Collector —
   // same gated-render principle as the Admin repo's per-page session guards.
@@ -223,7 +224,7 @@ function App(): React.JSX.Element | null {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (session === 'loading') return null
+  if (session === 'loading') return <SplashScreen />
   return session ? <SignedIn /> : <Login />
 }
 
