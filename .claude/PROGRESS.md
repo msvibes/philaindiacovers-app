@@ -1,11 +1,11 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-02
-**Last session worked on:** T-30, dark mode — **In progress, split into 2 incremental PRs given its cross-cutting scope.** PR 1 (core theming infrastructure) merged and fully user-verified live across every screen. PR 2 (remaining hardcoded-color cleanup) starting now. See its own entry below. T-34/T-36/T-16/T-17/T-37/T-27 (previous entries, still below) are unchanged and still Done.
+**Last session worked on:** T-30, dark mode — **Done.** Split into 2 incremental PRs given its cross-cutting scope, both merged. See its own entry below. T-34/T-36/T-16/T-17/T-37/T-27 (previous entries, still below) are unchanged and still Done.
 
-**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → ~~T-36~~ → ~~T-34~~ → **T-30 (dark mode, KAN-57) — in progress, PR 2 of 2** → T-35 (toast/confirmation feedback, KAN-67) → T-26 (browse-by-year timeline, KAN-62) → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → ~~T-36~~ → ~~T-34~~ → ~~T-30~~ → **T-35 (toast/confirmation feedback, KAN-67)** → T-26 (browse-by-year timeline, KAN-62) → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
 
-## T-30 — dark mode (2026-09-02): split into 2 PRs given cross-cutting scope, per the user's explicit request
+## T-30 — dark mode (2026-09-02): PR #24 + PR #25, both merged, [KAN-57](https://krutimlogic.atlassian.net/browse/KAN-57) Done
 
 **Fifth in the real task sequencing order set 2026-09-01** (T-37 → T-16/T-17 → T-36 → T-34 → T-30 → ...). Built the addendum's FR-18/US-46 (KAN-57): system-preference detection by default, manual override in Settings, re-themes every screen — real theming infrastructure, not a same-screen toggle, per the addendum's own explicit framing for why this got its own task.
 
@@ -21,9 +21,13 @@ System-preference detection needs zero JS `matchMedia` listener — a plain CSS 
 
 **Verified twice**: by me — compiled-CSS inspection (every new token/utility class confirmed present in the real build output) plus a live Browser-pane pass under real `prefers-color-scheme: dark` emulation (Login, Signup, a modal) — the dev server wasn't reachable for the rest of the session. **Then fully, by the user**, live, across every screen: Home, Catalogue, Detail, Settings, the guided tour, and the manual override toggle — system dark mode triggers automatically everywhere, the manual override applies correctly and persists across a full app restart. **Merged 2026-09-02.**
 
-### PR 2/2 — remaining hardcoded-color cleanup (starting now)
+### PR 2/2 — remaining hardcoded-color cleanup ([PR #25](https://github.com/msvibes/philaindiacovers-app/pull/25), merged 2026-09-02)
 
-Deliberately deferred out of PR 1, not missed: ~15 remaining hardcoded `rgba()` spots (Signup/Login's focus-ring `rgba(178,58,72,.12)`, `GuidedTour`'s inline spotlight/shadow values) that don't break legibility or function without a fix, unlike the ink/accent split PR 1 had to solve as a hard blocker.
+Deliberately deferred out of PR 1, not missed: the remaining hardcoded `rgba()` spots that didn't break legibility or function without a fix, unlike the ink/accent split PR 1 had to solve as a hard blocker. New `--color-stamp-ring` token replaces the hardcoded `rgba(178,58,72,0.12)` focus-ring value at every Login/Signup input (5 call sites) — light value byte-for-byte identical to before, dark value brightened slightly (opacity 0.12 → 0.18) so a faint ring doesn't disappear against a dark card. `GuidedTour`'s spotlight scrim now matches `--color-scrim`'s RGB instead of a stale, pre-dark-mode hardcoded value, same "stays dark in both themes" reasoning as the modal backdrops PR 1 already fixed. The tooltip's neutral black drop shadow was deliberately left alone — a normal choice in dark UIs too, not a real gap.
+
+**Verified live** under real `prefers-color-scheme: dark` emulation, not just assumed from the CSS: the actual focused input's computed `boxShadow` confirmed `rgba(178,58,72,.12)` unchanged in light mode and `rgba(226,89,107,.18)` in dark mode. Full suite: 155 passed, 5 skipped. `lint`/`typecheck` clean.
+
+**T-30 is Done.**
 
 ## T-34 — interactive guided tour on first login (2026-09-02): PR #23, merged, [KAN-17](https://krutimlogic.atlassian.net/browse/KAN-17) Done
 
