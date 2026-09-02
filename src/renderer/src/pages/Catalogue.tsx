@@ -15,6 +15,8 @@ import CatalogueEmptyState from '../components/CatalogueEmptyState'
 import Pagination from '../components/Pagination'
 import FilterPanel, { type AppliedFilters } from '../components/FilterPanel'
 import Eyebrow from '../components/Eyebrow'
+import CatalogueViewToggle, { type CatalogueViewMode } from '../components/CatalogueViewToggle'
+import YearTimeline from '../components/YearTimeline'
 
 const PAGE_SIZE = 24
 
@@ -46,6 +48,20 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
   const [isFilterPanelOpen, setFilterPanelOpen] = useState(false)
   const [pendingFilters, setPendingFilters] = useState<AppliedFilters>(EMPTY_FILTERS)
   const [retryCount, setRetryCount] = useState(0)
+  // T-26 (KAN-62): local, not lifted to App.tsx — unlike query, prev/next
+  // navigation in Detail view has no need to know which view mode was
+  // showing when a cover was opened, so this doesn't need the same
+  // treatment T-25 gave the filter/search/sort/page state.
+  const [viewMode, setViewMode] = useState<CatalogueViewMode>('grid')
+
+  function selectYear(year: number): void {
+    dispatch({
+      type: 'SET_FILTERS',
+      filters: { postalCircleIds: [], productCategories: [], years: [year] }
+    })
+    setViewMode('grid')
+    showToast('Filters applied')
+  }
 
   // Seeded here, in a real click handler, rather than via an effect on
   // FilterPanel's own isOpen prop — avoids resetting state synchronously
@@ -202,6 +218,10 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
         onSortChange={(sort) => dispatch({ type: 'SET_SORT', sort })}
       />
 
+      <div className="mb-4">
+        <CatalogueViewToggle viewMode={viewMode} onChange={setViewMode} />
+      </div>
+
       {query.giItemNameFilter !== null && (
         <div className="flex items-center gap-2 mb-4 text-sm text-ink-soft">
           <span>
@@ -218,7 +238,13 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
         </div>
       )}
 
-      {totalCount === 0 ? (
+      {viewMode === 'year' ? (
+        // T-26: driven by the same facets object as FilterPanel's own
+        // checkboxes — full-catalogue counts, independent of whatever
+        // filters/search happen to be currently applied, matching the
+        // prototype's own full-dataset-driven timeline.
+        <YearTimeline years={facets.years} onSelectYear={selectYear} />
+      ) : totalCount === 0 ? (
         <CatalogueEmptyState
           quickCategories={facets.productCategories.slice(0, 2).map((f) => f.value)}
           onClearFilters={() => {
