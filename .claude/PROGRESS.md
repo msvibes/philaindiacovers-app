@@ -1,11 +1,25 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-09-01
-**Last session worked on:** T-16/T-17, local SQLite cache layer + offline banner — **Done, real bug found and fixed along the way (not just the planned feature).** See its own entry below. T-37/T-27 (previous entries, still below) are unchanged and still Done.
+**Last updated:** 2026-09-02
+**Last session worked on:** T-36, styled splash/session-loading state — **Done.** See its own entry below. T-16/T-17/T-37/T-27 (previous entries, still below) are unchanged and still Done.
 
-**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → **T-36 (styled splash/session-loading state, [KAN-73](https://krutimlogic.atlassian.net/browse/KAN-73))** → T-34 (guided tour, FR-04, KAN-17) → T-30 (dark mode, KAN-57) → T-35 (toast/confirmation feedback, KAN-67) → T-26 (browse-by-year timeline, KAN-62) → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → ~~T-36~~ → **T-34 (guided tour, FR-04, KAN-17)** → T-30 (dark mode, KAN-57) → T-35 (toast/confirmation feedback, KAN-67) → T-26 (browse-by-year timeline, KAN-62) → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
 
-**2026-09-01 standup found T-36 genuinely Jira-invisible** — a real, fully-specced, addendum-documented task (EPIC-11) with no corresponding Jira ticket, same class of gap T-39/T-40 were in before they got tickets. Opened directly as **[KAN-73](https://krutimlogic.atlassian.net/browse/KAN-73)**, scope pulled straight from the addendum's T-36 row, not a placeholder.
+## T-36 — styled splash/session-loading state (2026-09-02): PR #22, merged, [KAN-73](https://krutimlogic.atlassian.net/browse/KAN-73) Done
+
+**Third in the real task sequencing order set 2026-09-01** (T-37 → T-16/T-17 → T-36 → T-34 → ...). **Found genuinely Jira-invisible during the 2026-09-01 standup reconciliation** — a real, fully-specced, addendum-documented task (EPIC-11) with no corresponding Jira ticket, same class of gap T-39/T-40 were in before they got tickets. Opened directly as KAN-73, scope pulled straight from the addendum's T-36 row, not a placeholder.
+
+`App.tsx`'s `session === 'loading'` state (shown while the real Supabase session check resolves on launch) previously rendered an unstyled blank flash (`return null`). New `SplashScreen.tsx`: "PhilaIndiaCovers" heading, subtext, three staggered bouncing dots.
+
+**A real prototype-vs-addendum text mismatch, resolved by going with the prototype**: the addendum's own T-36 row paraphrases the subtext as "Connecting..."; the actual prototype (`docs/design/app-prototype-v3-full.html`'s `.splash`/`.dots` markup and rules — the same file's exact keyframe was copied verbatim into a new `--animate-bounce-dot` token in `base.css`, named to avoid colliding with Tailwind's own built-in `bounce`) has the real, fuller copy: "Connecting to the catalogue…". Went with the prototype as authoritative, same precedent as prior design-fidelity tasks in this repo (the prototypes, not secondary paraphrases of them, are the source of truth).
+
+No artificial minimum display time — reflects the real, variable-length session check; a near-instant check barely showing this state is correct, not a bug.
+
+**Verified live**: the real loading state resolves too fast to screenshot directly (a plain browser tab's `getSession()` is near-instant), so — same method used for an earlier CSS-fidelity task when live capture wasn't practical — the exact component markup/classes were injected into a live page and checked via `getComputedStyle()`: every spec value matched exactly (min-height 504px = 70vh at that viewport, Playfair Display 600 22px, `ink-soft`/`stamp` colors as their real RGB values, 1.1s ease-in-out infinite animation). A visual screenshot of the same injected markup confirmed the staggered bounce animation actually running.
+
+**Tests**: new `SplashScreen.test.tsx` (2 tests — title/subtext render, three dots with correct staggered delays). Full suite: 128 passed, 5 skipped (up from 126). `lint`/`typecheck` both clean.
+
+**Merged 2026-09-02** ([PR #22](https://github.com/msvibes/philaindiacovers-app/pull/22), squash, both `ci` and `package-windows` checks green). Branch cleaned up both remote and local. **T-36 is Done.**
 
 ## T-16/T-17 — local SQLite cache layer + offline banner (2026-09-01): PR #21, merged
 
