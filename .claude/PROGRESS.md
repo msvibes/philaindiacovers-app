@@ -1,9 +1,21 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-02
-**Last session worked on:** T-35, toast/confirmation feedback — **Done.** See its own entry below. T-30/T-34/T-36/T-16/T-17/T-37/T-27 (previous entries, still below) are unchanged and still Done.
+**Last session worked on:** T-26, browse-by-year timeline view — **Done.** See its own entry below. T-35/T-30/T-34/T-36/T-16/T-17/T-37/T-27 (previous entries, still below) are unchanged and still Done.
 
-**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → ~~T-36~~ → ~~T-34~~ → ~~T-30~~ → ~~T-35~~ → **T-26 (browse-by-year timeline, KAN-62)** → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → ~~T-36~~ → ~~T-34~~ → ~~T-30~~ → ~~T-35~~ → ~~T-26~~ → **T-41 (password reset, KAN-15) — the only task left in this locked sequence, deliberately last.** Real reasoning discussed with the user 2026-09-02 (not previously recorded verbatim, reconstructed from real evidence and confirmed): T-41 is architecturally different from every other task in this run — it needs new external infrastructure (a GitHub Pages-hosted static page, a separate mini-codebase, live email-token verification) rather than fitting the normal in-repo Electron/React build→PR→CI loop every other task used; Trial #1 is personally supervised (ADR-007), so self-service password reset matters less during the trial than the in-app polish items that preceded it. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+
+## T-26 — browse-by-year timeline view (2026-09-02): PR #27, merged, [KAN-62](https://krutimlogic.atlassian.net/browse/KAN-62) Done
+
+**Seventh in the real task sequencing order set 2026-09-01** (T-37 → T-16/T-17 → T-36 → T-34 → T-30 → T-35 → T-26 → T-41 last). Built the addendum's US-51: a "By year" view mode for the Catalogue, reusing `fetchCatalogueFacets`' already-computed years facet (T-13+T-18) — no new backend query, matching the addendum's own fit criterion exactly.
+
+New `CatalogueViewToggle` (Grid/By year, same two-button segmented pattern as `SortControl`) and `YearTimeline`, wired into `Catalogue.tsx` as local `viewMode` state — not lifted to `App.tsx` the way `query` is, since Detail view's prev/next navigation has no need to know which view mode was active. Layout/interaction copied from the reference prototype (`app-prototype-v3-full.html`'s `.timeline`/`renderTimelineView()`): most-recent year first, each row a bar proportional to the most-covered year. Selecting a year applies it as the only active filter (reuses the existing `SET_FILTERS` action, no new reducer action needed) and returns to the grid, firing T-35's own "Filters applied" toast for consistency with `FilterPanel`'s identical action — a real, deliberate reuse rather than inventing separate toast copy. The prototype's sibling "By region" tab is a separate, not-yet-built task (US-50/KAN-61) — deliberately not built here.
+
+**Two real bugs found and fixed during testing, not shipped and found later**: an unrounded bar-width formula (my own oversight, dropped the prototype's `.toFixed(0)`) producing `33.333...%` instead of `33%`, caught by the test itself; and a real query-scoping collision — `FilterPanel` stays mounted in the DOM even while closed (just slid off-screen via CSS), so its own year checkboxes render the same year text as the timeline rows, and a plain `getByText` collided. Fixed by querying role-scoped (`YearTimeline` rows are real `<button>`s, `FilterPanel`'s are checkboxes), not by loosening the assertion.
+
+**Tests**: `YearTimeline.test.tsx` (5), `CatalogueViewToggle.test.tsx` (2), `Catalogue.year.test.tsx` (2, full integration). Full suite: 169 passed, 5 skipped (up from 160). `lint`/`typecheck` clean.
+
+**Verified live by the user**: year list with proportional bars, year-click correctly filters the grid with the toast, all confirmed working. **Merged 2026-09-02.**
 
 ## T-35 — toast/confirmation feedback (2026-09-02): PR #26, merged, [KAN-67](https://krutimlogic.atlassian.net/browse/KAN-67) Done
 
