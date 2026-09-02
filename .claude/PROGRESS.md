@@ -3,7 +3,9 @@
 **Last updated:** 2026-09-01
 **Last session worked on:** T-16/T-17, local SQLite cache layer + offline banner — **Done, real bug found and fixed along the way (not just the planned feature).** See its own entry below. T-37/T-27 (previous entries, still below) are unchanged and still Done.
 
-**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → **T-36 (styled splash/session-loading state)** → T-34 (guided tour, FR-04) → T-30 (dark mode) → T-35 (toast/confirmation feedback) → T-26 (browse-by-year timeline) → **T-41 (password reset) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → **T-36 (styled splash/session-loading state, [KAN-73](https://krutimlogic.atlassian.net/browse/KAN-73))** → T-34 (guided tour, FR-04, KAN-17) → T-30 (dark mode, KAN-57) → T-35 (toast/confirmation feedback, KAN-67) → T-26 (browse-by-year timeline, KAN-62) → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+
+**2026-09-01 standup found T-36 genuinely Jira-invisible** — a real, fully-specced, addendum-documented task (EPIC-11) with no corresponding Jira ticket, same class of gap T-39/T-40 were in before they got tickets. Opened directly as **[KAN-73](https://krutimlogic.atlassian.net/browse/KAN-73)**, scope pulled straight from the addendum's T-36 row, not a placeholder.
 
 ## T-16/T-17 — local SQLite cache layer + offline banner (2026-09-01): PR #21, merged
 
