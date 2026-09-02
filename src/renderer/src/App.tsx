@@ -12,6 +12,7 @@ import { useOnlineStatus } from './lib/useOnlineStatus'
 import { hasCompletedTour, markTourCompleted } from './lib/tourCompletion'
 import { TOUR_STEPS } from './lib/tourSteps'
 import { useThemePreference, type ThemePreference } from './lib/useThemePreference'
+import { useToast } from './lib/ToastContext'
 import Sidebar from './components/Sidebar'
 import ShortcutsModal from './components/ShortcutsModal'
 import OfflineBanner from './components/OfflineBanner'
@@ -75,6 +76,14 @@ function SignedIn({
   const { recordView } = useRecentlyViewed()
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
   const isOnline = useOnlineStatus()
+  const { showToast } = useToast()
+  // T-35 (KAN-67): tracks the previous isOnline value so the sync
+  // effect below can tell "just came back online" apart from "the
+  // very first sync right after sign-in" — both re-run this same
+  // effect (isOnline is its only dependency), but only the former is a
+  // genuine reconnect worth a toast. Starting the ref at the current
+  // value means the very first effect run always sees no change.
+  const previousIsOnlineRef = useRef(isOnline)
 
   // T-34 (KAN-17): starts once, on mount, only for an account that
   // hasn't completed (or skipped) the tour before — see
@@ -110,10 +119,20 @@ function SignedIn({
   // must never block the app from using the real, direct online queries
   // that already work.
   useEffect(() => {
-    syncCacheFromSupabase().catch(() => {
-      // Swallowed deliberately — see the comment above this effect.
-    })
-  }, [isOnline])
+    // T-35 (KAN-67): the second real firing site — genuinely silent
+    // before this, unlike filter-applied (Catalogue.tsx), which at
+    // least changed the visible grid. Only fires on an actual
+    // offline→online transition, not the initial post-sign-in sync.
+    const isReconnect = !previousIsOnlineRef.current && isOnline
+    syncCacheFromSupabase()
+      .then(() => {
+        if (isReconnect) showToast('Back online — catalogue synced')
+      })
+      .catch(() => {
+        // Swallowed deliberately — see the comment above this effect.
+      })
+    previousIsOnlineRef.current = isOnline
+  }, [isOnline, showToast])
 
   // US-55: global "?" opens the shortcuts modal — guarded so typing a
   // literal "?" into a form field (e.g. a password) doesn't pop it open.

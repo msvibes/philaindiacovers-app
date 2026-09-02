@@ -7,6 +7,7 @@ import {
 } from '../lib/covers'
 import { EMPTY_FILTERS, type CatalogueAction, type CatalogueQueryState } from '../lib/catalogueQuery'
 import { useDebouncedValue } from '../lib/useDebouncedValue'
+import { useToast } from '../lib/ToastContext'
 import CatalogueCard from '../components/CatalogueCard'
 import CatalogueToolbar from '../components/CatalogueToolbar'
 import CatalogueGridSkeleton from '../components/CatalogueGridSkeleton'
@@ -33,6 +34,7 @@ interface CatalogueProps {
 // loading/error, the filter panel's own open/pending-draft UI state)
 // stays here — only the cross-page-relevant query moved up.
 export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueProps): React.JSX.Element {
+  const { showToast } = useToast()
   const [state, setState] = useState<LoadState>('loading')
   const [covers, setCovers] = useState<VerifiedCover[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -265,6 +267,9 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
         onApply={() => {
           dispatch({ type: 'SET_FILTERS', filters: pendingFilters })
           setFilterPanelOpen(false)
+          // T-35 (KAN-67): the addendum's own required fit-criterion
+          // firing site — "at least filter applied (Catalogue)."
+          showToast('Filters applied')
         }}
         onClose={() => setFilterPanelOpen(false)}
       />
