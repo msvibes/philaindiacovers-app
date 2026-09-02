@@ -1,9 +1,21 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-02
-**Last session worked on:** T-30, dark mode — **Done.** Split into 2 incremental PRs given its cross-cutting scope, both merged. See its own entry below. T-34/T-36/T-16/T-17/T-37/T-27 (previous entries, still below) are unchanged and still Done.
+**Last session worked on:** T-35, toast/confirmation feedback — **Done.** See its own entry below. T-30/T-34/T-36/T-16/T-17/T-37/T-27 (previous entries, still below) are unchanged and still Done.
 
-**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → ~~T-36~~ → ~~T-34~~ → ~~T-30~~ → **T-35 (toast/confirmation feedback, KAN-67)** → T-26 (browse-by-year timeline, KAN-62) → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+**Next up — the real, locked sequencing decision made directly by the user on 2026-09-01 (not a suggestion of mine):** ~~T-37~~ → ~~T-16/T-17~~ → ~~T-36~~ → ~~T-34~~ → ~~T-30~~ → ~~T-35~~ → **T-26 (browse-by-year timeline, KAN-62)** → **T-41 (password reset, KAN-15) deliberately last** — a known, accepted trade-off, not an oversight. US-01–04's Google SSO half (KAN-12) and US-47 (update-available prompt) aren't part of this ordered sequence and remain open on the Trial Readiness checklist separately.
+
+## T-35 — toast/confirmation feedback (2026-09-02): PR #26, merged, [KAN-67](https://krutimlogic.atlassian.net/browse/KAN-67) Done
+
+**Sixth in the real task sequencing order set 2026-09-01** (T-37 → T-16/T-17 → T-36 → T-34 → T-30 → T-35 → ...). Built the addendum's FR-24/US-56: a shared, reusable toast mechanism — the codebase's first React Context, deliberately, since the addendum explicitly requires "usable from anywhere," not scoped to one screen (unlike `session`/`themePreference`, each of which only ever had one deep consumer and were correctly prop-drilled instead).
+
+**Scope: two firing sites, not more** — filter applied (Catalogue, the addendum's required fit criterion) and sync succeeding on reconnect (genuinely silent before this; fires only on an actual offline→online transition, tracked via a ref holding the previous `isOnline` value, not on the initial post-sign-in sync). Deliberately excluded sort/search, sign-out, the theme toggle, tour skip/complete, and the offline banner's manual refresh — each already has its own visible feedback, and more toasts would risk fatigue against this project's "simple and fast beats feature-rich" principle.
+
+**Real prototype spec found and reused** (`docs/design/app-prototype-v3-full.html`'s own `showToast()`): bottom-right stack, 2200ms visible then a 250ms fade-out, insert-invisible-then-flip-visible-next-frame so the CSS transition actually animates. **A real continuity catch before it became a bug**: the prototype's toast styled itself with `background: var(--ink)` — predating T-30's ink/accent split. Post-split, `ink` is text-only and inverts for dark mode; used `bg-accent`/`text-white` instead (same category as `VerifiedBadge`'s tooltip), confirmed live under dark-mode emulation to resolve correctly (`rgb(74,106,158)` with white text, not inverted).
+
+**Tests**: `ToastProvider.test.tsx` (5 — shows/stacks/auto-dismisses for real over real elapsed time, not faked; throws outside a Provider). `CatalogueTestHarness.tsx` now wraps `Catalogue` in a `ToastProvider` (fixes all five existing `Catalogue.*.test.tsx` files from one shared place), plus a new assertion confirming the real fit-criterion toast fires. Full suite: 160 passed, 5 skipped (up from 155). `lint`/`typecheck` clean.
+
+**Verified live by the user**: filter toast, reconnect toast (fires once on an actual offline→online transition, correctly does not fire on normal sign-in), and dark-mode styling all confirmed working. **Merged 2026-09-02.**
 
 ## T-30 — dark mode (2026-09-02): PR #24 + PR #25, both merged, [KAN-57](https://krutimlogic.atlassian.net/browse/KAN-57) Done
 
