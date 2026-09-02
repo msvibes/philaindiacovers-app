@@ -64,7 +64,10 @@ export default function Sidebar({
 
   return (
     <>
-      <aside className="fixed left-0 top-0 h-full w-[220px] bg-card border-r border-line flex flex-col">
+      <aside
+        data-tour="sidebar"
+        className="fixed left-0 top-0 h-full w-[220px] bg-card border-r border-line flex flex-col"
+      >
         <div className="pt-5 px-5 pb-6 border-b border-line">
           <span className="font-display font-semibold text-[18px] text-ink">PhilaIndiaCovers</span>
         </div>

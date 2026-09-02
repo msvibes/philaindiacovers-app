@@ -9,10 +9,13 @@ import {
 } from './lib/catalogueQuery'
 import { useRecentlyViewed } from './lib/useRecentlyViewed'
 import { useOnlineStatus } from './lib/useOnlineStatus'
+import { hasCompletedTour, markTourCompleted } from './lib/tourCompletion'
+import { TOUR_STEPS } from './lib/tourSteps'
 import Sidebar from './components/Sidebar'
 import ShortcutsModal from './components/ShortcutsModal'
 import OfflineBanner from './components/OfflineBanner'
 import SplashScreen from './components/SplashScreen'
+import GuidedTour from './components/GuidedTour'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
@@ -53,7 +56,11 @@ function queryCacheKey(query: CatalogueQueryState): string {
 // active query to support prev/next navigation within it (FR-12), which
 // wasn't possible while Catalogue owned that state privately and unmounted
 // it whenever a cover was selected.
-function SignedIn(): React.JSX.Element {
+interface SignedInProps {
+  session: Session
+}
+
+function SignedIn({ session }: SignedInProps): React.JSX.Element {
   // FR-01: lands on Home, not the grid, on every sign-in/launch.
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
@@ -61,6 +68,29 @@ function SignedIn(): React.JSX.Element {
   const { recordView } = useRecentlyViewed()
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
   const isOnline = useOnlineStatus()
+
+  // T-34 (KAN-17): starts once, on mount, only for an account that
+  // hasn't completed (or skipped) the tour before — see
+  // lib/tourCompletion.ts for why user_metadata, not localStorage or a
+  // new profiles column. -1 means inactive; a real index means active.
+  const [tourStepIndex, setTourStepIndex] = useState(() => (hasCompletedTour(session) ? -1 : 0))
+  const isTourActive = tourStepIndex >= 0
+
+  function endTour(): void {
+    setTourStepIndex(-1)
+    markTourCompleted().catch(() => {
+      // Swallowed deliberately, same reasoning as sync above — worst
+      // case this account sees the tour again next sign-in, not a
+      // broken UI this one.
+    })
+  }
+
+  function advanceTour(): void {
+    setTourStepIndex((current) => (current + 1 >= TOUR_STEPS.length ? -1 : current + 1))
+    if (tourStepIndex + 1 >= TOUR_STEPS.length) {
+      markTourCompleted().catch(() => {})
+    }
+  }
 
   // T-16: "synced from Supabase on successful connection" — once right
   // after sign-in (this effect's first run, since this component only
@@ -161,6 +191,15 @@ function SignedIn(): React.JSX.Element {
   function navigateTo(target: Screen): void {
     setSelectedCoverId(null)
     setScreen(target)
+    // T-34 (KAN-17): the tour's one step that advances via a real
+    // interaction rather than its own Next button (see tourSteps.ts) —
+    // Home's actual CTA already routes through here, and so does every
+    // other way of reaching Catalogue (e.g. the sidebar), so this covers
+    // "however the user got there" without watching `screen` in an
+    // effect just to notice a change this same function just made.
+    if (isTourActive && TOUR_STEPS[tourStepIndex]?.advancesViaRealInteraction && target === 'catalogue') {
+      advanceTour()
+    }
   }
 
   function renderScreen(): React.JSX.Element {
@@ -200,6 +239,14 @@ function SignedIn(): React.JSX.Element {
         {renderScreen()}
       </div>
       {isShortcutsOpen && <ShortcutsModal onClose={() => setIsShortcutsOpen(false)} />}
+      {isTourActive && (
+        <GuidedTour
+          key={tourStepIndex}
+          stepIndex={tourStepIndex}
+          onNext={advanceTour}
+          onSkip={endTour}
+        />
+      )}
     </>
   )
 }
@@ -225,7 +272,7 @@ function App(): React.JSX.Element {
   }, [])
 
   if (session === 'loading') return <SplashScreen />
-  return session ? <SignedIn /> : <Login />
+  return session ? <SignedIn session={session} /> : <Login />
 }
 
 export default App

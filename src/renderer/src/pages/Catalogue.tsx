@@ -236,8 +236,13 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
       ) : (
         <>
           <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
-            {covers.map((cover) => (
-              <CatalogueCard key={cover.id} cover={cover} onSelect={() => onSelectCover(cover.id)} />
+            {covers.map((cover, index) => (
+              <CatalogueCard
+                key={cover.id}
+                cover={cover}
+                onSelect={() => onSelectCover(cover.id)}
+                tourTarget={index === 0 ? 'catalogue-card' : undefined}
+              />
             ))}
           </ul>
           <Pagination
