@@ -56,7 +56,7 @@ export default function Pagination({
             onClick={() => onPageChange(item)}
             aria-current={item === page ? 'page' : undefined}
             className={`px-3 py-1.5 rounded border font-mono text-sm ${
-              item === page ? 'bg-ink text-white border-ink' : 'border-line text-ink-soft'
+              item === page ? 'bg-accent text-white border-accent' : 'border-line text-ink-soft'
             }`}
           >
             {item}

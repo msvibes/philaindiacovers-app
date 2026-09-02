@@ -11,6 +11,7 @@ import { useRecentlyViewed } from './lib/useRecentlyViewed'
 import { useOnlineStatus } from './lib/useOnlineStatus'
 import { hasCompletedTour, markTourCompleted } from './lib/tourCompletion'
 import { TOUR_STEPS } from './lib/tourSteps'
+import { useThemePreference, type ThemePreference } from './lib/useThemePreference'
 import Sidebar from './components/Sidebar'
 import ShortcutsModal from './components/ShortcutsModal'
 import OfflineBanner from './components/OfflineBanner'
@@ -58,9 +59,15 @@ function queryCacheKey(query: CatalogueQueryState): string {
 // it whenever a cover was selected.
 interface SignedInProps {
   session: Session
+  themePreference: ThemePreference
+  onThemePreferenceChange: (preference: ThemePreference) => void
 }
 
-function SignedIn({ session }: SignedInProps): React.JSX.Element {
+function SignedIn({
+  session,
+  themePreference,
+  onThemePreferenceChange
+}: SignedInProps): React.JSX.Element {
   // FR-01: lands on Home, not the grid, on every sign-in/launch.
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
@@ -222,7 +229,12 @@ function SignedIn({ session }: SignedInProps): React.JSX.Element {
       case 'catalogue':
         return <Catalogue query={query} dispatch={dispatch} onSelectCover={selectCover} />
       case 'settings':
-        return <Settings />
+        return (
+          <Settings
+            themePreference={themePreference}
+            onThemePreferenceChange={onThemePreferenceChange}
+          />
+        )
     }
   }
 
@@ -256,6 +268,9 @@ function App(): React.JSX.Element {
   // the Login screen before redirecting an already-signed-in Collector —
   // same gated-render principle as the Admin repo's per-page session guards.
   const [session, setSession] = useState<Session | null | 'loading'>('loading')
+  // T-30 (KAN-57): called at the true top level, not inside SignedIn — the
+  // theme must apply to Login/SplashScreen too, not just once signed in.
+  const { preference: themePreference, setPreference: setThemePreference } = useThemePreference()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -272,7 +287,15 @@ function App(): React.JSX.Element {
   }, [])
 
   if (session === 'loading') return <SplashScreen />
-  return session ? <SignedIn session={session} /> : <Login />
+  return session ? (
+    <SignedIn
+      session={session}
+      themePreference={themePreference}
+      onThemePreferenceChange={setThemePreference}
+    />
+  ) : (
+    <Login />
+  )
 }
 
 export default App

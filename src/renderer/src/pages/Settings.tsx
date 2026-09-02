@@ -1,20 +1,38 @@
 import { useState } from 'react'
 import { version } from '../../../../package.json'
+import type { ThemePreference } from '../lib/useThemePreference'
 import Eyebrow from '../components/Eyebrow'
 import DisclaimerModal from '../components/DisclaimerModal'
+import ThemeToggle from '../components/ThemeToggle'
+
+interface SettingsProps {
+  themePreference: ThemePreference
+  onThemePreferenceChange: (preference: ThemePreference) => void
+}
 
 // T-27: real content, replacing T-29's placeholder. Values verbatim from
 // docs/legal/DISCLAIMER-and-Developer-Details.md §5a — version is read
 // live from package.json, not hardcoded, so it can't silently drift from
-// a real release. Dark mode (T-30) isn't built here — this layout leaves
-// a sensible place for it to land later, per that task's own boundary.
-export default function Settings(): React.JSX.Element {
+// a real release. T-30 (KAN-57): the Appearance section below is the
+// "sensible place" this file's own earlier comment left for dark mode to
+// land — now built.
+export default function Settings({
+  themePreference,
+  onThemePreferenceChange
+}: SettingsProps): React.JSX.Element {
   const [showDisclaimer, setShowDisclaimer] = useState(false)
 
   return (
     <main className="p-8 max-w-xl">
       <Eyebrow>Preferences</Eyebrow>
       <h1 className="text-2xl font-semibold font-display text-ink mb-6">Settings</h1>
+
+      <section className="mb-8">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft mb-3">
+          Appearance
+        </h2>
+        <ThemeToggle preference={themePreference} onChange={onThemePreferenceChange} />
+      </section>
 
       <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft mb-3">

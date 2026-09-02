@@ -130,7 +130,7 @@ export default function Sidebar({
 
       {isLogoutConfirmOpen && (
         <div
-          className="fixed inset-0 bg-ink/40 flex items-center justify-center p-6 z-50"
+          className="fixed inset-0 bg-scrim/40 flex items-center justify-center p-6 z-50"
           onClick={() => setIsLogoutConfirmOpen(false)}
         >
           <div

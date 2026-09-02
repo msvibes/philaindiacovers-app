@@ -4,7 +4,25 @@
    (docs/design/catalogue-prototype.html, app-prototype-v3-full.html) — read
    directly from their source, not re-derived. Tailwind v4 is CSS-first here
    (no tailwind.config.js), so this @theme block is what makes bg-paper,
-   text-ink, border-line, font-display, etc. real Tailwind utilities. */
+   text-ink, border-line, font-display, etc. real Tailwind utilities.
+
+   T-30 (KAN-57): --color-accent/--color-accent-hover are new here, split
+   out of --color-ink on purpose. --color-ink was doing double duty as both
+   body-text color AND primary-button background (bg-ink, paired with
+   text-white) — that's fine while ink is a fixed dark navy, but dark mode
+   requires ink to become a LIGHT color for text to stay legible, which
+   would break every button using the same token for its background.
+   --color-accent carries the "brand navy surface" meaning instead (primary
+   buttons, active/selected states, always-inverted surfaces like
+   VerifiedBadge's tooltip) and is allowed to have a genuinely different
+   value per theme rather than staying fixed, so it keeps working as a
+   button color in the dark palette below. Light mode's --color-accent
+   equals today's --color-ink value exactly, so light mode looks
+   byte-for-byte identical to before this token split, not just similar.
+   --color-scrim is also new: modal backdrops (bg-ink/40 previously) need
+   to stay a dark dimming overlay in BOTH themes — they must NOT invert the
+   way ink now does, since a light-mode-style overlay would brighten a dark
+   screen instead of dimming it. */
 @theme {
   --color-paper: #f6f1e7;
   --color-card: #ffffff;
@@ -16,6 +34,9 @@
   --color-success-bg: #e7f1ea;
   --color-success-text: #2f6b4f;
   --color-success-border: #bfdbc9;
+  --color-accent: #1b2a4a;
+  --color-accent-hover: #132038;
+  --color-scrim: #0a0e18;
   --font-display: 'Playfair Display', Georgia, serif;
   --font-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
@@ -28,6 +49,53 @@
      bounce, so it doesn't collide with Tailwind's own built-in keyframe
      of that name. */
   --animate-bounce-dot: bounce-dot 1.1s ease-in-out infinite;
+}
+
+/* T-30 (KAN-57): dark-mode token values. Every pairing below was checked
+   against real WCAG 2.1 contrast ratios (not eyeballed) before being
+   picked — see PROGRESS.md's T-30 entry for the actual numbers. Applied
+   two ways, both needed:
+     1. The prefers-color-scheme media query — the system-default case,
+        guarded by :not([data-theme="light"]) so an explicit light
+        override (chosen while the OS is in dark mode) still wins.
+     2. The [data-theme="dark"] selector — the explicit manual-override
+        case (chosen while the OS is in light mode), applied by
+        useThemePreference.ts setting document.documentElement.dataset.
+        theme. Same values in both blocks, deliberately not deduplicated
+        via a shared custom property — @theme's own variables are what
+        Tailwind's utilities already reference, so redefining them again
+        here for either condition is the actual override mechanism, not
+        an extra indirection layer. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-paper: #1a1613;
+    --color-card: #242019;
+    --color-ink: #ece7de;
+    --color-ink-soft: #9aa3b8;
+    --color-stamp: #e2596b;
+    --color-line: #3d362a;
+    --color-line-strong: #554b3a;
+    --color-success-bg: #1c2e21;
+    --color-success-text: #7fc99a;
+    --color-success-border: #2f4a37;
+    --color-accent: #4a6a9e;
+    --color-accent-hover: #5470a3;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-paper: #1a1613;
+  --color-card: #242019;
+  --color-ink: #ece7de;
+  --color-ink-soft: #9aa3b8;
+  --color-stamp: #e2596b;
+  --color-line: #3d362a;
+  --color-line-strong: #554b3a;
+  --color-success-bg: #1c2e21;
+  --color-success-text: #7fc99a;
+  --color-success-border: #2f4a37;
+  --color-accent: #4a6a9e;
+  --color-accent-hover: #5470a3;
 }
 
 @keyframes bounce-dot {

@@ -40,7 +40,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="h-10 rounded-lg bg-ink px-5 text-sm font-medium text-white hover:bg-[#132038]"
+          className="h-10 rounded-lg bg-accent px-5 text-sm font-medium text-white hover:bg-accent-hover"
         >
           Reload
         </button>

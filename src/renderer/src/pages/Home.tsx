@@ -77,7 +77,7 @@ export default function Home({ onEnterCatalogue, onSelectCover }: HomeProps): Re
           type="button"
           onClick={onEnterCatalogue}
           data-tour="home-cta"
-          className="rounded bg-ink px-6 py-2 text-white hover:bg-[#132038]"
+          className="rounded bg-accent px-6 py-2 text-white hover:bg-accent-hover"
         >
           Enter the catalogue
         </button>

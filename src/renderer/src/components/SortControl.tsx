@@ -19,7 +19,7 @@ export default function SortControl({ sort, onChange }: SortControlProps): React
         type="button"
         onClick={() => onChange('newest')}
         aria-pressed={sort === 'newest'}
-        className={`px-3 py-1.5 ${sort === 'newest' ? 'bg-ink text-white' : 'bg-card text-ink-soft'}`}
+        className={`px-3 py-1.5 ${sort === 'newest' ? 'bg-accent text-white' : 'bg-card text-ink-soft'}`}
       >
         Newest first
       </button>
@@ -27,7 +27,7 @@ export default function SortControl({ sort, onChange }: SortControlProps): React
         type="button"
         onClick={() => onChange('alphabetical')}
         aria-pressed={sort === 'alphabetical'}
-        className={`px-3 py-1.5 border-l border-line ${sort === 'alphabetical' ? 'bg-ink text-white' : 'bg-card text-ink-soft'}`}
+        className={`px-3 py-1.5 border-l border-line ${sort === 'alphabetical' ? 'bg-accent text-white' : 'bg-card text-ink-soft'}`}
       >
         A–Z
       </button>

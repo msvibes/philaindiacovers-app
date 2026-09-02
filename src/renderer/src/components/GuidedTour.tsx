@@ -120,7 +120,7 @@ export default function GuidedTour({
             <button
               type="button"
               onClick={onNext}
-              className="rounded-[7px] bg-ink px-3.5 py-1.5 text-[12.5px] text-white"
+              className="rounded-[7px] bg-accent px-3.5 py-1.5 text-[12.5px] text-white"
             >
               {isLast ? 'Done' : 'Next'}
             </button>

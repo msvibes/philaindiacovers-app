@@ -164,7 +164,7 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
         <button
           type="button"
           onClick={() => setRetryCount((count) => count + 1)}
-          className="rounded bg-ink px-4 py-2 text-white hover:bg-[#132038]"
+          className="rounded bg-accent px-4 py-2 text-white hover:bg-accent-hover"
         >
           Try again
         </button>
