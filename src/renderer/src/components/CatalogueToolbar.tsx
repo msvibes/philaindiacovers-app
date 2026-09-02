@@ -26,11 +26,13 @@ export default function CatalogueToolbar({
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder="Search by item name, cover name, or description"
         aria-label="Search the catalogue"
+        data-tour="catalogue-search"
         className="flex-1 min-w-[220px] rounded-lg border border-line px-3 py-2 text-sm bg-card"
       />
       <button
         type="button"
         onClick={onOpenFilters}
+        data-tour="catalogue-filters"
         className="relative rounded-lg border border-line px-3 py-2 text-sm bg-card text-ink"
       >
         Filters

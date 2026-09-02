@@ -5,19 +5,30 @@ import CoverThumbnail from './CoverThumbnail'
 interface CatalogueCardProps {
   cover: VerifiedCover
   onSelect: () => void
+  // T-34 (KAN-17): set only on the first card in Catalogue.tsx's grid —
+  // gives the guided tour's "Open any cover" step a real element to
+  // highlight without every card carrying a tour-specific attribute.
+  tourTarget?: string
 }
 
 // Every card shown here is already verification_status='verified' (the
 // query itself filters that), so the Verified badge is unconditional —
 // unlike the design prototype, which mixes verified/unverified mock rows.
-export default function CatalogueCard({ cover, onSelect }: CatalogueCardProps): React.JSX.Element {
+export default function CatalogueCard({
+  cover,
+  onSelect,
+  tourTarget
+}: CatalogueCardProps): React.JSX.Element {
   const title = withFallback(cover.nameOfCover, 'Name not recorded yet')
   const subtitle = cover.giItemName ?? 'Item name not recorded yet'
   const category = cover.productCategory ?? 'Category not recorded yet'
   const circle = cover.postalCircleName ?? 'Postal circle not recorded yet'
 
   return (
-    <li className="border border-line rounded-xl bg-card overflow-hidden hover:-translate-y-0.5 hover:shadow-md transition text-left">
+    <li
+      data-tour={tourTarget}
+      className="border border-line rounded-xl bg-card overflow-hidden hover:-translate-y-0.5 hover:shadow-md transition text-left"
+    >
       <button type="button" onClick={onSelect} className="w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-stamp">
         <CoverThumbnail imageFile={cover.imageFile} alt={title} />
         <div className="p-3">
