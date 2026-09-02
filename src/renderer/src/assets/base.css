@@ -37,6 +37,13 @@
   --color-accent: #1b2a4a;
   --color-accent-hover: #132038;
   --color-scrim: #0a0e18;
+  /* T-30 PR 2/2: was a hardcoded rgba(178,58,72,0.12) arbitrary value at
+     every focus-ring call site (Login.tsx/Signup.tsx) — same class of
+     problem PR 1 fixed for buttons/scrims, just lower-urgency (a focus
+     ring still renders in dark mode without this, just at the wrong
+     tint). Light value is byte-for-byte the same as the old hardcoded
+     one. */
+  --color-stamp-ring: rgba(178, 58, 72, 0.12);
   --font-display: 'Playfair Display', Georgia, serif;
   --font-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
@@ -80,6 +87,7 @@
     --color-success-border: #2f4a37;
     --color-accent: #4a6a9e;
     --color-accent-hover: #5470a3;
+    --color-stamp-ring: rgba(226, 89, 107, 0.18);
   }
 }
 
@@ -96,6 +104,7 @@
   --color-success-border: #2f4a37;
   --color-accent: #4a6a9e;
   --color-accent-hover: #5470a3;
+  --color-stamp-ring: rgba(226, 89, 107, 0.18);
 }
 
 @keyframes bounce-dot {

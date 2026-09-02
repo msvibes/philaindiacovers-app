@@ -100,7 +100,7 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-stamp-ring"
           />
         </div>
         <div className="mb-3.5">
@@ -115,7 +115,7 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-stamp-ring"
           />
         </div>
         <div className="mb-3.5">
@@ -132,7 +132,7 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-stamp-ring"
           />
           {passwordsMismatch && (
             <p className="text-red-600 text-xs mt-1">Passwords don&apos;t match yet.</p>

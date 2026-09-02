@@ -96,7 +96,14 @@ export default function GuidedTour({
           left: highlight.left,
           width: highlight.width,
           height: highlight.height,
-          boxShadow: '0 0 0 9999px rgba(19,32,56,.6)'
+          // T-30 PR 2/2: was a hardcoded rgba(19,32,56,.6) — --color-ink's
+          // old, pre-split light-mode RGB — before dark mode existed.
+          // Matches --color-scrim's RGB (#0a0e18) instead now, same
+          // "stays dark in both themes" reasoning as the modal backdrops
+          // (DisclaimerModal/FilterPanel/ShortcutsModal/Sidebar all use
+          // bg-scrim/40) — a box-shadow spread can't reference a Tailwind
+          // utility directly, so this stays a literal, just the same one.
+          boxShadow: '0 0 0 9999px rgba(10,14,24,.6)'
         }}
       />
       <div
