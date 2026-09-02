@@ -97,7 +97,7 @@ export default function Login(): React.JSX.Element {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-stamp-ring"
           />
         </div>
         <div className="mb-3.5">
@@ -111,7 +111,7 @@ export default function Login(): React.JSX.Element {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-[rgba(178,58,72,0.12)]"
+            className="w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-[13.5px] text-ink focus:outline-none focus:border-stamp focus:ring-[3px] focus:ring-stamp-ring"
           />
         </div>
         <button
