@@ -112,6 +112,10 @@ describe('Catalogue filters', () => {
       expect(lastCall?.years).toEqual([2021])
       expect(lastCall?.page).toBe(1)
     })
+
+    // T-35 (KAN-67): the addendum's own required fit-criterion firing
+    // site for the toast mechanism.
+    expect(await screen.findByText('Filters applied')).toBeInTheDocument()
   })
 
   it('Clear all resets the pending draft without closing the panel', async () => {
