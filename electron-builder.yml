@@ -13,9 +13,19 @@ files:
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,CLAUDE.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  # KAN-74: this repo's own .claude/ and docs/ predate this files list (T-38)
+  # and were never excluded — every installer up to and including this fix
+  # shipped the full internal project record (PROGRESS.md, skills, PRD,
+  # architecture/design docs) inside app.asar, extractable via a plain
+  # `npx asar extract`. Nothing secret leaked (no credentials involved,
+  # confirmed by check:secrets), but none of this belongs in a distributed
+  # installer. LEGAL/EULA.txt is deliberately NOT excluded here — it's the
+  # real EULA, referenced by nsis.license below, and is meant to ship.
+  - '!.claude/**'
+  - '!docs/**'
 asarUnpack:
   - resources/**
 # T-38: Windows/nsis only — this is a Windows desktop app (see package.json's
