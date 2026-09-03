@@ -63,8 +63,18 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
         </h1>
         <p className="text-[13px] text-ink-soft text-center mb-6">
           If that address doesn&apos;t already have an account, we&apos;ve sent a link to verify it
-          — click it, then come back here and sign in. (The page it opens may not look like much —
-          that&apos;s expected, just return to the app afterward.)
+          — click it, then come back here and sign in. (
+          {/* 2026-09-03, real production test: the page it opens next shows a
+              browser connection error (ERR_CONNECTION_REFUSED), confirmed
+              live — Supabase's confirmation redirect points at an inert
+              localhost address (KAN-75) since there's no real web page to
+              land on yet. Confirmation itself completes before that
+              redirect fires, confirmed via email_confirmed_at flipping
+              server-side — the error is cosmetic, not a failure. Revisit
+              this copy once T-41 ships a real destination for these
+              links to land on. */}
+          Your browser will probably show an error on that next page — that&apos;s expected, not a
+          sign anything went wrong. Just close that tab and come back here to sign in.)
         </p>
         <button
           type="button"
