@@ -2,9 +2,10 @@ import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { fetchCurrentRole } from '../lib/currentRole'
 import Signup from './Signup'
+import ForgotPassword from './ForgotPassword'
 
 export default function Login(): React.JSX.Element {
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
+  const [mode, setMode] = useState<'sign-in' | 'sign-up' | 'forgot-password'>('sign-in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -74,6 +75,10 @@ export default function Login(): React.JSX.Element {
     return <Signup onSwitchToSignIn={() => setMode('sign-in')} />
   }
 
+  if (mode === 'forgot-password') {
+    return <ForgotPassword onSwitchToSignIn={() => setMode('sign-in')} />
+  }
+
   return (
     <main className="mx-auto flex min-h-screen max-w-[380px] w-full flex-col justify-center p-8">
       <div>
@@ -101,9 +106,18 @@ export default function Login(): React.JSX.Element {
           />
         </div>
         <div className="mb-3.5">
-          <label className="block text-[12.5px] text-ink-soft mb-1.5" htmlFor="password">
-            Password
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-[12.5px] text-ink-soft" htmlFor="password">
+              Password
+            </label>
+            <button
+              type="button"
+              onClick={() => setMode('forgot-password')}
+              className="text-[12px] text-stamp underline"
+            >
+              Forgot password?
+            </button>
+          </div>
           <input
             id="password"
             type="password"
