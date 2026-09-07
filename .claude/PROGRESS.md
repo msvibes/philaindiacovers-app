@@ -1,7 +1,7 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-07
-**Last session worked on:** Five small, deliberately-scoped value-add items (KAN-76/77/78/79 Done, KAN-41's view-only slice Done, editing still open) — see the new entry below. Also T-41 (KAN-15, password reset) — **Done**, the only task left in the 2026-09-01 locked sequence, built, merged, and live-verified end to end with a real token — see its own entry below that. The 2026-09-03 session's work (KAN-72/74/75, `.env.production` build separation, the key-mixup incident/fix, Signup copy fix — all previous entries, still below) is unchanged and still Done.
+**Last session worked on:** Five small, deliberately-scoped value-add items (KAN-76/77/78/79 Done, all four live-verified by the user; KAN-41's view-only slice shipped, stays In Progress, editing still open) — see the new entry below, including two real corrections made during live verification. Also T-41 (KAN-15, password reset) — **Done**, the only task left in the 2026-09-01 locked sequence, built, merged, and live-verified end to end with a real token — see its own entry below that. The 2026-09-03 session's work (KAN-72/74/75, `.env.production` build separation, the key-mixup incident/fix, Signup copy fix — all previous entries, still below) is unchanged and still Done.
 
 ## Five small value-add items (2026-09-07): App PRs #34-#38, all merged
 
@@ -20,6 +20,10 @@ Requested as new, deliberately small-scoped work — explicitly not Collection M
 **A real process slip during PR #38, caught and fixed properly, not silently left**: the commit landed directly on `main` — forgot to branch first, same class of slip this project has hit before (T-34's own precedent). Caught by checking `git branch --show-current` after the commit (not assuming), confirmed nothing had been pushed yet (the push itself failed first, which is what surfaced it), created the correct branch at that exact commit, reset local `main` back to its precise prior state via `git reset --hard origin/main`, no force-push, no rewritten shared history — same clean-recovery pattern as this project's very first branch-mixup incident.
 
 Full suite grew from 174 to 185 passing tests across the five PRs (5 skipped throughout, unchanged). `lint`/`typecheck` clean on every PR. All 5 CI runs green (both `ci` and `package-windows` jobs) before merge.
+
+**All five live-verified by the user on a real fresh installer** (built off a `main` explicitly re-confirmed byte-identical to `origin/main` after the reset above — same hash, zero divergence either direction, no duplicate commits, all 7 feature branches genuinely deleted). All working as intended. **Two real corrections surfaced during that verification, checked against the actual code before accepting either claim:**
+1. The sidebar email tooltip the user suggested adding was already built (`title={email}` on the truncated element) — not a real gap, just not noticed during the live pass.
+2. The "Previous/Next/X of Y" navigation observed while testing the lightbox was misattributed to it — `ImageLightbox.tsx` genuinely has no navigation of its own (open/close only); what was seen is `Detail.tsx`'s pre-existing prev/next-cover controls (FR-12, T-25), which predate this session and sit above the image, not inside the lightbox. Corrected on the Jira ticket rather than silently accepted as extra credit. Navigating between covers *without* closing the lightbox first would be genuine new scope, not yet built or decided.
 
 ## T-41 — password reset (KAN-15, US-04/FR-29) (2026-09-07): App PRs #32 + #33, both merged, live-verified end to end: Done
 
