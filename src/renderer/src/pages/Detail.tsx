@@ -10,6 +10,8 @@ import { useCoverImage } from '../lib/useCoverImage'
 import VerifiedBadge from '../components/VerifiedBadge'
 import Eyebrow from '../components/Eyebrow'
 import ImageLightbox from '../components/ImageLightbox'
+import ProtectedImage from '../components/ProtectedImage'
+import { useBlockSaveShortcut } from '../lib/useBlockSaveShortcut'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
@@ -58,7 +60,7 @@ function FullSizeImage({
     // hint needed to signal it's interactive.
     return (
       <button type="button" onClick={() => onZoom(image.url)} className="cursor-zoom-in">
-        <img src={image.url} alt={alt} className="w-full max-w-md rounded" />
+        <ProtectedImage src={image.url} alt={alt} className="w-full max-w-md rounded" />
       </button>
     )
   }
@@ -120,6 +122,11 @@ export default function Detail({
   const [cover, setCover] = useState<CoverDetail | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null)
+
+  // KAN-81: active for the whole time a cover image is on screen here —
+  // covers both the inline image and the lightbox rendered above it,
+  // since both only ever show while state === 'ready'.
+  useBlockSaveShortcut(state === 'ready')
 
   // FR-12 keyboard nav — no text inputs exist on this screen today, so no
   // focused-element guard is needed to avoid hijacking typing elsewhere.
