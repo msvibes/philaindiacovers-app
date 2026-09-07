@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { fetchDisplayName, updateDisplayName } from './profile'
+import { fetchDisplayName, resolveGreetingName, updateDisplayName } from './profile'
 
 // A minimal fake matching the exact chain both functions actually call --
 // same style as this project's other injectable-client tests (e.g.
@@ -70,5 +70,23 @@ describe('updateDisplayName', () => {
     await expect(updateDisplayName('collector-1', 'Priya Sharma', client)).rejects.toThrow(
       'permission denied'
     )
+  })
+})
+
+describe('resolveGreetingName', () => {
+  it('uses the real display_name when one has been set', () => {
+    expect(resolveGreetingName('Priya Sharma', 'priya@example.test')).toBe('Priya Sharma')
+  })
+
+  it("falls back to the email's local part when no name has been set", () => {
+    expect(resolveGreetingName(null, 'priya.sharma@example.test')).toBe('priya.sharma')
+  })
+
+  it('treats a whitespace-only name the same as unset', () => {
+    expect(resolveGreetingName('   ', 'priya@example.test')).toBe('priya')
+  })
+
+  it('falls back to a generic greeting when even email is somehow missing — defensive only', () => {
+    expect(resolveGreetingName(null, undefined)).toBe('there')
   })
 })
