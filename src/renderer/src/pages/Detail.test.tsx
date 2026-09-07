@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Detail from './Detail'
@@ -100,6 +100,41 @@ describe('Detail', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Varanasi')).toBeInTheDocument()
     expect(screen.getByText('Verified')).toBeInTheDocument()
+  })
+
+  // KAN-78
+  it('clicking the cover image opens a lightbox with the same image, and closes on Escape', async () => {
+    mockedFetch.mockResolvedValue(fullCover)
+    mockedDownload.mockResolvedValue('blob:mock-url')
+    render(<Detail coverId="cover-1" onBack={() => {}} {...defaultNavProps} />)
+
+    await waitFor(() => expect(screen.getByText('Adamchini Chawal')).toBeInTheDocument())
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByAltText('Adamchini Chawal'))
+
+    const dialog = screen.getByRole('dialog', { name: 'Adamchini Chawal' })
+    expect(dialog).toBeInTheDocument()
+    // Two <img>s with the same alt now exist (the inline one behind the
+    // lightbox, and the enlarged one inside it) -- scope the query to the
+    // dialog to assert the right one, not just that one exists somewhere.
+    expect(within(dialog).getByAltText('Adamchini Chawal')).toHaveAttribute('src', 'blob:mock-url')
+
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('the lightbox also closes when clicking outside the image', async () => {
+    mockedFetch.mockResolvedValue(fullCover)
+    mockedDownload.mockResolvedValue('blob:mock-url')
+    render(<Detail coverId="cover-1" onBack={() => {}} {...defaultNavProps} />)
+
+    await waitFor(() => expect(screen.getByText('Adamchini Chawal')).toBeInTheDocument())
+    await userEvent.click(screen.getByAltText('Adamchini Chawal'))
+    const dialog = screen.getByRole('dialog')
+
+    await userEvent.click(dialog)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('FR-14: GI Item Name is tappable and filters the catalogue to that exact tag', async () => {

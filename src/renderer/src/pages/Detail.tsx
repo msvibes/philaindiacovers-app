@@ -8,6 +8,7 @@ import {
 import { useCoverImage } from '../lib/useCoverImage'
 import VerifiedBadge from '../components/VerifiedBadge'
 import Eyebrow from '../components/Eyebrow'
+import ImageLightbox from '../components/ImageLightbox'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
@@ -38,11 +39,27 @@ interface DetailProps {
 // today (the covers schema has a single image_file column, nothing to
 // navigate yet) — satisfies "supports >1 image without rework" without
 // building thumbnail-strip/multi-image UI against data that doesn't exist.
-function FullSizeImage({ images, alt }: { images: string[]; alt: string }): React.JSX.Element {
+function FullSizeImage({
+  images,
+  alt,
+  onZoom
+}: {
+  images: string[]
+  alt: string
+  onZoom: (url: string) => void
+}): React.JSX.Element {
   const image = useCoverImage(images[0])
 
   if (image.status === 'loaded') {
-    return <img src={image.url} alt={alt} className="w-full max-w-md rounded" />
+    // KAN-78: the whole image is the zoom trigger, not a separate
+    // overlaid button -- matches how photo-viewer affordances usually
+    // work (click the photo itself), and cursor-zoom-in is the one visual
+    // hint needed to signal it's interactive.
+    return (
+      <button type="button" onClick={() => onZoom(image.url)} className="cursor-zoom-in">
+        <img src={image.url} alt={alt} className="w-full max-w-md rounded" />
+      </button>
+    )
   }
 
   if (image.status === 'failed') {
@@ -101,6 +118,7 @@ export default function Detail({
   const [state, setState] = useState<LoadState>('loading')
   const [cover, setCover] = useState<CoverDetail | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null)
 
   // FR-12 keyboard nav — no text inputs exist on this screen today, so no
   // focused-element guard is needed to avoid hijacking typing elsewhere.
@@ -201,6 +219,7 @@ export default function Detail({
           <FullSizeImage
             images={[cover.imageFile]}
             alt={withFallback(cover.nameOfCover, 'Cover')}
+            onZoom={setZoomedImageUrl}
           />
           <div>
             <Eyebrow>Special Cover</Eyebrow>
@@ -248,6 +267,13 @@ export default function Detail({
           </dl>
         </div>
       )}
+
+      <ImageLightbox
+        isOpen={zoomedImageUrl !== null}
+        imageUrl={zoomedImageUrl ?? ''}
+        alt={withFallback(cover?.nameOfCover, 'Cover')}
+        onClose={() => setZoomedImageUrl(null)}
+      />
     </main>
   )
 }
