@@ -137,6 +137,24 @@ describe('Detail', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  // KAN-79
+  it('the Share to WhatsApp link points at a wa.me URL with the correct URL-encoded summary text', async () => {
+    mockedFetch.mockResolvedValue(fullCover)
+    mockedDownload.mockResolvedValue('blob:mock-url')
+    render(<Detail coverId="cover-1" onBack={() => {}} {...defaultNavProps} />)
+
+    await waitFor(() => expect(screen.getByText('Adamchini Chawal')).toBeInTheDocument())
+
+    const link = screen.getByRole('link', { name: /share to whatsapp/i })
+    expect(link).toHaveAttribute('target', '_blank')
+    const href = link.getAttribute('href') ?? ''
+    expect(href.startsWith('https://wa.me/?text=')).toBe(true)
+    const decodedText = decodeURIComponent(href.replace('https://wa.me/?text=', ''))
+    expect(decodedText).toBe(
+      'Check out this GI Tag Special Cover: Adamchini Chawal — Adamchini Chawal (Rice), Uttar Pradesh, issued 19 May 2023.'
+    )
+  })
+
   it('FR-14: GI Item Name is tappable and filters the catalogue to that exact tag', async () => {
     mockedFetch.mockResolvedValue(fullCover)
     mockedDownload.mockResolvedValue('blob:mock-url')

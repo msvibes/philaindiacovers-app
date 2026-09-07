@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  buildWhatsAppShareText,
   fetchVerifiedCoverById,
   formatDateOfIssue,
   withFallback,
@@ -229,6 +230,22 @@ export default function Detail({
               </h1>
               <VerifiedBadge />
             </div>
+            {/* KAN-79: text-only -- this app has no per-cover public URL to
+                share, confirmed before scoping this at all (see that
+                ticket). wa.me/?text= with no phone number opens WhatsApp's
+                own contact picker; the actual open happens via
+                window.open, which src/main/index.ts's existing
+                setWindowOpenHandler already routes to shell.openExternal
+                -- the same mechanism Settings.tsx's GitHub links already
+                rely on, no new IPC needed. */}
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(buildWhatsAppShareText(cover))}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-block text-[13px] text-stamp underline"
+            >
+              Share to WhatsApp
+            </a>
           </div>
           <dl className="space-y-4">
             <Field
