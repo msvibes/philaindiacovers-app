@@ -16,6 +16,7 @@ beforeEach(() => {
 
 function renderSidebar(
   overrides: Partial<{
+    email: string | undefined
     currentScreen: 'home' | 'catalogue' | 'settings'
     onNavigate: (screen: 'home' | 'catalogue' | 'settings') => void
     isShortcutsOpen: boolean
@@ -24,6 +25,7 @@ function renderSidebar(
 ): void {
   render(
     <Sidebar
+      email={'email' in overrides ? overrides.email : 'signed-in-collector@example.test'}
       currentScreen={overrides.currentScreen ?? 'home'}
       onNavigate={overrides.onNavigate ?? vi.fn()}
       isShortcutsOpen={overrides.isShortcutsOpen ?? false}
@@ -33,6 +35,17 @@ function renderSidebar(
 }
 
 describe('Sidebar', () => {
+  // KAN-76
+  it('shows the signed-in user’s email below the brand header', () => {
+    renderSidebar({ email: 'signed-in-collector@example.test' })
+    expect(screen.getByText('signed-in-collector@example.test')).toBeInTheDocument()
+  })
+
+  it('renders cleanly with no crash when email is somehow undefined', () => {
+    renderSidebar({ email: undefined })
+    expect(screen.getByText('PhilaIndiaCovers')).toBeInTheDocument()
+  })
+
   it('renders the working nav entries, Keyboard Shortcuts, and the coming-soon placeholders', () => {
     renderSidebar()
 
