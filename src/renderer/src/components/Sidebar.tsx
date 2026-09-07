@@ -4,6 +4,7 @@ import { useEscapeToClose } from '../lib/useEscapeToClose'
 import type { Screen } from '../App'
 
 interface SidebarProps {
+  email: string | undefined
   currentScreen: Screen
   onNavigate: (screen: Screen) => void
   isShortcutsOpen: boolean
@@ -48,6 +49,7 @@ function rowClasses(isActive: boolean): string {
 // sidebar at all, confirmed directly; this is a fresh design decision
 // written straight into the addendum text.
 export default function Sidebar({
+  email,
   currentScreen,
   onNavigate,
   isShortcutsOpen,
@@ -70,6 +72,14 @@ export default function Sidebar({
       >
         <div className="pt-5 px-5 pb-6 border-b border-line">
           <span className="font-display font-semibold text-[18px] text-ink">PhilaIndiaCovers</span>
+          {/* KAN-76: signed-in identity, always visible — nowhere in the
+              app showed this before. Truncates rather than wraps; email
+              addresses can run long and this column is a fixed 220px. */}
+          {email && (
+            <p className="text-[11.5px] text-ink-soft mt-1 truncate" title={email}>
+              {email}
+            </p>
+          )}
         </div>
 
         <nav className="flex flex-col">
