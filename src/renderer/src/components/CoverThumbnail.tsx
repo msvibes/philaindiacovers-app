@@ -1,4 +1,5 @@
 import { useCoverImage } from '../lib/useCoverImage'
+import ProtectedImage from './ProtectedImage'
 
 interface CoverThumbnailProps {
   imageFile: string
@@ -14,7 +15,7 @@ export default function CoverThumbnail({ imageFile, alt }: CoverThumbnailProps):
 
   if (image.status === 'loaded') {
     return (
-      <img
+      <ProtectedImage
         src={image.url}
         alt={alt}
         className="w-full aspect-square object-cover rounded-t-xl"

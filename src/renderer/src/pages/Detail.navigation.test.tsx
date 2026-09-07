@@ -137,6 +137,34 @@ describe('Detail navigation (FR-12)', () => {
     expect(onSelectCover).toHaveBeenCalledTimes(2)
   })
 
+  // KAN-81: explicitly checked, not assumed -- the copy-protection changes
+  // (onContextMenu/onDragStart preventDefault, select-none, draggable
+  // false) apply only to the <img> itself via ProtectedImage, but this
+  // proves it live: Previous/Next are separate elements entirely and must
+  // keep working even while the lightbox (which also uses ProtectedImage)
+  // is open.
+  it('Previous/Next still work normally while the lightbox is open', async () => {
+    const onSelectCover = vi.fn()
+    render(
+      <Detail
+        coverId="cover-2"
+        onBack={() => {}}
+        onSelectCover={onSelectCover}
+        previousCoverId="cover-1"
+        nextCoverId="cover-3"
+        position={{ index: 1, total: 5 }}
+        onFilterByGiTag={vi.fn()}
+      />
+    )
+    await waitFor(() => expect(screen.getByAltText('Test Cover')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByAltText('Test Cover'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }))
+    expect(onSelectCover).toHaveBeenCalledExactlyOnceWith('cover-3')
+  })
+
   it('arrow keys do nothing at a bound where the corresponding id is null', async () => {
     const onSelectCover = vi.fn()
     render(

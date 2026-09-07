@@ -108,7 +108,14 @@ describe('Detail', () => {
     mockedDownload.mockResolvedValue('blob:mock-url')
     render(<Detail coverId="cover-1" onBack={() => {}} {...defaultNavProps} />)
 
-    await waitFor(() => expect(screen.getByText('Adamchini Chawal')).toBeInTheDocument())
+    // Waits on the image itself, not just the cover heading -- the two
+    // resolve via separate async paths (fetchVerifiedCoverById vs.
+    // useCoverImage/downloadCoverImageUrl), and only the image being
+    // present means it's actually clickable yet. A real, pre-existing
+    // race caught while touching this file for KAN-81, not introduced by
+    // it -- waiting on the heading alone let this test pass by timing
+    // luck rather than a real guarantee.
+    await waitFor(() => expect(screen.getByAltText('Adamchini Chawal')).toBeInTheDocument())
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     await userEvent.click(screen.getByAltText('Adamchini Chawal'))
@@ -124,12 +131,28 @@ describe('Detail', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  // KAN-81: explicitly checked -- the lightbox's own close button must
+  // keep working with ProtectedImage's onContextMenu/onDragStart handlers
+  // and select-none/draggable=false in place.
+  it('the lightbox\'s own Close button still works', async () => {
+    mockedFetch.mockResolvedValue(fullCover)
+    mockedDownload.mockResolvedValue('blob:mock-url')
+    render(<Detail coverId="cover-1" onBack={() => {}} {...defaultNavProps} />)
+
+    await waitFor(() => expect(screen.getByAltText('Adamchini Chawal')).toBeInTheDocument())
+    await userEvent.click(screen.getByAltText('Adamchini Chawal'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('the lightbox also closes when clicking outside the image', async () => {
     mockedFetch.mockResolvedValue(fullCover)
     mockedDownload.mockResolvedValue('blob:mock-url')
     render(<Detail coverId="cover-1" onBack={() => {}} {...defaultNavProps} />)
 
-    await waitFor(() => expect(screen.getByText('Adamchini Chawal')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByAltText('Adamchini Chawal')).toBeInTheDocument())
     await userEvent.click(screen.getByAltText('Adamchini Chawal'))
     const dialog = screen.getByRole('dialog')
 

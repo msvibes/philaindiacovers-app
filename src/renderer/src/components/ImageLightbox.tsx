@@ -1,4 +1,5 @@
 import { useEscapeToClose } from '../lib/useEscapeToClose'
+import ProtectedImage from './ProtectedImage'
 
 interface ImageLightboxProps {
   isOpen: boolean
@@ -35,11 +36,11 @@ export default function ImageLightbox({
           "outside"). The close button is redundant with click-outside/
           Escape but kept visible for discoverability -- nothing here
           hints a click closes it otherwise. */}
-      <img
+      <ProtectedImage
         src={imageUrl}
         alt={alt}
-        className="max-w-[90vw] max-h-[85vh] rounded object-contain"
         onClick={(e) => e.stopPropagation()}
+        className="max-w-[90vw] max-h-[85vh] rounded object-contain cursor-default"
       />
       <button
         type="button"
