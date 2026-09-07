@@ -6,6 +6,7 @@ import DisclaimerModal from '../components/DisclaimerModal'
 import ThemeToggle from '../components/ThemeToggle'
 
 interface SettingsProps {
+  email: string | undefined
   themePreference: ThemePreference
   onThemePreferenceChange: (preference: ThemePreference) => void
 }
@@ -17,6 +18,7 @@ interface SettingsProps {
 // "sensible place" this file's own earlier comment left for dark mode to
 // land — now built.
 export default function Settings({
+  email,
   themePreference,
   onThemePreferenceChange
 }: SettingsProps): React.JSX.Element {
@@ -26,6 +28,29 @@ export default function Settings({
     <main className="p-8 max-w-xl">
       <Eyebrow>Preferences</Eyebrow>
       <h1 className="text-2xl font-semibold font-display text-ink mb-6">Settings</h1>
+
+      {/* KAN-41 (US-30/FR-33), view-only slice — editing is a deliberately
+          separate follow-up task, not built here. Email only, not "name":
+          this app's actual signup flow (Signup.tsx) never collects one,
+          and nothing in the schema/user_metadata populates it today — a
+          Profile section showing a name field would just show blank or
+          invented data. Revisit once a real name source exists (e.g.
+          Google SSO's own profile data, once that ships). email is typed
+          optional only because Supabase's own Session["user"]["email"]
+          type is optional — every real account in this app has one
+          (email/password is the only auth method that exists), so the
+          fallback text below is a defensive label, not an expected path. */}
+      <section className="mb-8">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft mb-3">
+          Profile
+        </h2>
+        <dl className="space-y-2 text-sm text-ink">
+          <div className="flex gap-2">
+            <dt className="text-ink-soft w-28 shrink-0">Email</dt>
+            <dd>{email ?? 'Not available'}</dd>
+          </div>
+        </dl>
+      </section>
 
       <section className="mb-8">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft mb-3">
