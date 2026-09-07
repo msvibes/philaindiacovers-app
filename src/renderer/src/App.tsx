@@ -262,6 +262,7 @@ function SignedIn({
     <>
       <Sidebar
         email={session.user.email}
+        isOnline={isOnline}
         currentScreen={screen}
         onNavigate={navigateTo}
         isShortcutsOpen={isShortcutsOpen}
