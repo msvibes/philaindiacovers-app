@@ -553,6 +553,18 @@ export function withFallback(value: string | null | undefined, fallback: string)
   return value && value.trim() !== '' ? value : fallback
 }
 
+// KAN-79: text-only share (no per-cover URL exists -- this app has no web
+// presence for individual covers, confirmed before scoping this feature at
+// all, see that ticket's own description). Pure/testable on its own,
+// matching this file's existing convention for formatting helpers.
+export function buildWhatsAppShareText(cover: CoverDetail): string {
+  const name = withFallback(cover.nameOfCover, 'a GI Tag Special Cover')
+  const giTag = withFallback(cover.giItemName, 'GI Tag not recorded yet')
+  const circle = withFallback(cover.postalCircleName, 'Postal Circle not recorded yet')
+  const date = formatDateOfIssue(cover.dateOfIssue)
+  return `Check out this GI Tag Special Cover: ${name} — ${giTag}, ${circle}, issued ${date}.`
+}
+
 interface RawSyncRow extends RawCoverDetailRow {
   verified_at: string | null
 }

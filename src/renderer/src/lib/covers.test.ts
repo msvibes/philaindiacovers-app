@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { formatDateOfIssue, resolvePostalCircleName, sanitizeSearchTerm, withFallback } from './covers'
+import {
+  buildWhatsAppShareText,
+  formatDateOfIssue,
+  resolvePostalCircleName,
+  sanitizeSearchTerm,
+  withFallback,
+  type CoverDetail
+} from './covers'
 
 describe('sanitizeSearchTerm', () => {
   // Left unescaped, these characters either break the .or() filter
@@ -83,6 +90,45 @@ describe('withFallback', () => {
   it('falls back on undefined, defensively', () => {
     expect(withFallback(undefined, 'Place of issue not recorded yet')).toBe(
       'Place of issue not recorded yet'
+    )
+  })
+})
+
+// KAN-79 -- text-only WhatsApp share.
+describe('buildWhatsAppShareText', () => {
+  const fullCover: CoverDetail = {
+    id: 'cover-1',
+    giItemName: 'Adamchini Chawal (Rice)',
+    productCategory: null,
+    dateOfIssue: '2023-05-19',
+    imageFile: 'some/path.jpg',
+    postalCircleId: 'circle-1',
+    postalCircleName: 'Uttar Pradesh',
+    nameOfCover: 'Adamchini Chawal',
+    giRegistrationNumber: null,
+    cancellationDescription: null,
+    cachetDescription: null,
+    overallDescription: null,
+    placeOfIssue: null
+  }
+
+  it('builds a real, complete summary from every field', () => {
+    expect(buildWhatsAppShareText(fullCover)).toBe(
+      'Check out this GI Tag Special Cover: Adamchini Chawal — Adamchini Chawal (Rice), Uttar Pradesh, issued 19 May 2023.'
+    )
+  })
+
+  it('falls back courteously, field by field, when data is missing -- same shape as the Detail view itself', () => {
+    expect(
+      buildWhatsAppShareText({
+        ...fullCover,
+        nameOfCover: null,
+        giItemName: null,
+        postalCircleName: null,
+        dateOfIssue: null
+      })
+    ).toBe(
+      'Check out this GI Tag Special Cover: a GI Tag Special Cover — GI Tag not recorded yet, Postal Circle not recorded yet, issued Date not recorded yet.'
     )
   })
 })
