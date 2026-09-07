@@ -5,10 +5,17 @@ import Settings from './Settings'
 import { version } from '../../../../package.json'
 
 function renderSettings(
-  themePreference: 'system' | 'light' | 'dark' = 'system'
+  themePreference: 'system' | 'light' | 'dark' = 'system',
+  email: string | undefined = 'signed-in-collector@example.test'
 ): { onThemePreferenceChange: ReturnType<typeof vi.fn> } {
   const onThemePreferenceChange = vi.fn()
-  render(<Settings themePreference={themePreference} onThemePreferenceChange={onThemePreferenceChange} />)
+  render(
+    <Settings
+      email={email}
+      themePreference={themePreference}
+      onThemePreferenceChange={onThemePreferenceChange}
+    />
+  )
   return { onThemePreferenceChange }
 }
 
@@ -24,6 +31,28 @@ describe('Settings', () => {
     expect(screen.getByText('krutimlogic@gmail.com')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /github\.com\/msvibes\/philaindiacovers-app/ })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /report an issue/i })).toBeInTheDocument()
+  })
+
+  // KAN-41 (US-30/FR-33), view-only slice.
+  it('shows a Profile section with the signed-in user’s real email, distinct from the About section’s own contact email', () => {
+    renderSettings('system', 'signed-in-collector@example.test')
+    expect(screen.getByRole('heading', { name: /^profile$/i })).toBeInTheDocument()
+    expect(screen.getByText('signed-in-collector@example.test')).toBeInTheDocument()
+    // Both the real developer-contact email and the signed-in user's own
+    // email are on screen at once — asserting both stay distinct, not
+    // colliding into one node or overwriting each other.
+    expect(screen.getByText('krutimlogic@gmail.com')).toBeInTheDocument()
+  })
+
+  it('falls back to a defensive label when email is somehow undefined', () => {
+    // Deliberately not routed through renderSettings() -- its own
+    // `email` parameter defaults on exactly `undefined`, which would
+    // silently swallow this test's whole point (JS default-parameter
+    // semantics, not a Settings.tsx bug).
+    render(
+      <Settings email={undefined} themePreference="system" onThemePreferenceChange={vi.fn()} />
+    )
+    expect(screen.getByText('Not available')).toBeInTheDocument()
   })
 
   it('opens and closes the Disclaimer from the View Disclaimer link', async () => {
