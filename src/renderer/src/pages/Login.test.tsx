@@ -153,4 +153,15 @@ describe('Login — mode toggle', () => {
     await userEvent.click(screen.getByRole('button', { name: /already have an account/i }))
     expect(screen.getByRole('heading', { name: /welcome back, collector/i })).toBeInTheDocument()
   })
+
+  // T-41 (KAN-15)
+  it('switches to the forgot-password form and back', async () => {
+    render(<Login />)
+
+    await userEvent.click(screen.getByRole('button', { name: /forgot password/i }))
+    expect(screen.getByRole('heading', { name: /forgot your password/i })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /back to sign in/i }))
+    expect(screen.getByRole('heading', { name: /welcome back, collector/i })).toBeInTheDocument()
+  })
 })
