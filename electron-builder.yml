@@ -26,6 +26,12 @@ files:
   # real EULA, referenced by nsis.license below, and is meant to ship.
   - '!.claude/**'
   - '!docs/**'
+  # T-41: webpage/ is the GitHub Pages password-reset page's own source —
+  # a separate deployable artifact (see .github/workflows/deploy-pages.yml),
+  # never meant to ship inside the Electron app. Excluded here for the same
+  # reason as .claude/ and docs/ above: this files list is a denylist, and
+  # a new top-level folder ships by default unless something excludes it.
+  - '!webpage/**'
 asarUnpack:
   - resources/**
 # T-38: Windows/nsis only — this is a Windows desktop app (see package.json's

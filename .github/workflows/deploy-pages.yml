@@ -1,0 +1,53 @@
+# Deploys webpage/ (and only webpage/) to GitHub Pages -- the password
+# reset landing page T-41 needs (see docs/PRD-Addendum-App-Catalogue-UX.md's
+# T-41 row and CLAUDE.md).
+#
+# Deliberately isolated to this one folder, not the repo root or docs/ --
+# a direct lesson from KAN-74 (the installer used to bundle .claude/ and
+# docs/ into every app.asar because nothing excluded them). Publishing
+# docs/ or all of main via Pages would repeat that exact mistake, just
+# over a public URL instead of an installer. The upload-pages-artifact
+# step below only ever packages webpage/'s own contents -- nothing else
+# in this repo is reachable through the deployed site, structurally, not
+# just by convention.
+#
+# One-time manual setup this workflow depends on and cannot create
+# itself: repo Settings > Pages > Source must be set to "GitHub Actions"
+# (not "Deploy from a branch"). Until that's set, this workflow's deploy
+# job will fail with a clear error from GitHub, not silently no-op.
+name: Deploy password-reset page
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'webpage/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: webpage
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
