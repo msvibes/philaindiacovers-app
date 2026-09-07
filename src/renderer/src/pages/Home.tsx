@@ -1,28 +1,64 @@
 import { useEffect, useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import { countCatalogueMatches, fetchCoversByIds, type VerifiedCover } from '../lib/covers'
+import { fetchDisplayName, resolveGreetingName } from '../lib/profile'
 import { useRecentlyViewed } from '../lib/useRecentlyViewed'
 import CatalogueCard from '../components/CatalogueCard'
 import Eyebrow from '../components/Eyebrow'
 
 interface HomeProps {
+  session: Session
+  // Computed once, at sign-in, by App.tsx's SignedIn -- see
+  // lib/dailyPrompt.ts for why this lives there rather than being
+  // recomputed here (the write that marks today as seen has to happen
+  // exactly once per sign-in, not once per Home mount/remount).
+  showDailyPrompt: boolean
   onEnterCatalogue: () => void
   onSelectCover: (id: string) => void
 }
 
-// FR-01: a distinct landing screen, separate from the catalogue grid. No
-// name field exists anywhere in this app (confirmed during US-01
-// planning), so the hero stays generic rather than inventing a
-// personalization the schema has nowhere to back. The count line is real,
-// live data (countCatalogueMatches({}) — no filters, full verified count),
-// not copy that could silently drift from what the grid actually shows.
+// FR-01: a distinct landing screen, separate from the catalogue grid. The
+// count line is real, live data (countCatalogueMatches({}) — no filters,
+// full verified count), not copy that could silently drift from what the
+// grid actually shows.
 //
 // Recently viewed finally gets the rendering surface FR-28/T-25 always
 // intended for it — T-25 built the tracking/persistence with nowhere to
 // show it since this screen didn't exist yet.
-export default function Home({ onEnterCatalogue, onSelectCover }: HomeProps): React.JSX.Element {
+//
+// displayName is fetched independently here, the same way
+// ProfileSection.tsx fetches it for Settings, rather than lifted into
+// App.tsx and passed down -- this screen fully unmounts on navigation
+// away (App.tsx's renderScreen is a plain switch, not a router keeping
+// screens alive), so remounting here already picks up any edit made in
+// Settings for free, with no extra plumbing needed to keep two copies in
+// sync.
+export default function Home({
+  session,
+  showDailyPrompt,
+  onEnterCatalogue,
+  onSelectCover
+}: HomeProps): React.JSX.Element {
   const { recentIds } = useRecentlyViewed()
   const [totalCount, setTotalCount] = useState<number | null>(null)
   const [recentCovers, setRecentCovers] = useState<VerifiedCover[]>([])
+  const [displayName, setDisplayName] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchDisplayName(session.user.id)
+      .then((name) => {
+        if (!cancelled) setDisplayName(name)
+      })
+      .catch(() => {
+        // The greeting still has a real fallback (email local-part) --
+        // a failed read just means that fallback is used instead of the
+        // real name, not a broken screen.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [session.user.id])
 
   useEffect(() => {
     let cancelled = false
@@ -67,20 +103,45 @@ export default function Home({ onEnterCatalogue, onSelectCover }: HomeProps): Re
           inconsistency. */}
       <div className="space-y-3 text-center">
         <Eyebrow>Collector&apos;s Desk</Eyebrow>
-        <h1 className="text-2xl font-semibold font-display text-ink">Welcome back!</h1>
+        {/* One sign-in per day sees this instead of the normal greeting --
+            computed once by App.tsx's SignedIn (see lib/dailyPrompt.ts),
+            not recomputed on every Home mount. The second shortcut
+            deliberately doesn't render with no recently-viewed history —
+            "continue where you left off" has nothing real to continue
+            with on a genuinely first-ever session. */}
+        {showDailyPrompt ? (
+          <h1 className="text-2xl font-semibold font-display text-ink">
+            What would you like to do today?
+          </h1>
+        ) : (
+          <h1 className="text-2xl font-semibold font-display text-ink">
+            Hi, {resolveGreetingName(displayName, session.user.email)}!
+          </h1>
+        )}
         <p className="text-ink-soft">
           {totalCount === null
             ? 'Loading the catalogue…'
             : `${totalCount} verified cover${totalCount === 1 ? '' : 's'} ready to browse.`}
         </p>
-        <button
-          type="button"
-          onClick={onEnterCatalogue}
-          data-tour="home-cta"
-          className="rounded bg-accent px-6 py-2 text-white hover:bg-accent-hover"
-        >
-          Enter the catalogue
-        </button>
+        <div className="flex justify-center gap-3">
+          <button
+            type="button"
+            onClick={onEnterCatalogue}
+            data-tour="home-cta"
+            className="rounded bg-accent px-6 py-2 text-white hover:bg-accent-hover"
+          >
+            Enter the catalogue
+          </button>
+          {showDailyPrompt && recentIds.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onSelectCover(recentIds[0])}
+              className="rounded border border-line-strong bg-card px-6 py-2 text-ink hover:bg-paper"
+            >
+              Continue where you left off
+            </button>
+          )}
+        </div>
       </div>
 
       <div>

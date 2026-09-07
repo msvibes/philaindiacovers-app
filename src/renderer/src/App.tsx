@@ -12,6 +12,7 @@ import { useOnlineStatus } from './lib/useOnlineStatus'
 import { hasCompletedTour, markTourCompleted } from './lib/tourCompletion'
 import { TOUR_STEPS } from './lib/tourSteps'
 import { useThemePreference, type ThemePreference } from './lib/useThemePreference'
+import { isFirstLoginToday, markActiveToday } from './lib/dailyPrompt'
 import { useToast } from './lib/ToastContext'
 import Sidebar from './components/Sidebar'
 import ShortcutsModal from './components/ShortcutsModal'
@@ -91,6 +92,20 @@ function SignedIn({
   // new profiles column. -1 means inactive; a real index means active.
   const [tourStepIndex, setTourStepIndex] = useState(() => (hasCompletedTour(session) ? -1 : 0))
   const isTourActive = tourStepIndex >= 0
+
+  // Home screen personalization: captured once, at the value true at the
+  // moment of THIS sign-in -- must not be recomputed later in the session
+  // (e.g. on every Home mount/remount while navigating around), or it
+  // would flip to false the instant markActiveToday()'s own write below
+  // resolves, even within the same still-"first login today" session.
+  const [showDailyPrompt] = useState(() => isFirstLoginToday(session))
+  useEffect(() => {
+    markActiveToday().catch(() => {
+      // Same reasoning as the tour-completion write -- worst case the
+      // prompt shows again on the next sign-in today instead of the
+      // normal greeting, not a broken UI this session.
+    })
+  }, [])
 
   function endTour(): void {
     setTourStepIndex(-1)
@@ -244,7 +259,14 @@ function SignedIn({
     }
     switch (screen) {
       case 'home':
-        return <Home onEnterCatalogue={() => navigateTo('catalogue')} onSelectCover={selectCover} />
+        return (
+          <Home
+            session={session}
+            showDailyPrompt={showDailyPrompt}
+            onEnterCatalogue={() => navigateTo('catalogue')}
+            onSelectCover={selectCover}
+          />
+        )
       case 'catalogue':
         return <Catalogue query={query} dispatch={dispatch} onSelectCover={selectCover} />
       case 'settings':
