@@ -1,8 +1,25 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Settings from './Settings'
 import { version } from '../../../../package.json'
+import { fetchDisplayName } from '../lib/profile'
+
+// ProfileSection (rendered by Settings) calls these for real otherwise --
+// mocked the same way every other Supabase-backed page/component in this
+// suite is, not because Settings.test.tsx itself is testing profile
+// fetch/save behavior (that's ProfileSection.test.tsx's job).
+vi.mock('../lib/profile', () => ({
+  fetchDisplayName: vi.fn(),
+  updateDisplayName: vi.fn()
+}))
+
+const mockedFetchDisplayName = vi.mocked(fetchDisplayName)
+
+beforeEach(() => {
+  mockedFetchDisplayName.mockReset()
+  mockedFetchDisplayName.mockResolvedValue(null)
+})
 
 function renderSettings(
   themePreference: 'system' | 'light' | 'dark' = 'system',
@@ -11,6 +28,7 @@ function renderSettings(
   const onThemePreferenceChange = vi.fn()
   render(
     <Settings
+      userId="collector-1"
       email={email}
       themePreference={themePreference}
       onThemePreferenceChange={onThemePreferenceChange}
@@ -50,7 +68,12 @@ describe('Settings', () => {
     // silently swallow this test's whole point (JS default-parameter
     // semantics, not a Settings.tsx bug).
     render(
-      <Settings email={undefined} themePreference="system" onThemePreferenceChange={vi.fn()} />
+      <Settings
+        userId="collector-1"
+        email={undefined}
+        themePreference="system"
+        onThemePreferenceChange={vi.fn()}
+      />
     )
     expect(screen.getByText('Not available')).toBeInTheDocument()
   })
