@@ -5,6 +5,7 @@ import type { Screen } from '../App'
 
 interface SidebarProps {
   email: string | undefined
+  isOnline: boolean
   currentScreen: Screen
   onNavigate: (screen: Screen) => void
   isShortcutsOpen: boolean
@@ -50,6 +51,7 @@ function rowClasses(isActive: boolean): string {
 // written straight into the addendum text.
 export default function Sidebar({
   email,
+  isOnline,
   currentScreen,
   onNavigate,
   isShortcutsOpen,
@@ -129,10 +131,26 @@ export default function Sidebar({
 
         <div className="border-t border-line my-3 mx-5" />
 
+        {/* KAN-77: a small, always-visible connectivity indicator —
+            deliberately separate from OfflineBanner (T-16/17, only shown
+            while offline) and the reconnect toast (T-35, fires once).
+            Neither of those tells you anything while the connection is
+            healthy; this fills that gap without duplicating either. */}
+        <div
+          className="mt-auto px-5 py-2 flex items-center gap-1.5 text-[11.5px] text-ink-soft"
+          role="status"
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-success-text' : 'bg-stamp'}`}
+            aria-hidden="true"
+          />
+          {isOnline ? 'Online' : 'Offline'}
+        </div>
+
         <button
           type="button"
           onClick={() => setIsLogoutConfirmOpen(true)}
-          className="mt-auto border-t border-line py-3.5 px-5 text-left text-[13.5px] text-ink"
+          className="border-t border-line py-3.5 px-5 text-left text-[13.5px] text-ink"
         >
           Log out
         </button>

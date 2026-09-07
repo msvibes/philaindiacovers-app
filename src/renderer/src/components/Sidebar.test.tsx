@@ -17,6 +17,7 @@ beforeEach(() => {
 function renderSidebar(
   overrides: Partial<{
     email: string | undefined
+    isOnline: boolean
     currentScreen: 'home' | 'catalogue' | 'settings'
     onNavigate: (screen: 'home' | 'catalogue' | 'settings') => void
     isShortcutsOpen: boolean
@@ -26,6 +27,7 @@ function renderSidebar(
   render(
     <Sidebar
       email={'email' in overrides ? overrides.email : 'signed-in-collector@example.test'}
+      isOnline={overrides.isOnline ?? true}
       currentScreen={overrides.currentScreen ?? 'home'}
       onNavigate={overrides.onNavigate ?? vi.fn()}
       isShortcutsOpen={overrides.isShortcutsOpen ?? false}
@@ -44,6 +46,17 @@ describe('Sidebar', () => {
   it('renders cleanly with no crash when email is somehow undefined', () => {
     renderSidebar({ email: undefined })
     expect(screen.getByText('PhilaIndiaCovers')).toBeInTheDocument()
+  })
+
+  // KAN-77
+  it('shows an always-visible Online indicator when connected', () => {
+    renderSidebar({ isOnline: true })
+    expect(screen.getByRole('status')).toHaveTextContent('Online')
+  })
+
+  it('shows an Offline indicator when disconnected', () => {
+    renderSidebar({ isOnline: false })
+    expect(screen.getByRole('status')).toHaveTextContent('Offline')
   })
 
   it('renders the working nav entries, Keyboard Shortcuts, and the coming-soon placeholders', () => {
