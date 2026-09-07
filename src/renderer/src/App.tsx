@@ -250,6 +250,7 @@ function SignedIn({
       case 'settings':
         return (
           <Settings
+            userId={session.user.id}
             email={session.user.email}
             themePreference={themePreference}
             onThemePreferenceChange={onThemePreferenceChange}
