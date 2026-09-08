@@ -6,8 +6,10 @@ import { useEffect } from 'react'
 // both live under Detail.tsx's own "ready" state). Same shape as
 // useEscapeToClose. In practice this is a safety net, not a fix for
 // existing behavior — confirmed before building that nothing in this app
-// (src/main/menu.ts has no File > Save item or accelerator) currently
-// does anything on Ctrl+S at all.
+// currently does anything on Ctrl+S at all (there was never a File > Save
+// item/accelerator even back when this app still had a native menu bar —
+// see the menu-removal decision logged in PROGRESS.md — so this remains
+// true a fortiori now that the menu is gone entirely).
 export function useBlockSaveShortcut(isActive: boolean): void {
   useEffect(() => {
     if (!isActive) return
