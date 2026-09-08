@@ -55,3 +55,16 @@ export function getShadingLevel(count: number, maxCount: number): 0 | 1 | 2 | 3 
   const level = Math.ceil((count / maxCount) * 4)
   return Math.min(4, Math.max(1, level)) as 1 | 2 | 3 | 4
 }
+
+// Moved here from IndiaMap.tsx (KAN-85) so IndiaMapLegend.tsx draws from
+// the exact same source of truth as the map itself -- the two must never
+// silently drift apart if the ramp's colors ever change. See base.css's
+// own comment on --color-choropleth-1..4 for why level 0 reuses
+// --color-line rather than getting a dedicated token.
+export const SHADING_FILLS: Record<0 | 1 | 2 | 3 | 4, string> = {
+  0: 'var(--color-line)',
+  1: 'var(--color-choropleth-1)',
+  2: 'var(--color-choropleth-2)',
+  3: 'var(--color-choropleth-3)',
+  4: 'var(--color-choropleth-4)'
+}

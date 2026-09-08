@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 import indiaTopoJson from '../assets/data/india-states.json'
 import type { CatalogueFacets } from '../lib/covers'
-import { getRegionCoverStats, getShadingLevel } from '../lib/regionCoverStats'
+import { getRegionCoverStats, getShadingLevel, SHADING_FILLS } from '../lib/regionCoverStats'
+import IndiaMapLegend from './IndiaMapLegend'
 
 interface IndiaMapProps {
   facets: CatalogueFacets
@@ -19,14 +20,6 @@ interface HoveredRegion {
   // uses for its own JS-computed tooltip positioning, not a new pattern.
   top: number
   left: number
-}
-
-const SHADING_FILLS: Record<0 | 1 | 2 | 3 | 4, string> = {
-  0: 'var(--color-line)',
-  1: 'var(--color-choropleth-1)',
-  2: 'var(--color-choropleth-2)',
-  3: 'var(--color-choropleth-3)',
-  4: 'var(--color-choropleth-4)'
 }
 
 // T-21 (US-50/KAN-61), PR 2 of 3: choropleth shading + hover tooltips on
@@ -125,6 +118,11 @@ export default function IndiaMap({ facets, onSelectRegion }: IndiaMapProps): Rea
           }
         </Geographies>
       </ComposableMap>
+
+      {/* KAN-85: bottom-left corner, deliberately -- leaves top-right free
+          for the future zoom control buttons and stays clear of the
+          cursor-anchored tooltip. */}
+      <IndiaMapLegend />
 
       {/* Fixed-position tooltip, positioned via the hovered path's own
           bounding rect rather than raw mouse coordinates -- matches
