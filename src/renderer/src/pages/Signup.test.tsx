@@ -54,7 +54,8 @@ describe('Signup', () => {
 
     expect(mockedSignUp).toHaveBeenCalledExactlyOnceWith({
       email: 'new@example.test',
-      password: 'a-real-password'
+      password: 'a-real-password',
+      options: { emailRedirectTo: 'https://msvibes.github.io/philaindiacovers-app/confirmed.html' }
     })
     await waitFor(() => expect(screen.getByText(/check your email/i)).toBeInTheDocument())
   })
