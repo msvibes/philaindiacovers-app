@@ -17,6 +17,7 @@ import FilterPanel, { type AppliedFilters } from '../components/FilterPanel'
 import Eyebrow from '../components/Eyebrow'
 import CatalogueViewToggle, { type CatalogueViewMode } from '../components/CatalogueViewToggle'
 import YearTimeline from '../components/YearTimeline'
+import IndiaMap from '../components/IndiaMap'
 
 const PAGE_SIZE = 24
 
@@ -244,6 +245,11 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
         // filters/search happen to be currently applied, matching the
         // prototype's own full-dataset-driven timeline.
         <YearTimeline years={facets.years} onSelectYear={selectYear} />
+      ) : viewMode === 'region' ? (
+        // T-21 (KAN-61) PR 1: static render only -- no shading or
+        // click-to-filter yet (PR 2 and PR 3), so facets isn't threaded
+        // through here yet either.
+        <IndiaMap />
       ) : totalCount === 0 ? (
         <CatalogueEmptyState
           quickCategories={facets.productCategories.slice(0, 2).map((f) => f.value)}
