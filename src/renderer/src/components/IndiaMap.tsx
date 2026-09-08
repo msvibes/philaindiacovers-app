@@ -6,6 +6,7 @@ import { getRegionCoverStats, getShadingLevel } from '../lib/regionCoverStats'
 
 interface IndiaMapProps {
   facets: CatalogueFacets
+  onSelectRegion: (circleId: string) => void
 }
 
 interface HoveredRegion {
@@ -38,7 +39,19 @@ const SHADING_FILLS: Record<0 | 1 | 2 | 3 | 4, string> = {
 // client-side lookup over facets.postalCircles, not a network call), so
 // this component stays a plain function of its props, no internal
 // fetching.
-export default function IndiaMap({ facets }: IndiaMapProps): React.JSX.Element {
+//
+// PR 3: a region only becomes clickable once its circle has a real,
+// known id -- which only exists in facets.postalCircles for a circle
+// with at least one verified cover (same reason FilterPanel's own
+// checkboxes only ever show circles with coverage). A genuinely
+// zero-cover region deliberately stays non-interactive rather than
+// firing a live fallback query just to filter into a guaranteed-empty
+// grid -- its neutral (unshaded) fill and "0 covers" tooltip already
+// tell the user there's nothing to click into, and this keeps the whole
+// component a pure, offline-friendly function of its props rather than
+// introducing a second, inconsistent async data path alongside the
+// offline-cache-aware facets it already receives.
+export default function IndiaMap({ facets, onSelectRegion }: IndiaMapProps): React.JSX.Element {
   const [hovered, setHovered] = useState<HoveredRegion | null>(null)
 
   // Relative to the single most-covered circle currently on the map, not
@@ -62,6 +75,7 @@ export default function IndiaMap({ facets }: IndiaMapProps): React.JSX.Element {
               const stats = getRegionCoverStats(geo.properties.shapeName, facets)
               const level = getShadingLevel(stats.count, maxCount)
               const fill = SHADING_FILLS[level]
+              const isClickable = stats.circleId !== null
               return (
                 <Geography
                   key={geo.rsmKey}
@@ -79,25 +93,30 @@ export default function IndiaMap({ facets }: IndiaMapProps): React.JSX.Element {
                     })
                   }}
                   onMouseLeave={() => setHovered(null)}
+                  onClick={() => {
+                    if (stats.circleId) onSelectRegion(stats.circleId)
+                  }}
                   style={{
                     default: {
                       fill,
                       stroke: 'var(--color-line-strong)',
                       strokeWidth: 0.5,
-                      outline: 'none'
+                      outline: 'none',
+                      cursor: isClickable ? 'pointer' : 'default'
                     },
                     hover: {
                       fill,
                       stroke: 'var(--color-ink)',
                       strokeWidth: 1,
                       outline: 'none',
-                      cursor: 'pointer'
+                      cursor: isClickable ? 'pointer' : 'default'
                     },
                     pressed: {
                       fill,
                       stroke: 'var(--color-ink)',
                       strokeWidth: 1,
-                      outline: 'none'
+                      outline: 'none',
+                      cursor: isClickable ? 'pointer' : 'default'
                     }
                   }}
                 />
