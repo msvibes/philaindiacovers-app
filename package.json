@@ -30,7 +30,16 @@
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/playfair-display": "^5.3.0",
-    "@supabase/supabase-js": "^2.112.3"
+    "@supabase/supabase-js": "^2.112.3",
+    "react-simple-maps": "^3.0.0",
+    "topojson-client": "^3.1.0"
+  },
+  "overrides": {
+    "react-simple-maps": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "d3-color": "^3.1.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
@@ -43,6 +52,7 @@
     "@types/node": "^22.19.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/react-simple-maps": "^3.0.6",
     "@vitejs/plugin-react": "^5.1.1",
     "electron": "^39.2.6",
     "electron-builder": "^26.0.12",

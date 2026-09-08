@@ -1,14 +1,15 @@
-export type CatalogueViewMode = 'grid' | 'year'
+export type CatalogueViewMode = 'grid' | 'year' | 'region'
 
 interface CatalogueViewToggleProps {
   viewMode: CatalogueViewMode
   onChange: (mode: CatalogueViewMode) => void
 }
 
-// T-26 (KAN-62): same two-button segmented pattern as SortControl.tsx
-// (this app's other small view toggle) — the prototype's own .view-tabs
-// has a third "By region" tab, but that's a separate, not-yet-built task
-// (US-50/KAN-61), so only Grid/By year exist here.
+// T-26 (KAN-62) added Grid/By year as a two-button segmented pattern
+// (same as SortControl.tsx, this app's other small view toggle), noting
+// the prototype's own .view-tabs already reserved a third "By region" tab
+// for the not-yet-built US-50/KAN-61. T-21 (KAN-61) now adds that third
+// tab for real.
 export default function CatalogueViewToggle({
   viewMode,
   onChange
@@ -32,6 +33,16 @@ export default function CatalogueViewToggle({
         }`}
       >
         By year
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('region')}
+        aria-pressed={viewMode === 'region'}
+        className={`px-3 py-1.5 border-l border-line ${
+          viewMode === 'region' ? 'bg-accent text-white' : 'bg-card text-ink-soft'
+        }`}
+      >
+        By region
       </button>
     </div>
   )

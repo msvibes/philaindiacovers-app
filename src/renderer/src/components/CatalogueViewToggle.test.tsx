@@ -16,4 +16,17 @@ describe('CatalogueViewToggle', () => {
     await userEvent.click(screen.getByRole('button', { name: 'By year' }))
     expect(onChange).toHaveBeenCalledExactlyOnceWith('year')
   })
+
+  // T-21 (KAN-61): the third tab the prototype always reserved a slot for.
+  it('has a third "By region" tab that marks pressed and calls onChange', async () => {
+    const onChange = vi.fn()
+    const { rerender } = render(<CatalogueViewToggle viewMode="grid" onChange={onChange} />)
+    await userEvent.click(screen.getByRole('button', { name: 'By region' }))
+    expect(onChange).toHaveBeenCalledExactlyOnceWith('region')
+
+    rerender(<CatalogueViewToggle viewMode="region" onChange={onChange} />)
+    expect(screen.getByRole('button', { name: 'By region' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Grid' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: 'By year' })).toHaveAttribute('aria-pressed', 'false')
+  })
 })
