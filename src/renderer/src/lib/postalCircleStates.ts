@@ -131,3 +131,10 @@ export function getSiblingRegionsInCircle(regionName: string): string[] {
     (region) => normalizeRegionName(region) !== normalizedSelf
   )
 }
+
+// KAN-85: the 36 canonical region display names, for the jump-to-state
+// search's suggestion list -- no new data, just exposing what
+// REGION_CIRCLE_TABLE already has. Not exported as the raw table itself
+// (which also carries each region's circle, an internal implementation
+// detail callers outside this module shouldn't need to know the shape of).
+export const ALL_REGION_NAMES: string[] = REGION_CIRCLE_TABLE.map((entry) => entry.region)

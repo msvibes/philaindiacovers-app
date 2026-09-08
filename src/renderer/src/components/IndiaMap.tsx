@@ -4,6 +4,7 @@ import indiaTopoJson from '../assets/data/india-states.json'
 import type { CatalogueFacets } from '../lib/covers'
 import { getRegionCoverStats, getShadingLevel, SHADING_FILLS } from '../lib/regionCoverStats'
 import IndiaMapLegend from './IndiaMapLegend'
+import IndiaMapSearch from './IndiaMapSearch'
 
 interface IndiaMapProps {
   facets: CatalogueFacets
@@ -55,6 +56,13 @@ export default function IndiaMap({ facets, onSelectRegion }: IndiaMapProps): Rea
 
   return (
     <div className="relative">
+      {/* KAN-85: top-left, over blank space above the landmass at this
+          projection/scale -- confirmed visually, doesn't obscure any
+          region. Complementary to clicking the map directly, not a
+          replacement for it -- selecting a suggestion calls the exact
+          same onSelectRegion callback a click would. */}
+      <IndiaMapSearch facets={facets} onSelectRegion={onSelectRegion} />
+
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ center: [83, 23], scale: 1000 }}
