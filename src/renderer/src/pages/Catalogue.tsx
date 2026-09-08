@@ -64,6 +64,21 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
     showToast('Filters applied')
   }
 
+  // T-21 (KAN-61) PR 3: same 3-step shape as selectYear above -- dispatch
+  // a single-value filter replacing every other filter group, flip back
+  // to grid, toast. circleId always comes from a real, known circle
+  // (IndiaMap only ever calls this for a region whose circle has at
+  // least one verified cover -- see IndiaMap.tsx's own comment on why
+  // zero-cover regions stay non-clickable).
+  function selectRegion(circleId: string): void {
+    dispatch({
+      type: 'SET_FILTERS',
+      filters: { postalCircleIds: [circleId], productCategories: [], years: [] }
+    })
+    setViewMode('grid')
+    showToast('Filters applied')
+  }
+
   // Seeded here, in a real click handler, rather than via an effect on
   // FilterPanel's own isOpen prop — avoids resetting state synchronously
   // inside an effect (see the fetch effect's own comment below for the
@@ -246,9 +261,9 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
         // prototype's own full-dataset-driven timeline.
         <YearTimeline years={facets.years} onSelectYear={selectYear} />
       ) : viewMode === 'region' ? (
-        // T-21 (KAN-61) PR 2: same facets object FilterPanel/YearTimeline
-        // already use -- no new query. Click-to-filter is still PR 3.
-        <IndiaMap facets={facets} />
+        // T-21 (KAN-61) PR 3: same facets object FilterPanel/YearTimeline
+        // already use -- no new query.
+        <IndiaMap facets={facets} onSelectRegion={selectRegion} />
       ) : totalCount === 0 ? (
         <CatalogueEmptyState
           quickCategories={facets.productCategories.slice(0, 2).map((f) => f.value)}
