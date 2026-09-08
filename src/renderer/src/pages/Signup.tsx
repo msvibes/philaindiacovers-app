@@ -6,6 +6,13 @@ interface SignupProps {
   onSwitchToSignIn: () => void
 }
 
+// KAN-83 PR 2: unlike ForgotPassword.tsx's resetPasswordForEmail() call,
+// signUp() never had its own explicit redirectTo -- it depended entirely
+// on Supabase's Site URL fallback (deliberately left at KAN-75's inert
+// localhost:9999). Passing this explicitly here fully decouples signup
+// confirmation from that fallback -- Site URL needs no further changes.
+const SIGNUP_CONFIRMATION_PAGE_URL = 'https://msvibes.github.io/philaindiacovers-app/confirmed.html'
+
 // FR-26/US-01 (email/password only — Google SSO is a separate follow-up,
 // see T-11a) + FR-27/US-02 (email verification). No name field — nothing
 // in PRD-v1.0/the addendum requires one, and the schema has nowhere to put
@@ -32,7 +39,11 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
     setError(null)
     setIsSubmitting(true)
 
-    const { error: signUpError } = await supabase.auth.signUp({ email, password })
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: SIGNUP_CONFIRMATION_PAGE_URL }
+    })
     setIsSubmitting(false)
 
     if (signUpError) {
@@ -63,18 +74,13 @@ export default function Signup({ onSwitchToSignIn }: SignupProps): React.JSX.Ele
         </h1>
         <p className="text-[13px] text-ink-soft text-center mb-6">
           If that address doesn&apos;t already have an account, we&apos;ve sent a link to verify it
-          — click it, then come back here and sign in. (
-          {/* 2026-09-03, real production test: the page it opens next shows a
-              browser connection error (ERR_CONNECTION_REFUSED), confirmed
-              live — Supabase's confirmation redirect points at an inert
-              localhost address (KAN-75) since there's no real web page to
-              land on yet. Confirmation itself completes before that
-              redirect fires, confirmed via email_confirmed_at flipping
-              server-side — the error is cosmetic, not a failure. Revisit
-              this copy once T-41 ships a real destination for these
-              links to land on. */}
-          Your browser will probably show an error on that next page — that&apos;s expected, not a
-          sign anything went wrong. Just close that tab and come back here to sign in.)
+          — click it, then come back here and sign in.
+          {/* KAN-83 PR 2: the "browser will probably show an error" caveat
+              this paragraph carried since 2026-09-03 is gone -- the
+              confirmation link now lands on a real page
+              (webpage/confirmed.html), not the inert localhost:9999
+              fallback KAN-75 left behind. Revisited exactly as that
+              comment said to, once a real destination existed. */}
         </p>
         <button
           type="button"
