@@ -1,7 +1,17 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-08 (later same day, again)
-**Last session worked on:** **KAN-85** — three value-adds on top of KAN-61 (legend, jump-to-state search, zoom/pan controls), all 3 PRs merged and Done, live-verified with real browser gestures (see new entry below). **KAN-84** (keyboard navigation) filed and deliberately deferred, not built. Before that, same day: KAN-61 (India map) and KAN-83 (signup-confirmation page) — both fully Done and live-verified end to end. Before that: Home screen personalization (KAN-41 + KAN-82), KAN-81, the five-item value-add batch, and T-41 — all still Done, unchanged, see below.
+**Last session worked on:** **KAN-71** (intermittent 401 on the covers sync REST query) — closed, not reproducible after 5 clean sign-out/sign-in cycles (30 requests, zero 401s) against the dev/CI project; explicitly **not confirmed fixed**, most plausibly resolved as a side effect of the 2026-09-03 key rotation, no root cause independently identified. See new entry below for the full precise framing (kept deliberately unambiguous so a future resurfacing isn't misread as "this was fixed"). Before that, same day: **KAN-85** — three value-adds on top of KAN-61 (legend, jump-to-state search, zoom/pan controls), all 3 PRs merged and Done, live-verified with real browser gestures. **KAN-84** (keyboard navigation) filed and deliberately deferred, not built. Before that: KAN-61 (India map) and KAN-83 (signup-confirmation page) — both fully Done and live-verified end to end. Before that: Home screen personalization (KAN-41 + KAN-82), KAN-81, the five-item value-add batch, and T-41 — all still Done, unchanged, see below.
+
+## KAN-71 — intermittent 401 on the covers sync REST query (2026-09-08): closed, not reproducible
+
+Originally found during T-16/T-17 live testing (2026-09-01) — 2 out of 3 logins failed with a 401 on the same `covers` REST query, filed as its own bug rather than folded into T-16/T-17's separately-root-caused login-bounce fix.
+
+**Before any root-cause investigation, first confirmed whether it's still live** — a lot had changed since the original observation (the 2026-09-03 key rotation, T-41's redirect changes, several new features). Ran 5 full sign-out → sign-in cycles against the dev/CI project (this ticket's own scope) using an existing verified account, with a fetch interceptor installed to capture every real Supabase request and status directly, since the Browser pane's own network log wasn't capturing cross-origin fetch calls.
+
+**Result**: 65 Supabase requests captured, 30 of them the exact `covers` sync query this ticket names. All 30 returned 200 — zero 401s, zero errors, across all 5 cycles.
+
+**Precise closing framing, deliberately not overstated**: this is **not reproducible under the original conditions right now** — it is **explicitly not confirmed fixed**. No code change was made to this call path; nothing was root-caused. Most plausible explanation (a hypothesis, not verified): the 2026-09-03 service-role key rotation resolved this as a side effect. Closed on this basis, with the Jira comment itself carrying the same precise distinction, so a future resurfacing isn't misread as "this was already fixed" — it would need a fresh investigation with fresh diagnostic logging, since none was ever added to this specific call path.
 
 ## KAN-85 — India map: legend, jump-to-state search, zoom/pan controls (2026-09-08): App PRs #47 + #48 + #49, all merged: Done
 
