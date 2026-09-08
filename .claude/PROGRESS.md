@@ -1,7 +1,35 @@
 # Progress Snapshot — philaindiacovers-app
 
-**Last updated:** 2026-09-08
-**Last session worked on:** Home screen personalization — KAN-41 closed for real (name field, view + edit, on top of a new cross-repo RLS migration) and KAN-82 ("Hi, [Name]!" greeting + first-login-of-day prompt), both Done — see the new entries below. Before that: KAN-81 (Tier 1 deterrent-level image copy-protection) — Done. Before that: five small, deliberately-scoped value-add items (KAN-76/77/78/79 Done, all four live-verified by the user). Also T-41 (KAN-15, password reset) — Done, the only task left in the 2026-09-01 locked sequence. The 2026-09-03 session's work (KAN-72/74/75, `.env.production` build separation, the key-mixup incident/fix, Signup copy fix) is unchanged and still Done. All previous entries still below, unchanged.
+**Last updated:** 2026-09-08 (later same day)
+**Last session worked on:** Two new pieces of work, both In Progress, planned together and sequenced independently — see the new entries below. **KAN-83** (signup-confirmation GitHub Pages page, companion to T-41): PR 1/2 merged and live-verified (real deployed page), PR 2 (app wiring) not yet started. **KAN-61** (US-50, India map): PR 1/3 merged (circle-to-state mapping + static render, with real political-boundary verification before merge); PR 2 (choropleth shading) and PR 3 (click-to-filter) not yet started. Before that: Home screen personalization (KAN-41 + KAN-82), KAN-81, the five-item value-add batch, and T-41 — all still Done, unchanged, see below.
+
+## KAN-61 — India map, browse by state/region (2026-09-08, in progress): App PR #43 merged (1 of 3)
+
+Two items surfaced as "from yesterday, not showing in standup" — checked and confirmed genuinely unstarted (no branches/commits/PRs/tickets for either) before planning. Planned in detail first (Explore-agent research + a political-boundary spot-check via WebFetch/WebSearch before finalizing), plan approved, then both tickets filed (KAN-61 transitioned from Idea to In Progress; KAN-83 created new) before any code, per this project's own standing "a decided requirement needs an owner" rule.
+
+**The real domain problem** (`covers.issuing_postal_circle` uses India Post's 23 circles, not states — not 1:1): researched directly against India Post's own org page + one independent source, both agreeing on 7 named exceptions. An 8th — Ladakh falling under Jammu and Kashmir — is an inference by elimination (no separate Ladakh circle exists among the 23), not a directly-stated fact in either source; flagged explicitly in `postalCircleStates.ts`'s own comments as the one row to re-check first, including exactly where the research hit a dead end (`jkpost.gov.in`, DNS failure).
+
+**A real finding only surfaced by downloading the actual geoBoundaries file** (the addendum had explicitly deferred this exact check): region names carry diacritic marks ("Bihar" → "Bihār", "Ladakh" → "Ladākh", etc.) — handled via NFD decomposition + stripping combining marks, verified against all 36 real shapeName strings copied directly from the file.
+
+**Political-boundary verification, given the sensitivity of India's political map** (this project's own standing rule): J&K/Ladakh split and the 2020 Dadra & Nagar Haveli/Daman & Diu merger both confirmed directly in the real file's properties, then visually re-verified by rendering the actual topology through d3-geo/topojson-client (the same libraries react-simple-maps uses internally) before merge — both render as correct, distinct shapes.
+
+**Library**: `react-simple-maps` (MIT) kept over a newer, unproven React-19-targeting fork — installed via an npm `overrides` entry (cleaner than the originally-planned `--legacy-peer-deps` flag) that also patches the one new vulnerable transitive dependency (`d3-color`) the install introduced, confirmed via a before/after `npm audit` diff.
+
+**Product decision, confirmed with the user before building**: the 9 states/UTs sharing a circle with others (e.g. all 6 North Eastern states) will show that circle's full count on every state it spans, not a false per-state split — matches PRD-v1.0 FR-15/KAN-37's "accurate over falsely blended" principle. This governs PR 2, not yet built.
+
+**PR 1/3** (App PR #43) — `postalCircleStates.ts` (the mapping + diacritic normalization, 46 tests), the TopoJSON asset (~60KB, geoBoundaries India ADM1, CC BY 2.5 India), `IndiaMap.tsx` (react-simple-maps, single neutral fill, no shading/click yet), `CatalogueViewToggle`'s third "By region" tab the prototype always reserved. Full suite: 272 passing (was 222). Not live-verified in the Browser pane (no signed-in session available) — verified instead via component tests plus a standalone rendered-topology visual check (screenshots of the J&K/Ladakh and DNH+DD regions specifically).
+
+**Next**: PR 2 (choropleth shading, dedicated dark-mode tokens, hover tooltips honoring the shared-circle decision above, zero-cover-state styling), then PR 3 (click-to-filter, reusing T-26's exact `selectYear` pattern).
+
+## KAN-83 — signup-confirmation GitHub Pages page (2026-09-08, in progress): App PR #42 merged (1 of 2)
+
+Companion to T-41's password-reset page, closing the loop on KAN-75's copy-only interim fix (`Signup.tsx`'s own comment named this as the logged trigger condition to revisit). Planned alongside KAN-61 (see above), new ticket filed before building.
+
+**A real technical difference from T-41, found during planning**: `Signup.tsx`'s `signUp({ email, password })` call passes no `emailRedirectTo` at all — it currently depends entirely on Supabase's Site URL fallback (deliberately left at the inert `localhost:9999` by KAN-75, specifically because Signup relied on it). PR 2 will add an explicit `emailRedirectTo`, which also fully decouples this flow from Site URL — no further Site URL changes needed.
+
+**PR 1/2** (App PR #42) — new `webpage/confirmed.html`, simpler than the password-reset page (no form, just a status page). No workflow changes needed — `deploy-pages.yml` already deploys the whole `webpage/` directory. Deliberately checks for a truthy session on *any* auth event rather than one specific event name, since (unlike `PASSWORD_RECOVERY`) there's no equally well-documented single event for implicit-flow signup confirmation. **Live-verified at the real deployed URL** (https://msvibes.github.io/philaindiacovers-app/confirmed.html) after merge — waiting state renders correctly, zero console errors.
+
+**Next**: PR 2 (the `emailRedirectTo` wiring, `Signup.tsx` copy update, production Redirect URLs allowlist addition) — this is also where the exact auth event name gets empirically confirmed against a real signup, same discipline T-41 applied to discovering `PASSWORD_RECOVERY`.
 
 ## KAN-41 (closed for real) + KAN-82 — Home screen personalization (2026-09-08): Admin PR #23, App PRs #40 + #41, all merged
 
