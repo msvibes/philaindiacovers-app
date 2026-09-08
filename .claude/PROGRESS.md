@@ -1,7 +1,7 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-08 (later same day)
-**Last session worked on:** Two new pieces of work, both In Progress, planned together and sequenced independently — see the new entries below. **KAN-83** (signup-confirmation GitHub Pages page, companion to T-41): PR 1/2 merged and live-verified (real deployed page), PR 2 (app wiring) not yet started. **KAN-61** (US-50, India map): PR 1/3 merged (circle-to-state mapping + static render, with real political-boundary verification before merge); PR 2 (choropleth shading) and PR 3 (click-to-filter) not yet started. Before that: Home screen personalization (KAN-41 + KAN-82), KAN-81, the five-item value-add batch, and T-41 — all still Done, unchanged, see below.
+**Last session worked on:** Two new pieces of work, both In Progress, planned together and sequenced independently — see the new entries below. **KAN-83** (signup-confirmation GitHub Pages page, companion to T-41): both PRs merged and code-complete; blocked on two user actions before it can move to Done (production Redirect URLs allowlist addition, then a real end-to-end signup test). **KAN-61** (US-50, India map): PR 1/3 merged (circle-to-state mapping + static render, with real political-boundary verification before merge); PR 2 (choropleth shading) and PR 3 (click-to-filter) not yet started. Before that: Home screen personalization (KAN-41 + KAN-82), KAN-81, the five-item value-add batch, and T-41 — all still Done, unchanged, see below.
 
 ## KAN-61 — India map, browse by state/region (2026-09-08, in progress): App PR #43 merged (1 of 3)
 
@@ -21,15 +21,19 @@ Two items surfaced as "from yesterday, not showing in standup" — checked and c
 
 **Next**: PR 2 (choropleth shading, dedicated dark-mode tokens, hover tooltips honoring the shared-circle decision above, zero-cover-state styling), then PR 3 (click-to-filter, reusing T-26's exact `selectYear` pattern).
 
-## KAN-83 — signup-confirmation GitHub Pages page (2026-09-08, in progress): App PR #42 merged (1 of 2)
+## KAN-83 — signup-confirmation GitHub Pages page (2026-09-08, in progress): App PRs #42 + #44 merged, both code-complete
 
 Companion to T-41's password-reset page, closing the loop on KAN-75's copy-only interim fix (`Signup.tsx`'s own comment named this as the logged trigger condition to revisit). Planned alongside KAN-61 (see above), new ticket filed before building.
 
-**A real technical difference from T-41, found during planning**: `Signup.tsx`'s `signUp({ email, password })` call passes no `emailRedirectTo` at all — it currently depends entirely on Supabase's Site URL fallback (deliberately left at the inert `localhost:9999` by KAN-75, specifically because Signup relied on it). PR 2 will add an explicit `emailRedirectTo`, which also fully decouples this flow from Site URL — no further Site URL changes needed.
+**A real technical difference from T-41, found during planning**: `Signup.tsx`'s `signUp({ email, password })` call passed no `emailRedirectTo` at all — it depended entirely on Supabase's Site URL fallback (deliberately left at the inert `localhost:9999` by KAN-75, specifically because Signup relied on it).
 
 **PR 1/2** (App PR #42) — new `webpage/confirmed.html`, simpler than the password-reset page (no form, just a status page). No workflow changes needed — `deploy-pages.yml` already deploys the whole `webpage/` directory. Deliberately checks for a truthy session on *any* auth event rather than one specific event name, since (unlike `PASSWORD_RECOVERY`) there's no equally well-documented single event for implicit-flow signup confirmation. **Live-verified at the real deployed URL** (https://msvibes.github.io/philaindiacovers-app/confirmed.html) after merge — waiting state renders correctly, zero console errors.
 
-**Next**: PR 2 (the `emailRedirectTo` wiring, `Signup.tsx` copy update, production Redirect URLs allowlist addition) — this is also where the exact auth event name gets empirically confirmed against a real signup, same discipline T-41 applied to discovering `PASSWORD_RECOVERY`.
+**PR 2/2** (App PR #44) — `Signup.tsx` now passes an explicit `emailRedirectTo` pointing at PR 1's page, fully decoupling the flow from Site URL (no further Site URL change needed). The now-stale "browser will probably show an error" copy removed. **Visually verified live in `npm run dev` against the dev Supabase project** — a real signup was submitted and the updated copy confirmed correct with zero console errors. **This created one real throwaway account, `kan83-verify-test@example.test`, in the dev project** — flagged here rather than left silent (this session has no service-role access to delete it directly).
+
+**Blocked on two user actions before this can move to Done** (same non-negotiable verification bar T-41 held itself to):
+1. Production's Redirect URLs allowlist needs the new page's URL added — manual dashboard step, same as T-41 needed.
+2. A real end-to-end signup test (real email, real link click) to empirically confirm which auth event actually fires and that the full flow genuinely works in production.
 
 ## KAN-41 (closed for real) + KAN-82 — Home screen personalization (2026-09-08): Admin PR #23, App PRs #40 + #41, all merged
 
