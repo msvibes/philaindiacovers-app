@@ -23,6 +23,11 @@ const WORKING_ENTRIES: NavEntry[] = [
   { label: 'Settings', screen: 'settings' }
 ]
 
+// KAN-86: same URL Settings.tsx's own "Report an Issue" link already
+// uses -- one destination, now reachable from two places rather than a
+// second, different one.
+const ISSUES_URL = 'https://github.com/msvibes/philaindiacovers-app/issues'
+
 // T-33: visible, greyed, genuinely non-interactive — confirmed explicitly
 // with the product owner after a full PRD-v1.0 scope audit (KAN-5 for My
 // Progress). No handler, no navigation.
@@ -114,6 +119,24 @@ export default function Sidebar({
           >
             Keyboard Shortcuts
           </button>
+          {/* KAN-86: restores the discoverability the removed native
+              Help menu's own "Report an Issue" item had -- top-level,
+              one click from anywhere, not buried at the bottom of
+              Settings. Same rowClasses styling as every other row above,
+              deliberately never "active" (it's an external destination,
+              not one of this app's own screens, so aria-current doesn't
+              apply). Opens via the app's existing setWindowOpenHandler
+              (src/main/index.ts) routing target="_blank" to the OS
+              browser -- the same mechanism Settings.tsx's own links
+              already use, no new IPC needed. */}
+          <a
+            href={ISSUES_URL}
+            target="_blank"
+            rel="noreferrer"
+            className={rowClasses(false)}
+          >
+            Report an Issue
+          </a>
         </nav>
 
         <div className="border-t border-line my-3 mx-5" />
