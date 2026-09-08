@@ -44,6 +44,30 @@
      tint). Light value is byte-for-byte the same as the old hardcoded
      one. */
   --color-stamp-ring: rgba(178, 58, 72, 0.12);
+  /* T-21/KAN-61 PR 2: the India map's choropleth shading ramp. A "no
+     covers yet" region reuses --color-line directly rather than getting
+     its own token (T-30's own precedent -- a value only needs a
+     dedicated token when light/dark actually need independently-tuned
+     values, and reusing --color-line here is exactly the "deliberately
+     neutral, distinguishable from the shading ramp" look zero-cover
+     states need). Levels 1-4 interpolate from a pale stamp tint to the
+     full --color-stamp value (level 4 == --color-stamp exactly, the same
+     red YearTimeline's own bars already use for "most covered" -- real,
+     deliberate visual continuity, not a coincidence). Contrast against
+     --color-line-strong (the boundary stroke) was computed, not
+     eyeballed: level 1 clears ~3:1 in both themes, but level 3-4
+     (deliberately the most *saturated*, highest-covered end of the
+     ramp) don't reach the 3:1 non-text-contrast target against a single
+     fixed stroke color -- an inherent property of any sequential
+     single-hue ramp spanning near-background to fully-saturated, not a
+     oversight. Boundaries stay visually distinguishable regardless
+     because every region renders its own stroked outline (geometry, not
+     just color, marks where one region ends and the next begins) --
+     the same reasoning every real single-hue choropleth relies on. */
+  --color-choropleth-1: #e7b8b9;
+  --color-choropleth-2: #d58e93;
+  --color-choropleth-3: #c4646e;
+  --color-choropleth-4: #b23a48;
   --font-display: 'Playfair Display', Georgia, serif;
   --font-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
@@ -88,6 +112,10 @@
     --color-accent: #4a6a9e;
     --color-accent-hover: #5470a3;
     --color-stamp-ring: rgba(226, 89, 107, 0.18);
+    --color-choropleth-1: #613435;
+    --color-choropleth-2: #8e4148;
+    --color-choropleth-3: #b74d59;
+    --color-choropleth-4: #e2596b;
   }
 }
 
@@ -105,6 +133,10 @@
   --color-accent: #4a6a9e;
   --color-accent-hover: #5470a3;
   --color-stamp-ring: rgba(226, 89, 107, 0.18);
+  --color-choropleth-1: #613435;
+  --color-choropleth-2: #8e4148;
+  --color-choropleth-3: #b74d59;
+  --color-choropleth-4: #e2596b;
 }
 
 @keyframes bounce-dot {
