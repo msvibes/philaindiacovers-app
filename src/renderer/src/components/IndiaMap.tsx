@@ -1,60 +1,139 @@
+import { useState } from 'react'
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 import indiaTopoJson from '../assets/data/india-states.json'
+import type { CatalogueFacets } from '../lib/covers'
+import { getRegionCoverStats, getShadingLevel } from '../lib/regionCoverStats'
 
-// T-21 (US-50/KAN-61), PR 1 of 3: proves the circle->state mapping and the
-// map itself render correctly, with no shading/interactivity yet -- those
-// are PR 2 (choropleth) and PR 3 (click-to-filter). Deliberately a single
-// neutral fill here so a boundary/rendering mistake is easy to spot on
-// its own, not hidden under a shading gradient.
+interface IndiaMapProps {
+  facets: CatalogueFacets
+}
+
+interface HoveredRegion {
+  region: string
+  count: number
+  circleName: string | null
+  siblingRegions: string[]
+  // Fixed-position coordinates, captured off the hovered path's own
+  // getBoundingClientRect() -- same technique GuidedTour.tsx already
+  // uses for its own JS-computed tooltip positioning, not a new pattern.
+  top: number
+  left: number
+}
+
+const SHADING_FILLS: Record<0 | 1 | 2 | 3 | 4, string> = {
+  0: 'var(--color-line)',
+  1: 'var(--color-choropleth-1)',
+  2: 'var(--color-choropleth-2)',
+  3: 'var(--color-choropleth-3)',
+  4: 'var(--color-choropleth-4)'
+}
+
+// T-21 (US-50/KAN-61), PR 2 of 3: choropleth shading + hover tooltips on
+// top of PR 1's static render. No click-to-filter yet (PR 3).
 //
-// TopoJSON source: geoBoundaries India ADM1 (36 regions, CC BY 2.5 India
-// license -- see docs/PRD-Addendum-App-Catalogue-UX.md's T-21 row),
-// simplified via mapshaper to ~60KB. Imported as a plain JSON module (the
-// file is named .json, not .topojson, specifically so Vite parses it at
-// build time) rather than fetched at runtime -- simpler and avoids any
-// packaged-app fetch/asset-path risk. Region-name resolution to postal
-// circles lives in ../lib/postalCircleStates.ts, not here -- this
-// component only renders shapes, it doesn't know about circles or covers.
-export default function IndiaMap(): React.JSX.Element {
+// facets is the SAME CatalogueFacets object Catalogue.tsx already fetches
+// for FilterPanel/YearTimeline -- no new query, matching this feature's
+// own fit criterion and T-26's established reuse precedent. Region-level
+// stats are computed per-render via regionCoverStats.ts (a cheap
+// client-side lookup over facets.postalCircles, not a network call), so
+// this component stays a plain function of its props, no internal
+// fetching.
+export default function IndiaMap({ facets }: IndiaMapProps): React.JSX.Element {
+  const [hovered, setHovered] = useState<HoveredRegion | null>(null)
+
+  // Relative to the single most-covered circle currently on the map, not
+  // an absolute threshold -- same "scale to the max" logic YearTimeline's
+  // bar widths already use, so the ramp stays meaningful regardless of
+  // how large the catalogue grows.
+  const maxCount = Math.max(...facets.postalCircles.map((f) => f.count), 1)
+
   return (
-    <ComposableMap
-      projection="geoMercator"
-      projectionConfig={{ center: [83, 23], scale: 1000 }}
-      role="img"
-      aria-label="Map of India by state, for browsing the catalogue by region"
-      className="w-full h-auto"
-    >
-      <Geographies geography={indiaTopoJson}>
-        {({ geographies }) =>
-          geographies.map((geo) => (
-            <Geography
-              key={geo.rsmKey}
-              geography={geo}
-              data-testid={`india-map-region-${geo.properties.shapeName}`}
-              style={{
-                default: {
-                  fill: 'var(--color-line)',
-                  stroke: 'var(--color-line-strong)',
-                  strokeWidth: 0.5,
-                  outline: 'none'
-                },
-                hover: {
-                  fill: 'var(--color-line-strong)',
-                  stroke: 'var(--color-line-strong)',
-                  strokeWidth: 0.5,
-                  outline: 'none'
-                },
-                pressed: {
-                  fill: 'var(--color-line-strong)',
-                  stroke: 'var(--color-line-strong)',
-                  strokeWidth: 0.5,
-                  outline: 'none'
-                }
-              }}
-            />
-          ))
-        }
-      </Geographies>
-    </ComposableMap>
+    <div className="relative">
+      <ComposableMap
+        projection="geoMercator"
+        projectionConfig={{ center: [83, 23], scale: 1000 }}
+        role="img"
+        aria-label="Map of India by state, for browsing the catalogue by region"
+        className="w-full h-auto"
+      >
+        <Geographies geography={indiaTopoJson}>
+          {({ geographies }) =>
+            geographies.map((geo) => {
+              const stats = getRegionCoverStats(geo.properties.shapeName, facets)
+              const level = getShadingLevel(stats.count, maxCount)
+              const fill = SHADING_FILLS[level]
+              return (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  data-testid={`india-map-region-${geo.properties.shapeName}`}
+                  onMouseEnter={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect()
+                    setHovered({
+                      region: stats.region,
+                      count: stats.count,
+                      circleName: stats.circleName,
+                      siblingRegions: stats.siblingRegions,
+                      top: rect.top,
+                      left: rect.left + rect.width / 2
+                    })
+                  }}
+                  onMouseLeave={() => setHovered(null)}
+                  style={{
+                    default: {
+                      fill,
+                      stroke: 'var(--color-line-strong)',
+                      strokeWidth: 0.5,
+                      outline: 'none'
+                    },
+                    hover: {
+                      fill,
+                      stroke: 'var(--color-ink)',
+                      strokeWidth: 1,
+                      outline: 'none',
+                      cursor: 'pointer'
+                    },
+                    pressed: {
+                      fill,
+                      stroke: 'var(--color-ink)',
+                      strokeWidth: 1,
+                      outline: 'none'
+                    }
+                  }}
+                />
+              )
+            })
+          }
+        </Geographies>
+      </ComposableMap>
+
+      {/* Fixed-position tooltip, positioned via the hovered path's own
+          bounding rect rather than raw mouse coordinates -- matches
+          GuidedTour.tsx's existing JS-computed-position pattern, not a
+          new one. pointer-events-none so it never itself becomes the
+          thing a mouseleave fires on. */}
+      {hovered && (
+        <div
+          role="tooltip"
+          className="fixed z-10 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-lg bg-accent px-3 py-2 text-xs text-white pointer-events-none max-w-[220px]"
+          style={{ top: hovered.top, left: hovered.left }}
+        >
+          <p className="font-semibold">{hovered.region}</p>
+          <p>
+            {hovered.count} cover{hovered.count === 1 ? '' : 's'}
+          </p>
+          {/* Honest circle-level framing for the 9 regions that share a
+              circle with others -- confirmed with the user before
+              building: the count shown is the whole circle's, not a
+              false per-region split, so the tooltip says so explicitly
+              rather than implying more precision than the data has. */}
+          {hovered.siblingRegions.length > 0 && (
+            <p className="text-white/80 mt-1">
+              {hovered.circleName} circle — also covers: {hovered.siblingRegions.join(', ')}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   )
 }

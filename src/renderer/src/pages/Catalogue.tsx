@@ -246,10 +246,9 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
         // prototype's own full-dataset-driven timeline.
         <YearTimeline years={facets.years} onSelectYear={selectYear} />
       ) : viewMode === 'region' ? (
-        // T-21 (KAN-61) PR 1: static render only -- no shading or
-        // click-to-filter yet (PR 2 and PR 3), so facets isn't threaded
-        // through here yet either.
-        <IndiaMap />
+        // T-21 (KAN-61) PR 2: same facets object FilterPanel/YearTimeline
+        // already use -- no new query. Click-to-filter is still PR 3.
+        <IndiaMap facets={facets} />
       ) : totalCount === 0 ? (
         <CatalogueEmptyState
           quickCategories={facets.productCategories.slice(0, 2).map((f) => f.value)}
