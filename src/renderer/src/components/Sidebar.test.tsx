@@ -114,6 +114,21 @@ describe('Sidebar', () => {
     expect(onOpenShortcuts).toHaveBeenCalledOnce()
   })
 
+  // KAN-86: restores the discoverability the removed native Help menu's
+  // own "Report an Issue" item had.
+  it('has a Report an Issue row pointing at the real GitHub issues URL, opened in a new tab', () => {
+    renderSidebar()
+
+    const link = screen.getByRole('link', { name: 'Report an Issue' })
+    expect(link).toHaveAttribute('href', 'https://github.com/msvibes/philaindiacovers-app/issues')
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('the Report an Issue row is never marked as the current screen', () => {
+    renderSidebar()
+    expect(screen.getByRole('link', { name: 'Report an Issue' })).not.toHaveAttribute('aria-current')
+  })
+
   // FR-25: Log out now requires confirmation — it must NOT end the session
   // on the first click, only after confirming. This replaces the old
   // AppHeader.test.tsx assumption that a single click called signOut().
