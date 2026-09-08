@@ -2,7 +2,6 @@ import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { buildMenuTemplate } from './menu'
 import {
   type CachedCoverRow,
   type CacheFilterParams,
@@ -81,7 +80,17 @@ app.whenReady().then(() => {
   // appId (T-38), not the scaffold default.
   electronApp.setAppUserModelId('com.krutimlogic.philaindiacovers')
 
-  Menu.setApplicationMenu(Menu.buildFromTemplate(buildMenuTemplate(is.dev)))
+  // Reverses T-24/US-54's own native File/Edit/View/Help menu (Done
+  // 2026-08-25) -- a deliberate product-decision reversal, not a defect
+  // fix. Note for the record: the stated concern that motivated this
+  // (Toggle DevTools reachable in production) does not hold up against
+  // the actual code -- the View menu's DevTools item was already gated
+  // behind is.dev (see the removed menu.ts / menu.test.ts's own "excludes
+  // Toggle DevTools outside dev mode" test), and the F12/Ctrl+Shift+I
+  // shortcut is separately gated dev-only by optimizer.watchWindowShortcuts
+  // below, regardless of this menu's presence. Removed anyway as a real,
+  // separately-decided UI-simplification call.
+  Menu.setApplicationMenu(null)
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
