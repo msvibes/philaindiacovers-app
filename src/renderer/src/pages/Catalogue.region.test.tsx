@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Catalogue from './CatalogueTestHarness'
@@ -74,7 +74,11 @@ describe('Catalogue — browse by region', () => {
     await waitFor(() => expect(screen.getByText('Item 0')).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: 'By region' }))
-    await user.click(screen.getByTestId('india-map-region-Uttar Pradesh'))
+    // fireEvent, not userEvent, deliberately -- see IndiaMap.test.tsx's
+    // own comment on why a real click's full pointerdown/mousedown/mouseup
+    // sequence crashes d3-zoom's native mousedown listener in jsdom once
+    // KAN-85 (PR 3) wraps Geographies in ZoomableGroup.
+    fireEvent.click(screen.getByTestId('india-map-region-Uttar Pradesh'))
 
     // Back on the grid view — the map is gone, Grid is pressed again.
     expect(screen.getByRole('button', { name: 'Grid' })).toHaveAttribute('aria-pressed', 'true')
@@ -97,7 +101,7 @@ describe('Catalogue — browse by region', () => {
 
     await user.click(screen.getByRole('button', { name: 'By region' }))
     mockedFetchPage.mockClear()
-    await user.click(screen.getByTestId('india-map-region-Odisha'))
+    fireEvent.click(screen.getByTestId('india-map-region-Odisha'))
 
     expect(screen.getByRole('img', { name: /map of india/i })).toBeInTheDocument()
     expect(mockedFetchPage).not.toHaveBeenCalled()
