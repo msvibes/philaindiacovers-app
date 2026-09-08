@@ -1,7 +1,7 @@
 # Progress Snapshot — philaindiacovers-app
 
 **Last updated:** 2026-09-08 (later same day)
-**Last session worked on:** Two new pieces of work, planned together and sequenced independently — see the new entries below. **KAN-61** (US-50, India map) is now **Done** — all 3 PRs merged (mapping+render, choropleth shading, click-to-filter), full addendum flow working end to end, 293 tests passing. **KAN-83** (signup-confirmation GitHub Pages page, companion to T-41): both PRs merged and code-complete; blocked on two user actions before it can move to Done (production Redirect URLs allowlist addition, then a real end-to-end signup test) — the user is handling these directly. Before that: Home screen personalization (KAN-41 + KAN-82), KAN-81, the five-item value-add batch, and T-41 — all still Done, unchanged, see below.
+**Last session worked on:** Two new pieces of work, planned together and sequenced independently, **both now fully Done and live-verified end to end on a fresh installer** — see the new entries below. **KAN-61** (US-50, India map): all 3 PRs merged, every interaction (shading, both tooltip cases, both click cases, zero-cover non-clickability) confirmed live by the user. **KAN-83** (signup-confirmation GitHub Pages page, companion to T-41): both PRs merged, production Redirect URLs allowlist updated by the user, real end-to-end signup test passed (real email, real confirmation link, real sign-in). Before that: Home screen personalization (KAN-41 + KAN-82), KAN-81, the five-item value-add batch, and T-41 — all still Done, unchanged, see below.
 
 ## KAN-61 — India map, browse by state/region (2026-09-08): App PRs #43 + #45 + #46, all merged: Done
 
@@ -23,9 +23,11 @@ Two items surfaced as "from yesterday, not showing in standup" — checked and c
 
 **PR 3/3** (App PR #46) — `IndiaMap` gains `onSelectRegion`, `Catalogue.tsx`'s new `selectRegion()` is the exact same 3-step shape `selectYear()` already established. **A real scope decision, logged not guessed**: a zero-cover region stays non-clickable (no known circle id from facets) rather than firing a live fallback query into a guaranteed-empty grid — its neutral fill and "0 covers" tooltip already say there's nothing there, keeping `IndiaMap` a pure, offline-friendly function of its props.
 
-Full suite: 293 passing (was 222 baseline). All three PRs' `lint`/`typecheck` clean, all CI green before merge. **Moved to Done** — not live-verified in a real signed-in session this session (no Browser-pane session was available), same disclosed limitation as several other recent features; worth a manual click-through pass whenever convenient.
+Full suite: 293 passing (was 222 baseline). All three PRs' `lint`/`typecheck` clean, all CI green before merge.
 
-## KAN-83 — signup-confirmation GitHub Pages page (2026-09-08, in progress): App PRs #42 + #44 merged, both code-complete
+**Live-verified end to end by the user on a fresh installer** — every interaction check passed: shading renders correctly; single-circle tooltip (Karnataka) and shared-circle tooltip (Arunachal Pradesh, correctly naming the North Eastern circle) both display honestly; single-circle click filters correctly with the toast; **shared-circle click correctly pulls the whole circle's covers** (verified directly — clicking into the North Eastern circle showed covers spanning multiple states, not just Arunachal Pradesh, confirming the "honest full circle count" decision behaves correctly in practice, not just in tests); a zero-cover state was correctly non-clickable. Genuinely, fully Done — no disclosed gaps remaining.
+
+## KAN-83 — signup-confirmation GitHub Pages page (2026-09-08): App PRs #42 + #44, both merged: Done
 
 Companion to T-41's password-reset page, closing the loop on KAN-75's copy-only interim fix (`Signup.tsx`'s own comment named this as the logged trigger condition to revisit). Planned alongside KAN-61 (see above), new ticket filed before building.
 
@@ -35,9 +37,9 @@ Companion to T-41's password-reset page, closing the loop on KAN-75's copy-only 
 
 **PR 2/2** (App PR #44) — `Signup.tsx` now passes an explicit `emailRedirectTo` pointing at PR 1's page, fully decoupling the flow from Site URL (no further Site URL change needed). The now-stale "browser will probably show an error" copy removed. **Visually verified live in `npm run dev` against the dev Supabase project** — a real signup was submitted and the updated copy confirmed correct with zero console errors. **This created one real throwaway account, `kan83-verify-test@example.test`, in the dev project** — flagged here rather than left silent (this session has no service-role access to delete it directly).
 
-**Blocked on two user actions before this can move to Done** (same non-negotiable verification bar T-41 held itself to):
-1. Production's Redirect URLs allowlist needs the new page's URL added — manual dashboard step, same as T-41 needed.
-2. A real end-to-end signup test (real email, real link click) to empirically confirm which auth event actually fires and that the full flow genuinely works in production.
+**Live-verified end to end by the user, real token, not simulated** — matching T-41's own non-negotiable verification bar: production's Redirect URLs allowlist was updated, then a real signup with a real email (`krutimlogic+kan83test@gmail.com`) was submitted, the confirmation email received, the link landed cleanly on `confirmed.html`, and the account signed into the app successfully. Genuinely Done.
+
+**Known, disclosed loose end, not a blocker**: `kan83-verify-test@example.test`, a throwaway account created in the **dev** project during this session's own `npm run dev` verification, is still unresolved — no service-role access this session to delete it. Separate from and unaffected by the real production test above.
 
 ## KAN-41 (closed for real) + KAN-82 — Home screen personalization (2026-09-08): Admin PR #23, App PRs #40 + #41, all merged
 
