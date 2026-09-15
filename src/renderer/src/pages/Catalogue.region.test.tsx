@@ -57,6 +57,23 @@ beforeEach(() => {
 // clicking a state filters the grid to it, reusing the exact
 // selectYear/selectRegion 3-step pattern T-26 already established.
 describe('Catalogue — browse by region', () => {
+  // Home redesign PR 3/3 (2026-09-15): the By Region Home tile lands
+  // directly here via initialViewMode, no click needed — this is the
+  // seed prop's own test, distinct from the click-driven test below.
+  it('initialViewMode="region" opens directly on the map, no click needed', async () => {
+    render(<Catalogue onSelectCover={noop} initialViewMode="region" />)
+
+    // The loading skeleton (real until fetchCataloguePage/Facets resolve)
+    // renders before the toolbar/toggle exist at all -- can't wait on
+    // 'Item 0' here specifically, since the whole point of this test is
+    // that the grid never shows with initialViewMode="region".
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'By region' })).toHaveAttribute('aria-pressed', 'true')
+    )
+    expect(screen.getByRole('img', { name: /map of india/i })).toBeInTheDocument()
+    expect(screen.queryByText('Item 0')).not.toBeInTheDocument()
+  })
+
   it('the "By region" tab shows the map and hides the grid', async () => {
     const user = userEvent.setup()
     render(<Catalogue onSelectCover={noop} />)

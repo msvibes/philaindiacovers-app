@@ -65,6 +65,8 @@ function renderHome(
     daysSinceLastVisit: number | null
     viewedTodayCount: number
     onEnterCatalogue: () => void
+    onBrowseByRegion: () => void
+    onBrowseByYear: () => void
     onSelectCover: (id: string) => void
   }> = {}
 ): void {
@@ -75,6 +77,8 @@ function renderHome(
       daysSinceLastVisit={overrides.daysSinceLastVisit ?? null}
       viewedTodayCount={overrides.viewedTodayCount ?? 0}
       onEnterCatalogue={overrides.onEnterCatalogue ?? vi.fn()}
+      onBrowseByRegion={overrides.onBrowseByRegion ?? vi.fn()}
+      onBrowseByYear={overrides.onBrowseByYear ?? vi.fn()}
       onSelectCover={overrides.onSelectCover ?? vi.fn()}
     />
   )
@@ -209,6 +213,32 @@ describe('Home', () => {
 
       await userEvent.click(screen.getByRole('button', { name: /jump back in/i }))
       expect(onSelectCover).toHaveBeenCalledExactlyOnceWith('cover-5')
+    })
+  })
+
+  // Home redesign PR 3/3, 2026-09-15: unlike Catalogue/Jump-back-in,
+  // these two are always shown regardless of recent-history state -- a
+  // brand-new account with nothing viewed yet can still browse by
+  // region or year.
+  describe('"By region" and "By year" tiles', () => {
+    it('always render, even with no recent history', () => {
+      renderHome()
+      expect(screen.getByRole('button', { name: 'By region' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'By year' })).toBeInTheDocument()
+    })
+
+    it('"By region" calls onBrowseByRegion', async () => {
+      const onBrowseByRegion = vi.fn()
+      renderHome({ onBrowseByRegion })
+      await userEvent.click(screen.getByRole('button', { name: 'By region' }))
+      expect(onBrowseByRegion).toHaveBeenCalledOnce()
+    })
+
+    it('"By year" calls onBrowseByYear', async () => {
+      const onBrowseByYear = vi.fn()
+      renderHome({ onBrowseByYear })
+      await userEvent.click(screen.getByRole('button', { name: 'By year' }))
+      expect(onBrowseByYear).toHaveBeenCalledOnce()
     })
   })
 

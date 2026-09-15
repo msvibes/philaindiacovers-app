@@ -23,6 +23,7 @@ import GuidedTour from './components/GuidedTour'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
+import type { CatalogueViewMode } from './components/CatalogueViewToggle'
 import Settings from './pages/Settings'
 import Detail, { type DetailNavPosition } from './pages/Detail'
 
@@ -73,6 +74,11 @@ function SignedIn({
 }: SignedInProps): React.JSX.Element {
   // FR-01: lands on Home, not the grid, on every sign-in/launch.
   const [screen, setScreen] = useState<Screen>('home')
+  // Home redesign (2026-09-15): a one-shot seed for Catalogue's own local
+  // viewMode, so the By Region/By Year Home tiles can land directly on
+  // that view -- see navigateTo below and Catalogue.tsx's own comment on
+  // why this stays a seed, not a lifted/controlled value.
+  const [catalogueInitialViewMode, setCatalogueInitialViewMode] = useState<CatalogueViewMode>('grid')
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
   const [query, dispatch] = useReducer(catalogueReducer, initialCatalogueQueryState)
   const { recordView } = useRecentlyViewed()
@@ -237,9 +243,17 @@ function SignedIn({
   // catalogue" button (unaffected, unaware `screen` had changed) landed
   // on Home instead of Catalogue — a real, confusing bug, not a
   // hypothetical one.
-  function navigateTo(target: Screen): void {
+  // catalogueViewMode defaults to 'grid' -- every existing call site
+  // (Sidebar's nav, the tour, Home's plain "Enter the catalogue" tile)
+  // is unaffected and continues to always open Catalogue's default grid.
+  // Only the By Region/By Year tiles pass a real value, and passing
+  // through here (rather than a separate function) guarantees it's reset
+  // to 'grid' on every OTHER navigation, so it can never leak into an
+  // unrelated later visit.
+  function navigateTo(target: Screen, catalogueViewMode: CatalogueViewMode = 'grid'): void {
     setSelectedCoverId(null)
     setScreen(target)
+    setCatalogueInitialViewMode(catalogueViewMode)
     // T-34 (KAN-17): the tour's one step that advances via a real
     // interaction rather than its own Next button (see tourSteps.ts) —
     // Home's actual CTA already routes through here, and so does every
@@ -274,11 +288,20 @@ function SignedIn({
             daysSinceLastVisit={daysSinceLastVisitAtSignIn}
             viewedTodayCount={viewedTodayCount}
             onEnterCatalogue={() => navigateTo('catalogue')}
+            onBrowseByRegion={() => navigateTo('catalogue', 'region')}
+            onBrowseByYear={() => navigateTo('catalogue', 'year')}
             onSelectCover={selectCover}
           />
         )
       case 'catalogue':
-        return <Catalogue query={query} dispatch={dispatch} onSelectCover={selectCover} />
+        return (
+          <Catalogue
+            query={query}
+            dispatch={dispatch}
+            onSelectCover={selectCover}
+            initialViewMode={catalogueInitialViewMode}
+          />
+        )
       case 'settings':
         return (
           <Settings

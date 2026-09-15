@@ -23,6 +23,11 @@ interface HomeProps {
   // unmounting/remounting as the user navigates away and back.
   viewedTodayCount: number
   onEnterCatalogue: () => void
+  // Home redesign PR 3/3 (2026-09-15): land directly on Catalogue's
+  // region/year view, not the default grid -- see App.tsx's navigateTo
+  // and Catalogue.tsx's initialViewMode for how that's actually wired.
+  onBrowseByRegion: () => void
+  onBrowseByYear: () => void
   onSelectCover: (id: string) => void
 }
 
@@ -48,6 +53,8 @@ export default function Home({
   daysSinceLastVisit,
   viewedTodayCount,
   onEnterCatalogue,
+  onBrowseByRegion,
+  onBrowseByYear,
   onSelectCover
 }: HomeProps): React.JSX.Element {
   const { recentIds } = useRecentlyViewed()
@@ -189,7 +196,12 @@ export default function Home({
             always visible whenever real history exists, not gated to
             first-login-of-day -- the daily prompt and "is there anything
             to jump back into" are genuinely independent questions, and
-            gating the shortcut to one login a day undersold it. */}
+            gating the shortcut to one login a day undersold it. By
+            region/By year (PR 3/3) land directly on Catalogue's
+            corresponding view via onBrowseByRegion/onBrowseByYear --
+            held back from PR 1/3 until Catalogue.tsx's initialViewMode
+            plumbing existed, so neither tile ever shipped pointing at
+            the wrong view. */}
         <div className="flex flex-wrap justify-center gap-3">
           <HomeTile
             label="Enter the catalogue"
@@ -200,6 +212,8 @@ export default function Home({
           {recentIds.length > 0 && (
             <HomeTile label="Jump back in" accent="stamp" onClick={() => onSelectCover(recentIds[0])} />
           )}
+          <HomeTile label="By region" accent="success" onClick={onBrowseByRegion} />
+          <HomeTile label="By year" accent="choropleth-3" onClick={onBrowseByYear} />
         </div>
       </div>
 
