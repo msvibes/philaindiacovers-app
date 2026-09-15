@@ -89,4 +89,23 @@ describe('resolveGreetingName', () => {
   it('falls back to a generic greeting when even email is somehow missing — defensive only', () => {
     expect(resolveGreetingName(null, undefined)).toBe('there')
   })
+
+  // Found live, 2026-09-15 install test: a +collector-tagged test
+  // account showed "Hi, krutimlogic+collector!" — technically correct
+  // (it really is the local part), but not a clean display fallback.
+  it('strips a +alias suffix from the email local part', () => {
+    expect(resolveGreetingName(null, 'krutimlogic+collector@gmail.com')).toBe('krutimlogic')
+  })
+
+  it('strips only the first +alias segment, keeping the rest untouched', () => {
+    expect(resolveGreetingName(null, 'priya+test+extra@example.test')).toBe('priya')
+  })
+
+  it('leaves a local part with no + untouched', () => {
+    expect(resolveGreetingName(null, 'priya.sharma@example.test')).toBe('priya.sharma')
+  })
+
+  it('does not empty out a local part that starts with + — a real edge case, not the common one', () => {
+    expect(resolveGreetingName(null, '+foo@example.test')).toBe('+foo')
+  })
 })
