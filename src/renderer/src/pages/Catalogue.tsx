@@ -27,6 +27,15 @@ interface CatalogueProps {
   query: CatalogueQueryState
   dispatch: (action: CatalogueAction) => void
   onSelectCover: (id: string) => void
+  // Home redesign (2026-09-15): lets the By Region/By Year Home tiles
+  // land directly on that view instead of always opening to the grid.
+  // Deliberately a one-shot seed for viewMode's initial useState value,
+  // not a lifted/controlled prop -- viewMode stays local state here for
+  // the same reason the comment below already gives (Detail's prev/next
+  // navigation has no need to know it). App.tsx resets this back to
+  // 'grid' on every other navigation path, so it can never leak into an
+  // unrelated later visit via the sidebar or the plain Catalogue tile.
+  initialViewMode?: CatalogueViewMode
 }
 
 // Filter/search/sort/page state is owned by App.tsx (T-25) — Detail view
@@ -36,7 +45,12 @@ interface CatalogueProps {
 // selected. Everything genuinely local to this screen (the fetch itself,
 // loading/error, the filter panel's own open/pending-draft UI state)
 // stays here — only the cross-page-relevant query moved up.
-export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueProps): React.JSX.Element {
+export default function Catalogue({
+  query,
+  dispatch,
+  onSelectCover,
+  initialViewMode
+}: CatalogueProps): React.JSX.Element {
   const { showToast } = useToast()
   const [state, setState] = useState<LoadState>('loading')
   const [covers, setCovers] = useState<VerifiedCover[]>([])
@@ -52,8 +66,12 @@ export default function Catalogue({ query, dispatch, onSelectCover }: CatalogueP
   // T-26 (KAN-62): local, not lifted to App.tsx — unlike query, prev/next
   // navigation in Detail view has no need to know which view mode was
   // showing when a cover was opened, so this doesn't need the same
-  // treatment T-25 gave the filter/search/sort/page state.
-  const [viewMode, setViewMode] = useState<CatalogueViewMode>('grid')
+  // treatment T-25 gave the filter/search/sort/page state. initialViewMode
+  // (2026-09-15) only ever seeds this first render -- this component
+  // fully unmounts on navigation away (same as every other screen, see
+  // Home.tsx's own comment), so a fresh mount is a real "first render"
+  // every time the user navigates back into Catalogue.
+  const [viewMode, setViewMode] = useState<CatalogueViewMode>(initialViewMode ?? 'grid')
 
   function selectYear(year: number): void {
     dispatch({

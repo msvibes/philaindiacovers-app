@@ -57,6 +57,27 @@ beforeEach(() => {
 // year filters the grid to it, reusing fetchCatalogueFacets' already-
 // computed years facet, no new query.
 describe('Catalogue — browse by year', () => {
+  // Home redesign PR 3/3 (2026-09-15): the By Year Home tile lands
+  // directly here via initialViewMode, no click needed — this is the
+  // seed prop's own test, distinct from the click-driven test below.
+  it('initialViewMode="year" opens directly on the year view, no click needed', async () => {
+    render(<Catalogue onSelectCover={noop} initialViewMode="year" />)
+
+    // The loading skeleton (real until fetchCataloguePage/Facets resolve)
+    // renders before the toolbar/toggle exist at all -- same reason every
+    // other test in this file waits for real content first. Can't wait on
+    // 'Item 0' here specifically, since the whole point of this test is
+    // that the grid never shows with initialViewMode="year".
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'By year' })).toHaveAttribute('aria-pressed', 'true')
+    )
+    // Role-scoped, not getByText -- see the next test's own comment on
+    // why (FilterPanel's always-mounted year checkboxes render the same
+    // text).
+    expect(screen.getByRole('button', { name: /^2022/ })).toBeInTheDocument()
+    expect(screen.queryByText('Item 0')).not.toBeInTheDocument()
+  })
+
   it('the "By year" tab shows a year row per facet, most recent first, and hides the grid', async () => {
     const user = userEvent.setup()
     render(<Catalogue onSelectCover={noop} />)

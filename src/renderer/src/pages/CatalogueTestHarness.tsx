@@ -2,6 +2,7 @@ import { useReducer } from 'react'
 import Catalogue from './Catalogue'
 import { catalogueReducer, initialCatalogueQueryState } from '../lib/catalogueQuery'
 import ToastProvider from '../components/ToastProvider'
+import type { CatalogueViewMode } from '../components/CatalogueViewToggle'
 
 // T-25 lifted Catalogue's filter/search/sort/page state up into App.tsx,
 // making Catalogue a controlled component. Every Catalogue test needs the
@@ -13,15 +14,27 @@ import ToastProvider from '../components/ToastProvider'
 // T-35 (KAN-67): Catalogue now calls useToast(), which throws outside a
 // ToastProvider — wrapped here once so none of the five test files
 // needed individual updates, same sharing rationale as the reducer above.
+//
+// initialViewMode (2026-09-15): optional pass-through for the Home
+// redesign's By Region/By Year seed prop — undefined for every existing
+// test (Catalogue's own default of 'grid' applies), only the new
+// initialViewMode-specific test needs to pass a real value.
 export default function CatalogueTestHarness({
-  onSelectCover
+  onSelectCover,
+  initialViewMode
 }: {
   onSelectCover: (id: string) => void
+  initialViewMode?: CatalogueViewMode
 }): React.JSX.Element {
   const [query, dispatch] = useReducer(catalogueReducer, initialCatalogueQueryState)
   return (
     <ToastProvider>
-      <Catalogue query={query} dispatch={dispatch} onSelectCover={onSelectCover} />
+      <Catalogue
+        query={query}
+        dispatch={dispatch}
+        onSelectCover={onSelectCover}
+        initialViewMode={initialViewMode}
+      />
     </ToastProvider>
   )
 }
