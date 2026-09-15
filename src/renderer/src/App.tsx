@@ -8,11 +8,12 @@ import {
   type CatalogueQueryState
 } from './lib/catalogueQuery'
 import { useRecentlyViewed } from './lib/useRecentlyViewed'
+import { useViewedToday } from './lib/useViewedToday'
 import { useOnlineStatus } from './lib/useOnlineStatus'
 import { hasCompletedTour, markTourCompleted } from './lib/tourCompletion'
 import { TOUR_STEPS } from './lib/tourSteps'
 import { useThemePreference, type ThemePreference } from './lib/useThemePreference'
-import { isFirstLoginToday, markActiveToday } from './lib/dailyPrompt'
+import { daysSinceLastVisit, isFirstLoginToday, markActiveToday } from './lib/dailyPrompt'
 import { useToast } from './lib/ToastContext'
 import Sidebar from './components/Sidebar'
 import ShortcutsModal from './components/ShortcutsModal'
@@ -75,6 +76,7 @@ function SignedIn({
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null)
   const [query, dispatch] = useReducer(catalogueReducer, initialCatalogueQueryState)
   const { recordView } = useRecentlyViewed()
+  const { viewedTodayCount, recordViewToday } = useViewedToday()
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
   const isOnline = useOnlineStatus()
   const { showToast } = useToast()
@@ -99,6 +101,11 @@ function SignedIn({
   // would flip to false the instant markActiveToday()'s own write below
   // resolves, even within the same still-"first login today" session.
   const [showDailyPrompt] = useState(() => isFirstLoginToday(session))
+  // Stat strip (2026-09-15): captured at the same early point as
+  // showDailyPrompt above, for the exact same reason -- must not be
+  // recomputed later in the session, or it would silently read back "0
+  // days" the instant markActiveToday()'s write below resolves.
+  const [daysSinceLastVisitAtSignIn] = useState(() => daysSinceLastVisit(session))
   useEffect(() => {
     markActiveToday().catch(() => {
       // Same reasoning as the tour-completion write -- worst case the
@@ -175,6 +182,7 @@ function SignedIn({
 
   function selectCover(id: string): void {
     recordView(id)
+    recordViewToday(id)
     setSelectedCoverId(id)
 
     const key = queryCacheKey(query)
@@ -263,6 +271,8 @@ function SignedIn({
           <Home
             session={session}
             showDailyPrompt={showDailyPrompt}
+            daysSinceLastVisit={daysSinceLastVisitAtSignIn}
+            viewedTodayCount={viewedTodayCount}
             onEnterCatalogue={() => navigateTo('catalogue')}
             onSelectCover={selectCover}
           />

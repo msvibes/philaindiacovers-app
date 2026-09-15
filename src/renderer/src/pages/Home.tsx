@@ -14,6 +14,14 @@ interface HomeProps {
   // recomputed here (the write that marks today as seen has to happen
   // exactly once per sign-in, not once per Home mount/remount).
   showDailyPrompt: boolean
+  // Same "captured once at sign-in" constraint as showDailyPrompt, same
+  // reason -- see lib/dailyPrompt.ts's daysSinceLastVisit. null means no
+  // prior visit is on record (a genuinely new account), not "0 days ago".
+  daysSinceLastVisit: number | null
+  // Distinct covers opened so far today -- lib/useViewedToday.ts, owned
+  // by App.tsx since the underlying record needs to survive Home
+  // unmounting/remounting as the user navigates away and back.
+  viewedTodayCount: number
   onEnterCatalogue: () => void
   onSelectCover: (id: string) => void
 }
@@ -37,6 +45,8 @@ interface HomeProps {
 export default function Home({
   session,
   showDailyPrompt,
+  daysSinceLastVisit,
+  viewedTodayCount,
   onEnterCatalogue,
   onSelectCover
 }: HomeProps): React.JSX.Element {
@@ -96,6 +106,40 @@ export default function Home({
     }
   }, [recentIds])
 
+  // Stat strip (2026-09-15): distinct circles/years, derived client-side
+  // from recentCovers -- the exact same data already fetched above for
+  // the Recently Viewed grid, zero new queries. Deliberately scoped to
+  // the last-8-viewed cap (useRecentlyViewed's own MAX_RECENT), not full
+  // collection history -- no such history exists anywhere in this app
+  // (confirmed directly before proposing this), and the "recently"
+  // wording below is chosen specifically to not overclaim what this
+  // number actually covers, same "accurate over falsely blended"
+  // principle as FR-15/KAN-37 and KAN-61's honest shared-circle counts.
+  const circlesExplored = new Set(
+    recentCovers.map((cover) => cover.postalCircleId).filter((id): id is string => id !== null)
+  ).size
+  const yearsExplored = new Set(
+    recentCovers
+      .map((cover) => (cover.dateOfIssue ? new Date(cover.dateOfIssue).getFullYear() : null))
+      .filter((year): year is number => year !== null && !Number.isNaN(year))
+  ).size
+
+  const lastVisitText =
+    daysSinceLastVisit === null || daysSinceLastVisit <= 0
+      ? null
+      : daysSinceLastVisit === 1
+        ? 'Last visit: yesterday'
+        : `Last visit: ${daysSinceLastVisit} days ago`
+
+  const statItems = [
+    lastVisitText,
+    viewedTodayCount > 0
+      ? `${viewedTodayCount} cover${viewedTodayCount === 1 ? '' : 's'} viewed today`
+      : null,
+    circlesExplored > 0 ? `${circlesExplored} circle${circlesExplored === 1 ? '' : 's'} explored recently` : null,
+    yearsExplored > 0 ? `${yearsExplored} year${yearsExplored === 1 ? '' : 's'} explored recently` : null
+  ].filter((item): item is string => item !== null)
+
   return (
     <main className="p-8 space-y-8">
       {/* T-33 consistency audit: left-alignment is the default everywhere
@@ -121,6 +165,19 @@ export default function Home({
             ? 'Loading the catalogue…'
             : `${totalCount} verified cover${totalCount === 1 ? '' : 's'} ready to browse.`}
         </p>
+        {/* Stat strip (2026-09-15): quiet, understated -- Open's stat-row
+            reference, not a gamified streak/points display, which
+            wouldn't fit a serious philately audience. Plain text items,
+            no badges/boxes; renders nothing at all (not an empty row)
+            when every stat is genuinely empty, e.g. a brand-new account
+            with no prior visit and nothing viewed yet. */}
+        {statItems.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11.5px] text-ink-soft">
+            {statItems.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        )}
         {/* Home redesign (2026-09-15): entry-point tiles, Duolingo's
             "Your collections" layout pattern -- a small set of distinct
             tiles rather than one plain CTA. "Enter the catalogue" keeps
