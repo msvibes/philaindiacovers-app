@@ -62,6 +62,8 @@ function renderHome(
   overrides: Partial<{
     session: Session
     showDailyPrompt: boolean
+    daysSinceLastVisit: number | null
+    viewedTodayCount: number
     onEnterCatalogue: () => void
     onSelectCover: (id: string) => void
   }> = {}
@@ -70,6 +72,8 @@ function renderHome(
     <Home
       session={overrides.session ?? fakeSession()}
       showDailyPrompt={overrides.showDailyPrompt ?? false}
+      daysSinceLastVisit={overrides.daysSinceLastVisit ?? null}
+      viewedTodayCount={overrides.viewedTodayCount ?? 0}
       onEnterCatalogue={overrides.onEnterCatalogue ?? vi.fn()}
       onSelectCover={overrides.onSelectCover ?? vi.fn()}
     />
@@ -205,6 +209,114 @@ describe('Home', () => {
 
       await userEvent.click(screen.getByRole('button', { name: /jump back in/i }))
       expect(onSelectCover).toHaveBeenCalledExactlyOnceWith('cover-5')
+    })
+  })
+
+  // Stat strip, 2026-09-15: quiet stat row under the greeting. Each stat
+  // renders independently -- verified individually and in combination --
+  // and the whole strip renders nothing (not an empty row) when every
+  // stat is genuinely empty.
+  describe('stat strip', () => {
+    it('renders nothing at all when every stat is empty — a genuinely new account', () => {
+      renderHome({ daysSinceLastVisit: null, viewedTodayCount: 0 })
+      expect(screen.queryByText(/last visit/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/viewed today/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/explored/i)).not.toBeInTheDocument()
+    })
+
+    it('does not show "Last visit" when daysSinceLastVisit is null or 0', () => {
+      renderHome({ daysSinceLastVisit: null })
+      expect(screen.queryByText(/last visit/i)).not.toBeInTheDocument()
+
+      renderHome({ daysSinceLastVisit: 0 })
+      expect(screen.queryByText(/last visit/i)).not.toBeInTheDocument()
+    })
+
+    it('shows "Last visit: yesterday" for 1 day, "N days ago" otherwise', () => {
+      renderHome({ daysSinceLastVisit: 1 })
+      expect(screen.getByText('Last visit: yesterday')).toBeInTheDocument()
+
+      renderHome({ daysSinceLastVisit: 5 })
+      expect(screen.getByText('Last visit: 5 days ago')).toBeInTheDocument()
+    })
+
+    it('shows the covers-viewed-today count with correct singular/plural, and nothing at 0', () => {
+      renderHome({ viewedTodayCount: 0 })
+      expect(screen.queryByText(/viewed today/i)).not.toBeInTheDocument()
+
+      renderHome({ viewedTodayCount: 1 })
+      expect(screen.getByText('1 cover viewed today')).toBeInTheDocument()
+
+      renderHome({ viewedTodayCount: 3 })
+      expect(screen.getByText('3 covers viewed today')).toBeInTheDocument()
+    })
+
+    it('derives distinct circles/years explored from recently-viewed covers, deduped — zero new queries', async () => {
+      mockedUseRecentlyViewed.mockReturnValue({
+        recentIds: ['cover-1', 'cover-2', 'cover-3'],
+        recordView: vi.fn()
+      })
+      mockedFetchByIds.mockResolvedValue([
+        {
+          id: 'cover-1',
+          giItemName: 'GI 1',
+          nameOfCover: 'Cover 1',
+          productCategory: null,
+          dateOfIssue: '2020-01-01',
+          imageFile: 'a.jpg',
+          postalCircleId: 'circle-tn',
+          postalCircleName: 'Tamil Nadu'
+        },
+        {
+          id: 'cover-2',
+          giItemName: 'GI 2',
+          nameOfCover: 'Cover 2',
+          productCategory: null,
+          // Same circle as cover-1, different year -- circle count must
+          // dedupe to 1, year count must still be 2.
+          dateOfIssue: '2021-06-15',
+          imageFile: 'b.jpg',
+          postalCircleId: 'circle-tn',
+          postalCircleName: 'Tamil Nadu'
+        },
+        {
+          id: 'cover-3',
+          giItemName: 'GI 3',
+          nameOfCover: 'Cover 3',
+          productCategory: null,
+          // Same year as cover-1, different circle.
+          dateOfIssue: '2020-11-02',
+          imageFile: 'c.jpg',
+          postalCircleId: 'circle-ka',
+          postalCircleName: 'Karnataka'
+        }
+      ])
+      renderHome()
+
+      await waitFor(() => expect(screen.getByText('2 circles explored recently')).toBeInTheDocument())
+      expect(screen.getByText('2 years explored recently')).toBeInTheDocument()
+    })
+
+    it('shows all four stats together when all are present', async () => {
+      mockedUseRecentlyViewed.mockReturnValue({ recentIds: ['cover-1'], recordView: vi.fn() })
+      mockedFetchByIds.mockResolvedValue([
+        {
+          id: 'cover-1',
+          giItemName: 'GI 1',
+          nameOfCover: 'Cover 1',
+          productCategory: null,
+          dateOfIssue: '2020-01-01',
+          imageFile: 'a.jpg',
+          postalCircleId: 'circle-tn',
+          postalCircleName: 'Tamil Nadu'
+        }
+      ])
+      renderHome({ daysSinceLastVisit: 2, viewedTodayCount: 1 })
+
+      expect(screen.getByText('Last visit: 2 days ago')).toBeInTheDocument()
+      expect(screen.getByText('1 cover viewed today')).toBeInTheDocument()
+      await waitFor(() => expect(screen.getByText('1 circle explored recently')).toBeInTheDocument())
+      expect(screen.getByText('1 year explored recently')).toBeInTheDocument()
     })
   })
 })

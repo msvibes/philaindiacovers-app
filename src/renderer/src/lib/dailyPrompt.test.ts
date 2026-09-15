@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isFirstLoginToday, markActiveToday } from './dailyPrompt'
+import { daysSinceLastVisit, isFirstLoginToday, markActiveToday } from './dailyPrompt'
 import { supabase } from './supabaseClient'
 
 vi.mock('./supabaseClient', () => ({
@@ -45,6 +45,43 @@ describe('isFirstLoginToday', () => {
     // '2026-09-06' here instead of '2026-09-07'.
     vi.setSystemTime(new Date(2026, 8, 7, 1, 0))
     expect(isFirstLoginToday(fakeSession('2026-09-07'))).toBe(false)
+  })
+})
+
+// Stat strip (2026-09-15): reuses last_active_date, not a new column --
+// same timing constraint as isFirstLoginToday (must be read before
+// markActiveToday's write resolves), so these tests mirror that
+// describe block's own fixed-clock style exactly.
+describe('daysSinceLastVisit', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('is null when last_active_date is unset — a genuinely new account, not "0 days ago"', () => {
+    expect(daysSinceLastVisit(fakeSession(undefined))).toBeNull()
+  })
+
+  it('is 0 when the last recorded visit was today', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 8, 7, 14, 30))
+    expect(daysSinceLastVisit(fakeSession('2026-09-07'))).toBe(0)
+  })
+
+  it('is 1 for yesterday, 5 for five days ago', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 8, 7, 14, 30))
+    expect(daysSinceLastVisit(fakeSession('2026-09-06'))).toBe(1)
+    expect(daysSinceLastVisit(fakeSession('2026-09-02'))).toBe(5)
+  })
+
+  // Same real IST early-morning case isFirstLoginToday's own test guards
+  // against — parsing via new Date(dateStr) directly (UTC midnight)
+  // would shift this by a day in either direction depending on the
+  // machine's offset.
+  it('uses local calendar dates throughout, not UTC', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 8, 7, 1, 0)) // 2026-09-07, 01:00 local
+    expect(daysSinceLastVisit(fakeSession('2026-09-06'))).toBe(1)
   })
 })
 
