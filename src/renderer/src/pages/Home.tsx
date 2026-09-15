@@ -5,6 +5,7 @@ import { fetchDisplayName, resolveGreetingName } from '../lib/profile'
 import { useRecentlyViewed } from '../lib/useRecentlyViewed'
 import CatalogueCard from '../components/CatalogueCard'
 import Eyebrow from '../components/Eyebrow'
+import HomeTile from '../components/HomeTile'
 
 interface HomeProps {
   session: Session
@@ -105,10 +106,7 @@ export default function Home({
         <Eyebrow>Collector&apos;s Desk</Eyebrow>
         {/* One sign-in per day sees this instead of the normal greeting --
             computed once by App.tsx's SignedIn (see lib/dailyPrompt.ts),
-            not recomputed on every Home mount. The second shortcut
-            deliberately doesn't render with no recently-viewed history —
-            "continue where you left off" has nothing real to continue
-            with on a genuinely first-ever session. */}
+            not recomputed on every Home mount. */}
         {showDailyPrompt ? (
           <h1 className="text-2xl font-semibold font-display text-ink">
             What would you like to do today?
@@ -123,23 +121,27 @@ export default function Home({
             ? 'Loading the catalogue…'
             : `${totalCount} verified cover${totalCount === 1 ? '' : 's'} ready to browse.`}
         </p>
-        <div className="flex justify-center gap-3">
-          <button
-            type="button"
+        {/* Home redesign (2026-09-15): entry-point tiles, Duolingo's
+            "Your collections" layout pattern -- a small set of distinct
+            tiles rather than one plain CTA. "Enter the catalogue" keeps
+            its exact original text (the guided tour's data-tour="home-cta"
+            target, and Home.test.tsx's own assertion, both depend on it)
+            -- only its visual treatment changed, from a pill button to a
+            tile. The Jump back in tile replaces the old "Continue where
+            you left off" button: same destination (recentIds[0]), but now
+            always visible whenever real history exists, not gated to
+            first-login-of-day -- the daily prompt and "is there anything
+            to jump back into" are genuinely independent questions, and
+            gating the shortcut to one login a day undersold it. */}
+        <div className="flex flex-wrap justify-center gap-3">
+          <HomeTile
+            label="Enter the catalogue"
+            accent="accent"
             onClick={onEnterCatalogue}
-            data-tour="home-cta"
-            className="rounded bg-accent px-6 py-2 text-white hover:bg-accent-hover"
-          >
-            Enter the catalogue
-          </button>
-          {showDailyPrompt && recentIds.length > 0 && (
-            <button
-              type="button"
-              onClick={() => onSelectCover(recentIds[0])}
-              className="rounded border border-line-strong bg-card px-6 py-2 text-ink hover:bg-paper"
-            >
-              Continue where you left off
-            </button>
+            dataTour="home-cta"
+          />
+          {recentIds.length > 0 && (
+            <HomeTile label="Jump back in" accent="stamp" onClick={() => onSelectCover(recentIds[0])} />
           )}
         </div>
       </div>

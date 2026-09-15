@@ -171,39 +171,39 @@ describe('Home', () => {
     })
   })
 
-  describe('first-login-of-day prompt', () => {
-    it('shows "Continue where you left off" alongside the prompt when there is recent history', () => {
-      mockedUseRecentlyViewed.mockReturnValue({ recentIds: ['cover-5'], recordView: vi.fn() })
-      renderHome({ showDailyPrompt: true })
-      expect(
-        screen.getByRole('button', { name: /continue where you left off/i })
-      ).toBeInTheDocument()
-    })
-
-    it('does not show "Continue where you left off" with no recent history — nothing real to continue with', () => {
-      renderHome({ showDailyPrompt: true })
-      expect(
-        screen.queryByRole('button', { name: /continue where you left off/i })
-      ).not.toBeInTheDocument()
-    })
-
-    it('does not show the shortcut on a normal (non-first-of-day) visit even with history', () => {
+  // Home redesign, 2026-09-15: replaces the old "Continue where you left
+  // off" button (gated to showDailyPrompt only) with an always-visible
+  // "Jump back in" tile — same destination (recentIds[0]), but now shown
+  // whenever real history exists, regardless of the daily prompt. This
+  // deliberately supersedes the old "first-login-of-day prompt" describe
+  // block's gating assertions, not an oversight.
+  describe('"Jump back in" tile', () => {
+    it('shows whenever there is recent history, regardless of the daily prompt', () => {
       mockedUseRecentlyViewed.mockReturnValue({ recentIds: ['cover-5'], recordView: vi.fn() })
       renderHome({ showDailyPrompt: false })
-      expect(
-        screen.queryByRole('button', { name: /continue where you left off/i })
-      ).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /jump back in/i })).toBeInTheDocument()
     })
 
-    it('"Continue where you left off" calls onSelectCover with the most-recent id', async () => {
+    it('also shows on the daily-prompt visit when there is recent history', () => {
+      mockedUseRecentlyViewed.mockReturnValue({ recentIds: ['cover-5'], recordView: vi.fn() })
+      renderHome({ showDailyPrompt: true })
+      expect(screen.getByRole('button', { name: /jump back in/i })).toBeInTheDocument()
+    })
+
+    it('does not show with no recent history — nothing real to jump back into', () => {
+      renderHome()
+      expect(screen.queryByRole('button', { name: /jump back in/i })).not.toBeInTheDocument()
+    })
+
+    it('calls onSelectCover with the most-recent id when clicked', async () => {
       mockedUseRecentlyViewed.mockReturnValue({
         recentIds: ['cover-5', 'cover-3'],
         recordView: vi.fn()
       })
       const onSelectCover = vi.fn()
-      renderHome({ showDailyPrompt: true, onSelectCover })
+      renderHome({ onSelectCover })
 
-      await userEvent.click(screen.getByRole('button', { name: /continue where you left off/i }))
+      await userEvent.click(screen.getByRole('button', { name: /jump back in/i }))
       expect(onSelectCover).toHaveBeenCalledExactlyOnceWith('cover-5')
     })
   })
